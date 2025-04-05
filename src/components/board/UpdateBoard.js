@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
-import { getBoardById, updateBoard } from '../api/boardApi';
+import { AuthContext } from '../../contexts/AuthContext';
+import { getBoardById, updateBoard } from '../../api/boardApi';
 
 function UpdateBoard() {
   const { token } = useContext(AuthContext);

@@ -1,7 +1,7 @@
 import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext';
-import { createBoard } from '../api/boardApi';
+import { AuthContext } from '../../contexts/AuthContext';
+import { createBoard } from '../../api/boardApi';
 
 function CreateBoard() {
   const { token } = useContext(AuthContext);

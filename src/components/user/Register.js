@@ -1,9 +1,11 @@
+// src/components/user/Register.js
 import { useState, useContext } from 'react';
-import axios from 'axios';
-import { AuthContext } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthContext';
+import { registerUser } from '../../api/userApi';
 
-function Login() {
+function Register() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -12,24 +14,31 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Reset thông báo lỗi trước khi thực hiện
     try {
-      const response = await axios.post('http://localhost:3001/api/users/login', {
-        email,
-        password,
-      });
-      const { token, user } = response.data;
-      login(user, token);
-      navigate('/profile');
+      const response = await registerUser({ username, email, password });
+      const { token, user } = response;
+      login(user, token); // Lưu thông tin user và token vào AuthContext
+      navigate('/profile'); // Điều hướng đến trang profile
     } catch (err) {
-      setError(err.response?.data?.message || 'Đăng nhập thất bại');
+      setError(err.response?.data?.message || 'Đăng ký thất bại');
     }
   };
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>Đăng nhập</h2>
+      <h2>Đăng ký</h2>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <form onSubmit={handleSubmit}>
+        <div>
+          <label>Tên người dùng:</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
         <div>
           <label>Email:</label>
           <input
@@ -48,10 +57,10 @@ function Login() {
             required
           />
         </div>
-        <button type="submit">Đăng nhập</button>
+        <button type="submit">Đăng ký</button>
       </form>
     </div>
   );
 }
 
-export default Login;
+export default Register;
