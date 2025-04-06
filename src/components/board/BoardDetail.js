@@ -1,18 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getBoardById } from '../../api/boardApi';
 import { getListsByBoard, createList, updateList, deleteList } from '../../api/listApi';
 
 function BoardDetail() {
   const { token } = useContext(AuthContext);
-  const { id } = useParams(); // Lấy ID của board từ URL
+  const { id } = useParams();
   const [board, setBoard] = useState(null);
   const [lists, setLists] = useState([]);
   const [error, setError] = useState('');
-  const [newListTitle, setNewListTitle] = useState(''); // State để lưu tiêu đề list mới
+  const [newListTitle, setNewListTitle] = useState('');
 
-  // Lấy thông tin board và lists khi component mount
   useEffect(() => {
     const fetchBoardAndLists = async () => {
       try {
@@ -27,23 +26,21 @@ function BoardDetail() {
     if (token && id) fetchBoardAndLists();
   }, [token, id]);
 
-  // Hàm tạo list mới
   const handleCreateList = async (e) => {
     e.preventDefault();
     try {
       const newList = await createList(token, {
         title: newListTitle,
         boardId: id,
-        position: lists.length, // Vị trí mặc định là cuối danh sách
+        position: lists.length,
       });
       setLists([...lists, newList]);
-      setNewListTitle(''); // Reset input sau khi tạo
+      setNewListTitle('');
     } catch (err) {
       setError('Không thể tạo list');
     }
   };
 
-  // Hàm cập nhật list
   const handleUpdateList = async (listId, newTitle) => {
     try {
       const updatedList = await updateList(token, listId, { title: newTitle });
@@ -53,7 +50,6 @@ function BoardDetail() {
     }
   };
 
-  // Hàm xóa list
   const handleDeleteList = async (listId) => {
     try {
       await deleteList(token, listId);
@@ -74,13 +70,18 @@ function BoardDetail() {
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul>
         {lists.map((list) => (
-          <li key={list._id}>
+          <li key={list._id} style={{ marginBottom: '10px' }}>
             <input
               type="text"
               defaultValue={list.title}
-              onBlur={(e) => handleUpdateList(list._id, e.target.value)} // Cập nhật khi mất focus
+              onBlur={(e) => handleUpdateList(list._id, e.target.value)}
             />
-            <button onClick={() => handleDeleteList(list._id)}>Xóa</button>
+            <button onClick={() => handleDeleteList(list._id)} style={{ marginLeft: '10px' }}>
+              Xóa
+            </button>
+            <Link to={`/lists/${list._id}`} style={{ marginLeft: '10px' }}>
+              <button>Vào List</button>
+            </Link>
           </li>
         ))}
       </ul>

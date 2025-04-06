@@ -32,6 +32,7 @@ function CreateBoard() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
+            style={{ padding: '5px', width: '100%', marginBottom: '10px' }}
           />
         </div>
         <div>
@@ -39,9 +40,26 @@ function CreateBoard() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            style={{ padding: '5px', width: '100%', marginBottom: '10px' }}
           />
         </div>
-        <button type="submit">Tạo</button>
+        <button
+          type="submit"
+          style={{
+            backgroundColor: '#4CAF50', // Màu xanh lá cây
+            color: 'white',
+            padding: '10px 20px',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+            fontSize: '16px',
+            transition: 'background-color 0.3s', // Hiệu ứng chuyển màu mượt mà
+          }}
+          onMouseOver={(e) => (e.target.style.backgroundColor = '#45a049')} // Hover: xanh đậm hơn
+          onMouseOut={(e) => (e.target.style.backgroundColor = '#4CAF50')} // Trở lại màu gốc
+        >
+          Tạo Board
+        </button>
       </form>
     </div>
   );

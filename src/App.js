@@ -8,6 +8,7 @@ import Profile from './components/user/Profile';
 import CreateBoard from './components/board/CreateBoard';
 import BoardDetail from './components/board/BoardDetail';
 import UpdateBoard from './components/board/UpdateBoard';
+import ListDetail from './components/list/listDetail';
 
 function App() {
   return (
@@ -19,11 +20,14 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
           <Route path="/profile" element={<Profile />} />
+
           <Route path="/create-board" element={<CreateBoard />} />
           <Route path="/boards/:id" element={<BoardDetail />} />
           <Route path="/update-board/:id" element={<UpdateBoard />} />
+          <Route path="/boards/:id" element={<BoardDetail />} />
           <Route path="/" element={<Profile />} />
-          <Route path="/boards/:id" element={<BoardDetail />} /> 
+          
+          <Route path="/lists/:id" element={<ListDetail />} /> 
         </Routes>
       </Router>
     </AuthProvider>

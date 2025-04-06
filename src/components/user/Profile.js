@@ -2,31 +2,30 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getBoards } from '../../api/boardApi';
-import { getCurrentUser } from '../../api/userApi'; // Import hàm API lấy thông tin user
+import { getCurrentUser } from '../../api/userApi';
 
 function Profile() {
   const { token, logout } = useContext(AuthContext);
   const [userData, setUserData] = useState(null);
   const [boards, setBoards] = useState([]);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(true); // Thêm state để theo dõi trạng thái loading
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const user = await getCurrentUser(token); // Gọi API thực tế để lấy thông tin user
+        const user = await getCurrentUser(token);
         setUserData(user);
       } catch (err) {
         if (err.response?.status === 401) {
-          // Nếu token không hợp lệ, đăng xuất và chuyển về trang đăng nhập
           logout();
           navigate('/login');
         } else {
           setError('Không thể tải thông tin người dùng');
         }
       } finally {
-        setLoading(false); // Kết thúc trạng thái loading
+        setLoading(false);
       }
     };
 
@@ -43,16 +42,14 @@ function Profile() {
       fetchUserData();
       fetchBoards();
     } else {
-      setLoading(false); // Nếu không có token, không cần loading
+      setLoading(false);
     }
   }, [token, logout, navigate]);
 
-  // Nếu không có token, yêu cầu đăng nhập
   if (!token) {
     return <p>Vui lòng đăng nhập để xem hồ sơ của bạn.</p>;
   }
 
-  // Hiển thị "Đang tải..." khi đang chờ dữ liệu
   if (loading) {
     return <p>Đang tải...</p>;
   }
@@ -82,6 +79,24 @@ function Profile() {
           </li>
         ))}
       </ul>
+
+      {/* Nút Tạo Board Mới */}
+      <Link to="/create-board">
+        <button
+          style={{
+            marginTop: '20px',
+            padding: '10px 20px',
+            fontSize: '16px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '5px',
+            cursor: 'pointer',
+          }}
+        >
+          Tạo Board Mới
+        </button>
+      </Link>
     </div>
   );
 }
