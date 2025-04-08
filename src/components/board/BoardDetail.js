@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import { getBoardById } from '../../api/boardApi';
 import { getListsByBoard, createList, updateList, deleteList } from '../../api/listApi';
 
 function BoardDetail() {
-  const { token } = useContext(AuthContext);
+  const { token, logout } = useContext(AuthContext); // Giả sử logout có trong AuthContext
   const { id } = useParams();
   const [board, setBoard] = useState(null);
   const [lists, setLists] = useState([]);
@@ -63,10 +63,11 @@ function BoardDetail() {
 
   return (
     <div style={{ padding: '20px' }}>
-      <h2>{board.title}</h2>
-      <p>{board.description}</p>
+      {/* Ẩn thông tin hồ sơ (board title và description) */}
+      {/* <h2>{board.title}</h2>
+      <p>{board.description}</p> */}
 
-      <h3>Danh sách Lists</h3>
+      <h3>Danh sách</h3>
       {error && <p style={{ color: 'red' }}>{error}</p>}
       <ul>
         {lists.map((list) => (
@@ -79,9 +80,11 @@ function BoardDetail() {
             <button onClick={() => handleDeleteList(list._id)} style={{ marginLeft: '10px' }}>
               Xóa
             </button>
-            <Link to={`/lists/${list._id}`} style={{ marginLeft: '10px' }}>
-              <button>Vào List</button>
-            </Link>
+            <button style={{ marginLeft: '10px' }}>
+              <a href={`/lists/${list._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                Vào List
+              </a>
+            </button>
           </li>
         ))}
       </ul>
@@ -97,6 +100,13 @@ function BoardDetail() {
         />
         <button type="submit">Tạo</button>
       </form>
+
+      {/* Hiển thị nút Logout khi đã đăng nhập, ẩn Login và Home */}
+      {token && (
+        <div style={{ marginTop: '20px' }}>
+          <button onClick={logout}>Đăng xuất</button>
+        </div>
+      )}
     </div>
   );
 }

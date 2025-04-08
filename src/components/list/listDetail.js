@@ -4,6 +4,28 @@ import { AuthContext } from '../../contexts/AuthContext';
 import { getListById } from '../../api/listApi';
 import CardList from '../card/CardList';
 import CreateCard from '../card/CreateCard';
+import {
+  Container,
+  Typography,
+  Card,
+  CardContent,
+  CardHeader,
+  Box,
+  Divider,
+  ThemeProvider,
+  createTheme,
+} from '@mui/material';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
 function ListDetail() {
   const { token } = useContext(AuthContext);
@@ -27,23 +49,45 @@ function ListDetail() {
     if (token && id) fetchList();
   }, [token, id]);
 
-  if (loading) return <p>Đang tải...</p>;
-  if (error) return <p style={{ color: 'red' }}>{error}</p>;
-  if (!list) return <p>Không tìm thấy list</p>;
+  if (loading) return <Typography>Đang tải...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
+  if (!list) return <Typography>Không tìm thấy list</Typography>;
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>{list.title}</h2>
-      <p>ID: {list._id}</p>
-      <p>Thuộc Board: {list.boardId}</p>
-      <p>Vị trí: {list.position}</p>
+    <ThemeProvider theme={theme}>
+      <Container maxWidth="md" sx={{ py: 3 }}>
+        {/* Thông tin List */}
+        <Card elevation={3} sx={{ mb: 2 }}>
+          <CardHeader
+            title={list.title}
+            titleTypographyProps={{ variant: 'h4' }}
+            subheader={`ID: ${list._id} | Thuộc Board: ${list.boardId} | Vị trí: ${list.position}`}
+            subheaderTypographyProps={{ variant: 'body1' }}
+          />
+          <CardContent>
+            {/* Bạn có thể thêm nội dung bổ sung vào đây nếu cần */}
+          </CardContent>
+        </Card>
 
-      <h3>Danh sách Cards</h3>
-      <CardList listId={id} token={token} />
+        {/* Danh sách Cards */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom>
+            Danh sách Cards
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <CardList listId={id} token={token} />
+        </Box>
 
-      <h3>Tạo Card mới</h3>
-      <CreateCard listId={id} token={token} setCards={setCards} />
-    </div>
+        {/* Tạo Card mới */}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h5" gutterBottom>
+            Tạo Card mới
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
+          <CreateCard listId={id} token={token} setCards={setCards} />
+        </Box>
+      </Container>
+    </ThemeProvider>
   );
 }
 

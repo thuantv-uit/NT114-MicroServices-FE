@@ -2,6 +2,15 @@ import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../contexts/AuthContext';
 import { createBoard } from '../../api/boardApi';
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Paper,
+  Alert,
+} from '@mui/material';
 
 function CreateBoard() {
   const { token } = useContext(AuthContext);
@@ -21,47 +30,52 @@ function CreateBoard() {
   };
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Tạo Board mới</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Tiêu đề:</label>
-          <input
-            type="text"
+    <Container maxWidth="sm" sx={{ mt: 8 }}>
+      <Paper elevation={3} sx={{ p: 4, borderRadius: 2 }}>
+        <Typography variant="h5" align="center" gutterBottom>
+          Tạo Board Mới
+        </Typography>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}
+        >
+          <TextField
+            label="Tiêu đề"
+            variant="outlined"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
+            fullWidth
             required
-            style={{ padding: '5px', width: '100%', marginBottom: '10px' }}
+            InputLabelProps={{ shrink: true }}
           />
-        </div>
-        <div>
-          <label>Mô tả:</label>
-          <textarea
+          <TextField
+            label="Mô tả"
+            variant="outlined"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            style={{ padding: '5px', width: '100%', marginBottom: '10px' }}
+            fullWidth
+            multiline
+            rows={4}
+            InputLabelProps={{ shrink: true }}
           />
-        </div>
-        <button
-          type="submit"
-          style={{
-            backgroundColor: '#4CAF50', // Màu xanh lá cây
-            color: 'white',
-            padding: '10px 20px',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '16px',
-            transition: 'background-color 0.3s', // Hiệu ứng chuyển màu mượt mà
-          }}
-          onMouseOver={(e) => (e.target.style.backgroundColor = '#45a049')} // Hover: xanh đậm hơn
-          onMouseOut={(e) => (e.target.style.backgroundColor = '#4CAF50')} // Trở lại màu gốc
-        >
-          Tạo Board
-        </button>
-      </form>
-    </div>
+          <Button
+            type="submit"
+            variant="contained"
+            color="success" // Màu xanh lá cây giống yêu cầu của bạn
+            size="large"
+            sx={{ mt: 2, py: 1.5, borderRadius: 2 }}
+          >
+            Tạo Board
+          </Button>
+        </Box>
+      </Paper>
+    </Container>
   );
 }
 

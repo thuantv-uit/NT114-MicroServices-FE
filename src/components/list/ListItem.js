@@ -1,4 +1,16 @@
 import { useState } from 'react';
+import { Paper, Typography, Button, TextField, ThemeProvider, createTheme } from '@mui/material';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
 
 function ListItem({ list, onUpdate, onDelete }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -10,25 +22,55 @@ function ListItem({ list, onUpdate, onDelete }) {
   };
 
   return (
-    <div style={{ marginBottom: '10px', padding: '10px', border: '1px solid #ccc' }}>
-      {isEditing ? (
-        <>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-          />
-          <button onClick={handleUpdate}>Lưu</button>
-          <button onClick={() => setIsEditing(false)}>Hủy</button>
-        </>
-      ) : (
-        <>
-          <h4>{list.title}</h4>
-          <button onClick={() => setIsEditing(true)}>Chỉnh sửa</button>
-          <button onClick={() => onDelete(list._id)}>Xóa</button>
-        </>
-      )}
-    </div>
+    <ThemeProvider theme={theme}>
+      <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+        {isEditing ? (
+          <>
+            <TextField
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              variant="outlined"
+              fullWidth
+              sx={{ mb: 1 }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleUpdate}
+              sx={{ mr: 1 }}
+            >
+              Lưu
+            </Button>
+            <Button
+              variant="outlined"
+              onClick={() => setIsEditing(false)}
+            >
+              Hủy
+            </Button>
+          </>
+        ) : (
+          <>
+            <Typography variant="h6">{list.title}</Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setIsEditing(true)}
+              sx={{ mt: 1, mr: 1 }}
+            >
+              Chỉnh sửa
+            </Button>
+            <Button
+              variant="outlined"
+              color="secondary"
+              onClick={() => onDelete(list._id)}
+              sx={{ mt: 1 }}
+            >
+              Xóa
+            </Button>
+          </>
+        )}
+      </Paper>
+    </ThemeProvider>
   );
 }
 
