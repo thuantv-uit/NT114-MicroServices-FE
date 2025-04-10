@@ -14,7 +14,7 @@ import DeleteBoard from './features/boards/components/DeleteBoard';
 import InviteUser from './features/boards/components/InviteUser';
 import CreateColumn from './features/columns/components/CreateColumn';
 import EditColumn from './features/columns/components/ColumnEdit';
-import DeleteColum from './features/columns/components/DeleteColumn';
+import DeleteColumn from './features/columns/components/DeleteColumn';
 import CreateCard from './features/cards/components/CreateCard';
 
 function App() {
