@@ -15,7 +15,7 @@ import InviteUser from './features/boards/components/InviteUser';
 import CreateColumn from './features/columns/components/CreateColumn';
 import EditColumn from './features/columns/components/ColumnEdit';
 import DeleteColumn from './features/columns/components/DeleteColumn';
-import CreateCar from './features/cards/components/CreateCard';
+import CreateCard from './features/cards/components/CreateCard';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '');
