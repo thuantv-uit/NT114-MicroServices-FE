@@ -9,9 +9,18 @@ const Login = ({ setToken }) => {
   const initialValues = { email: '', password: '' };
   const validate = (values) => {
     const errors = {};
-    if (!values.email) errors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(values.email)) errors.email = 'Email is invalid';
-    if (!values.password) errors.password = 'Password is required';
+    // Kiểm tra email
+    if (!values.email) {
+      errors.email = 'Email is required';
+    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(values.email)) {
+      errors.email = 'Email is invalid';
+    }
+    // Kiểm tra password
+    if (!values.password) {
+      errors.password = 'Password is required';
+    } else if (values.password.length < 6) {
+      errors.password = 'Password must be at least 6 characters';
+    }
     return errors;
   };
 
@@ -25,7 +34,7 @@ const Login = ({ setToken }) => {
       showToast('Login successful!', 'success');
     },
     onError: (err) => {
-      showToast(err.response?.data.message || 'Login failed', 'error');
+      showToast(err.response?.data.message || 'Unable to connect to server User', 'error');
     },
   });
 
