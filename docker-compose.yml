@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  frontend:
+    image: frontend:v1
+    ports:
+      - "3000:3000" # Ánh xạ cổng 3000 của container ra cổng 3000 của host
+    networks:
+      - app-network
+
+# Định nghĩa network
+networks:
+  app-network:
+    driver: bridge
