@@ -1,9 +1,9 @@
 // src/features/cards/components/EditCardPage.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
 import useForm from '../../../hooks/useForm';
-import { updateCard } from '../services/cardService';
+import { updateCard, fetchCards } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 
 const EditCardPage = ({ token }) => {
@@ -11,6 +11,27 @@ const EditCardPage = ({ token }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
+  const columnId = state?.columnId || ''; // Cần columnId để lấy danh sách card
+  const [existingPositions, setExistingPositions] = useState([]); // Lưu danh sách position hiện có
+
+  // Lấy danh sách card để kiểm tra position
+  useEffect(() => {
+    const loadCards = async () => {
+      try {
+        const cards = await fetchCards(token, columnId);
+        const positions = cards
+          .filter(card => card._id !== cardId) // Loại trừ position của card đang chỉnh sửa
+          .map(card => card.position);
+        setExistingPositions(positions);
+      } catch (err) {
+        showToast('Failed to load cards for position validation', 'error');
+      }
+    };
+    if (columnId) {
+      loadCards();
+    }
+  }, [token, columnId, cardId]);
+
   const initialValues = {
     title: state?.title || '',
     description: state?.description || '',
@@ -19,8 +40,22 @@ const EditCardPage = ({ token }) => {
 
   const validate = (values) => {
     const errors = {};
-    if (!values.title) errors.title = 'Title is required';
-    if (values.position < 0) errors.position = 'Position cannot be negative';
+    // Kiểm tra title
+    if (!values.title) {
+      errors.title = 'Title is required';
+    } else if (values.title.length < 5) {
+      errors.title = 'Title must be at least 5 characters';
+    }
+    // Kiểm tra description
+    if (values.description && values.description.length < 5) {
+      errors.description = 'Description must be at least 5 characters';
+    }
+    // Kiểm tra position
+    if (values.position < 0) {
+      errors.position = 'Position cannot be negative';
+    } else if (existingPositions.includes(Number(values.position))) {
+      errors.position = 'Position must be unique';
+    }
     return errors;
   };
 
@@ -63,6 +98,8 @@ const EditCardPage = ({ token }) => {
             name="description"
             value={values.description}
             onChange={handleChange}
+            error={!!errors.description}
+            helperText={errors.description}
             sx={{ mb: 2 }}
           />
           <TextField

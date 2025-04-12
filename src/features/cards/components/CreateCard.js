@@ -1,9 +1,9 @@
 // src/features/cards/components/CreateCard.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
 import useForm from '../../../hooks/useForm';
-import { createCard } from '../services/cardService';
+import { createCard, fetchCards } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 
 const CreateCard = ({ token }) => {
@@ -11,11 +11,41 @@ const CreateCard = ({ token }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
+  const [existingPositions, setExistingPositions] = useState([]); // Lưu danh sách position hiện có
+
+  // Lấy danh sách card để kiểm tra position
+  useEffect(() => {
+    const loadCards = async () => {
+      try {
+        const cards = await fetchCards(token, columnId);
+        const positions = cards.map(card => card.position);
+        setExistingPositions(positions);
+      } catch (err) {
+        showToast('Failed to load cards for position validation', 'error');
+      }
+    };
+    loadCards();
+  }, [token, columnId]);
+
   const initialValues = { title: '', description: '', position: 0 };
   const validate = (values) => {
     const errors = {};
-    if (!values.title) errors.title = 'Title is required';
-    if (values.position < 0) errors.position = 'Position cannot be negative';
+    // Kiểm tra title
+    if (!values.title) {
+      errors.title = 'Title is required';
+    } else if (values.title.length < 5) {
+      errors.title = 'Title must be at least 5 characters';
+    }
+    // Kiểm tra description
+    if (values.description && values.description.length < 5) {
+      errors.description = 'Description must be at least 5 characters';
+    }
+    // Kiểm tra position
+    if (values.position < 0) {
+      errors.position = 'Position cannot be negative';
+    } else if (existingPositions.includes(Number(values.position))) {
+      errors.position = 'Position must be unique';
+    }
     return errors;
   };
 
@@ -28,7 +58,7 @@ const CreateCard = ({ token }) => {
       setTimeout(() => navigate(`/boards/${boardId}`), 2000);
     },
     onError: (err) => {
-      showToast(err.response?.data.message || 'Failed to create card', 'error');
+      showToast(err.response?.data.message || 'Unable to connect to server Card', 'error');
     },
   });
 
@@ -58,6 +88,8 @@ const CreateCard = ({ token }) => {
             name="description"
             value={values.description}
             onChange={handleChange}
+            error={!!errors.description}
+            helperText={errors.description}
             sx={{ mb: 2 }}
           />
           <TextField
