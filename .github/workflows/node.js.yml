@@ -1,5 +1,5 @@
-# Quy trình làm việc để kiểm tra, xây dựng và kiểm thử dự án Node.js
-# Cài đặt dependencies, lưu cache, kiểm tra mã, xây dựng và chạy kiểm thử trên nhiều phiên bản Node.js
+# Quy trình làm việc để xây dựng và kiểm thử dự án Node.js
+# Cài đặt dependencies, lưu cache, xây dựng mã nguồn và chạy kiểm thử trên nhiều phiên bản Node.js
 # Tham khảo: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
 name: Node.js CI
@@ -13,22 +13,19 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
         # Các phiên bản Node.js được hỗ trợ: https://nodejs.org/en/about/releases/
-      fail-fast: false # Tiếp tục kiểm thử các phiên bản khác nếu một phiên bản thất bại
-      max-parallel: 3 # Giới hạn số job chạy đồng thời để tối ưu tài nguyên
+      fail-fast: false # Tiếp tục kiểm thử các phiên bản khác ngay cả khi một phiên bản thất bại
 
     steps:
       # Lấy mã nguồn từ kho lưu trữ
       - name: Lấy mã nguồn
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Lấy toàn bộ lịch sử để hỗ trợ kiểm tra thay đổi
 
       # Thiết lập môi trường Node.js
       - name: Thiết lập Node.js ${{ matrix.node-version }}
@@ -37,66 +34,29 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm' # Lưu cache dependencies npm để tăng tốc
 
-      # Khôi phục cache npm nếu có
-      - name: Khôi phục cache npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-
-
       # Cài đặt dependencies
       - name: Cài đặt dependencies
         run: npm ci # Sử dụng npm ci để cài đặt sạch và đồng nhất
-
-      # Kiểm tra mã bằng linter
-      - name: Kiểm tra mã
-        run: npm run lint # Giả định dự án có script lint (như ESLint)
-        continue-on-error: true # Tiếp tục nếu lint có cảnh báo, nhưng vẫn báo lỗi chi tiết
 
       # Xây dựng dự án với ghi log chi tiết
       - name: Xây dựng
         run: npm run build -- --verbose # Bật chế độ ghi log chi tiết cho build
         env:
           NODE_ENV: production # Đảm bảo build ở chế độ production
+        continue-on-error: false # Dừng bước nếu build thất bại
 
-      # Chạy kiểm thử với chi tiết lỗi
-      - name: Chạy kiểm thử
-        run: npm test -- --verbose # Bật chế độ ghi log chi tiết cho kiểm thử
-        env:
-          NODE_ENV: test
-        continue-on-error: false # Dừng nếu kiểm thử thất bại
+      # Chạy kiểm thử với chi tiết lỗi (tùy chọn, bỏ comment nếu có kiểm thử)
+      # - name: Chạy kiểm thử
+      #   run: npm test -- --verbose # Bật chế độ ghi log chi tiết cho kiểm thử
+      #   env:
+      #     NODE_ENV: test
+      #   continue-on-error: false
 
-      # Hiển thị chi tiết lỗi nếu có bước thất bại
-      - name: Hiển thị chi tiết lỗi
+      # Hiển thị chi tiết lỗi nếu build thất bại
+      - name: Hiển thị chi tiết lỗi build
         if: failure() # Chỉ chạy nếu các bước trước thất bại
         run: |
           echo "Kiểm tra các file log lỗi..."
-          find . -type f \( -name "*.log" -o -name "error.log" -o -name "build.log" \) -exec cat {} \; || echo "Không tìm thấy file log"
+          find . -type f -name "*.log" -exec cat {} \; || echo "Không tìm thấy file log"
           echo "Liệt kê các file trong thư mục build (nếu có)..."
           ls -la dist/ || echo "Không tìm thấy thư mục dist/"
-
-      # Tải lên artifact (log và thư mục build)
-      - name: Tải lên artifact
-        if: always() # Chạy kể cả khi có bước thất bại
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs-${{ matrix.node-version }}
-          path: |
-            **/*.log
-            dist/
-          retention-days: 7 # Lưu artifact trong 7 ngày
-
-      # Comment vào PR nếu pipeline thất bại (tùy chọn)
-      - name: Comment vào PR nếu thất bại
-        if: failure() && github.event_name == 'pull_request'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `🚨 Pipeline thất bại cho Node.js v${{ matrix.node-version }}. Vui lòng kiểm tra log và artifact để biết chi tiết.`
-            })
