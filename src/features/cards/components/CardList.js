@@ -1,22 +1,17 @@
 // src/features/cards/components/CardList.js
 import React, { useState, useEffect } from 'react';
-import { fetchCards, deleteCard } from '../services/cardService';
-import CardEdit from './CardEdit';
-import { toast } from 'react-toastify';
-import {
-  Box,
-  Typography,
-  Paper,
-  IconButton,
-} from '@mui/material';
+import { fetchCards } from '../services/cardService';
+import { showToast } from '../../../utils/toastUtils';
+import { Box, Typography, Paper, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { CARD_PAPER_STYLE } from '../../../constants/styles';
+import { useNavigate } from 'react-router-dom';
 
-const CardList = ({ columnId, token }) => {
+const CardList = ({ columnId, token, boardId }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [editingCard, setEditingCard] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadCards = async () => {
@@ -25,8 +20,7 @@ const CardList = ({ columnId, token }) => {
         const data = await fetchCards(token, columnId);
         setCards(data);
       } catch (err) {
-        setError(err.response?.data.message || 'Failed to fetch cards');
-        toast.error(err.response?.data.message || 'Failed to fetch cards');
+        showToast(err.response?.data.message || 'Failed to fetch cards', 'error');
       } finally {
         setLoading(false);
       }
@@ -34,93 +28,48 @@ const CardList = ({ columnId, token }) => {
     loadCards();
   }, [columnId, token]);
 
-  const handleDelete = async (cardId) => {
-    if (!window.confirm('Are you sure you want to delete this card?')) return;
-    try {
-      await deleteCard(token, cardId);
-      setCards(cards.filter((card) => card._id !== cardId));
-      setError('');
-      toast.success('Card deleted successfully!');
-    } catch (err) {
-      setError(err.response?.data.message || 'Failed to delete card');
-      toast.error(err.response?.data.message || 'Failed to delete card');
-    }
+  const handleEdit = (card) => {
+    navigate(`/cards/${card._id}/edit`, {
+      state: {
+        title: card.title,
+        description: card.description,
+        position: card.position,
+        boardId,
+      },
+    });
   };
 
-  const handleUpdate = (updatedCard) => {
-    setCards(cards.map((card) => (card._id === updatedCard._id ? updatedCard : card)));
-    setEditingCard(null);
+  const handleDelete = (cardId) => {
+    navigate(`/cards/${cardId}/delete`, { state: { boardId } });
   };
 
   return (
     <Box sx={{ mb: 2 }}>
-      {loading && (
-        <Typography variant="body2" color="textSecondary">
-          Loading cards...
-        </Typography>
-      )}
-      {error && (
-        <Typography variant="body2" color="error" sx={{ mb: 1 }}>
-          {error}
-        </Typography>
-      )}
+      {loading && <Typography variant="body2" color="textSecondary">Loading cards...</Typography>}
       {cards.length > 0 ? (
         cards.map((card) => (
-          <Paper
-            key={card._id}
-            elevation={1}
-            sx={{
-              p: 1,
-              mb: 1,
-              maxHeight: 100,
-              overflowY: 'auto',
-              wordBreak: 'break-word',
-            }}
-          >
-            {editingCard === card._id ? (
-              <CardEdit
-                card={card}
-                token={token}
-                onUpdate={handleUpdate}
-                onCancel={() => setEditingCard(null)}
-              />
-            ) : (
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <Box>
-                  <Typography variant="subtitle2">{card.title}</Typography>
-                  {card.description && (
-                    <Typography variant="body2" color="textSecondary">
-                      {card.description}
-                    </Typography>
-                  )}
-                  <Typography variant="body2" color="textSecondary">
-                    Position: {card.position}
-                  </Typography>
-                </Box>
-                <Box>
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => setEditingCard(card._id)}
-                    color="primary"
-                  >
-                    <EditIcon fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    aria-label="delete"
-                    onClick={() => handleDelete(card._id)}
-                    color="error"
-                  >
-                    <DeleteIcon fontSize="small" />
-                  </IconButton>
-                </Box>
+          <Paper key={card._id} elevation={1} sx={CARD_PAPER_STYLE}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box>
+                <Typography variant="subtitle2">{card.title}</Typography>
+                {card.description && (
+                  <Typography variant="body2" color="textSecondary">{card.description}</Typography>
+                )}
+                <Typography variant="body2" color="textSecondary">Position: {card.position}</Typography>
               </Box>
-            )}
+              <Box>
+                <IconButton aria-label="edit" onClick={() => handleEdit(card)} color="primary">
+                  <EditIcon fontSize="small" />
+                </IconButton>
+                <IconButton aria-label="delete" onClick={() => handleDelete(card._id)} color="error">
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            </Box>
           </Paper>
         ))
       ) : (
-        <Typography variant="body2" color="textSecondary">
-          No cards in this column.
-        </Typography>
+        <Typography variant="body2" color="textSecondary">No cards in this column.</Typography>
       )}
     </Box>
   );

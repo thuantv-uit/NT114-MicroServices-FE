@@ -1,13 +1,13 @@
-// src/features/columns/components/DeleteColumn.js
+// src/features/cards/components/DeleteCardPage.js
 import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { deleteColumn } from '../services/columnService';
+import { deleteCard } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material';
 import useForm from '../../../hooks/useForm';
 
-const DeleteColumn = ({ token }) => {
-  const { columnId } = useParams();
+const DeleteCardPage = ({ token }) => {
+  const { cardId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
@@ -15,28 +15,39 @@ const DeleteColumn = ({ token }) => {
   const { loading, handleSubmit } = useForm({
     initialValues: {},
     onSubmit: async () => {
-      await deleteColumn(token, columnId);
-      showToast('Column deleted successfully!', 'success');
+      await deleteCard(token, cardId);
+      showToast('Card deleted successfully!', 'success');
       setTimeout(() => navigate(`/boards/${boardId}`), 2000);
     },
     onError: (err) => {
-      showToast(err.response?.data.message || 'Failed to delete column', 'error');
+      showToast(err.response?.data.message || 'Failed to delete card', 'error');
     },
   });
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>Delete Column</Typography>
+      <Typography variant="h4" gutterBottom>Delete Card</Typography>
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>}
       <Paper elevation={3} sx={{ p: 3 }}>
         <Typography variant="body1" gutterBottom>
-          Are you sure you want to delete this column? This action cannot be undone.
+          Are you sure you want to delete this card? This action cannot be undone.
         </Typography>
         <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button variant="contained" color="error" onClick={handleSubmit} disabled={loading} sx={{ flex: 1 }}>
-            Delete Column
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleSubmit}
+            disabled={loading}
+            sx={{ flex: 1 }}
+          >
+            Delete Card
           </Button>
-          <Button variant="outlined" onClick={() => navigate(`/boards/${boardId}`)} sx={{ flex: 1 }}>
+          <Button
+            variant="outlined"
+            onClick={() => navigate(`/boards/${boardId}`)}
+            sx={{ flex: 1 }}
+            disabled={loading}
+          >
             Cancel
           </Button>
         </Box>
@@ -45,4 +56,4 @@ const DeleteColumn = ({ token }) => {
   );
 };
 
-export default DeleteColumn;
+export default DeleteCardPage;

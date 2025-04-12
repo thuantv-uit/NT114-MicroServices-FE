@@ -1,48 +1,56 @@
 // src/features/users/components/UserDashboard.js
 import React, { useState, useEffect } from 'react';
 import { fetchUserData, fetchAllUsers } from '../services/userService';
+import { toast } from 'react-toastify';
+import { Box, Typography, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
 
 const UserDashboard = ({ token }) => {
   const [user, setUser] = useState(null);
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [userData, usersData] = await Promise.all([
+        fetchUserData(token),
+        fetchAllUsers(token),
+      ]);
+      setUser(userData);
+      setAllUsers(usersData);
+    } catch (err) {
+      toast.error(err.response?.data.message || 'Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadUserData = async () => {
-      setLoading(true);
-      try {
-        const userData = await fetchUserData(token);
-        const usersData = await fetchAllUsers(token);
-        setUser(userData);
-        setAllUsers(usersData);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadUserData();
+    loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   return (
-    <div className="dashboard">
-      <h2>User Dashboard</h2>
-      {loading && <p>Loading...</p>}
+    <Box sx={{ maxWidth: 1200, mx: 'auto', my: 4, p: 2 }}>
+      <Typography variant="h4" gutterBottom>User Dashboard</Typography>
+      {loading && <CircularProgress />}
       {user ? (
-        <div>
-          <h3>Welcome, {user.username}!</h3>
-          <p>Email: {user.email}</p>
-        </div>
+        <Box sx={{ mb: 4 }}>
+          <Typography variant="h5">Welcome, {user.username}!</Typography>
+          <Typography>Email: {user.email}</Typography>
+        </Box>
       ) : (
-        <p>No user data</p>
+        !loading && <Typography>No user data</Typography>
       )}
-      <h3>All Users</h3>
-      <ul>
+      <Typography variant="h5" gutterBottom>All Users</Typography>
+      <List>
         {allUsers.map((u) => (
-          <li key={u._id}>{u.username} - {u.email}</li>
+          <ListItem key={u._id}>
+            <ListItemText primary={`${u.username} - ${u.email}`} />
+          </ListItem>
         ))}
-      </ul>
-    </div>
+      </List>
+    </Box>
   );
 };
 

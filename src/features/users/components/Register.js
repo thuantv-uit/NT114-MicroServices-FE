@@ -1,27 +1,32 @@
 // src/features/users/components/Register.js
-import React, { useState } from 'react';
-import { registerUser } from '../services/userService';
-import { toast } from 'react-toastify';
+import React from 'react';
 import { Box, Typography, TextField, Button, Paper } from '@mui/material';
+import useForm from '../../../hooks/useForm';
+import { registerUser } from '../services/userService';
+import { showToast } from '../../../utils/toastUtils';
 
 const Register = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await registerUser(username, email, password);
-      toast.success('Registration successful! Please login.');
-    } catch (err) {
-      toast.error(err.response?.data.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
+  const initialValues = { username: '', email: '', password: '' };
+  const validate = (values) => {
+    const errors = {};
+    if (!values.username) errors.username = 'Username is required';
+    if (!values.email) errors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(values.email)) errors.email = 'Email is invalid';
+    if (!values.password) errors.password = 'Password is required';
+    return errors;
   };
+
+  const { values, errors, loading, handleChange, handleSubmit } = useForm({
+    initialValues,
+    validate,
+    onSubmit: async (values) => {
+      await registerUser(values.username, values.email, values.password);
+      showToast('Registration successful! Please login.', 'success');
+    },
+    onError: (err) => {
+      showToast(err.response?.data.message || 'Registration failed', 'error');
+    },
+  });
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', my: 4 }}>
@@ -32,9 +37,11 @@ const Register = () => {
             label="Username"
             variant="outlined"
             fullWidth
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
+            name="username"
+            value={values.username}
+            onChange={handleChange}
+            error={!!errors.username}
+            helperText={errors.username}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -42,9 +49,11 @@ const Register = () => {
             variant="outlined"
             fullWidth
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            name="email"
+            value={values.email}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -52,9 +61,11 @@ const Register = () => {
             variant="outlined"
             fullWidth
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            name="password"
+            value={values.password}
+            onChange={handleChange}
+            error={!!errors.password}
+            helperText={errors.password}
             sx={{ mb: 2 }}
           />
           <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>

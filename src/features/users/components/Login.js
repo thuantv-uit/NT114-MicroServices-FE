@@ -1,28 +1,33 @@
 // src/features/users/components/Login.js
-import React, { useState } from 'react';
-import { loginUser } from '../services/userService';
-import { toast } from 'react-toastify';
+import React from 'react';
 import { Box, Typography, TextField, Button, Paper } from '@mui/material';
+import useForm from '../../../hooks/useForm';
+import { loginUser } from '../services/userService';
+import { showToast } from '../../../utils/toastUtils';
 
 const Login = ({ setToken }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const initialValues = { email: '', password: '' };
+  const validate = (values) => {
+    const errors = {};
+    if (!values.email) errors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(values.email)) errors.email = 'Email is invalid';
+    if (!values.password) errors.password = 'Password is required';
+    return errors;
+  };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const data = await loginUser(email, password);
+  const { values, errors, loading, handleChange, handleSubmit } = useForm({
+    initialValues,
+    validate,
+    onSubmit: async (values) => {
+      const data = await loginUser(values.email, values.password);
       setToken(data.token);
       localStorage.setItem('token', data.token);
-      toast.success('Login successful!');
-    } catch (err) {
-      toast.error(err.response?.data.message || 'Login failed');
-    } finally {
-      setLoading(false);
-    }
-  };
+      showToast('Login successful!', 'success');
+    },
+    onError: (err) => {
+      showToast(err.response?.data.message || 'Login failed', 'error');
+    },
+  });
 
   return (
     <Box sx={{ maxWidth: 400, mx: 'auto', my: 4 }}>
@@ -34,9 +39,11 @@ const Login = ({ setToken }) => {
             variant="outlined"
             fullWidth
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
+            name="email"
+            value={values.email}
+            onChange={handleChange}
+            error={!!errors.email}
+            helperText={errors.email}
             sx={{ mb: 2 }}
           />
           <TextField
@@ -44,9 +51,11 @@ const Login = ({ setToken }) => {
             variant="outlined"
             fullWidth
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
+            name="password"
+            value={values.password}
+            onChange={handleChange}
+            error={!!errors.password}
+            helperText={errors.password}
             sx={{ mb: 2 }}
           />
           <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>

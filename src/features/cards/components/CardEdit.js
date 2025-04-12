@@ -1,57 +1,84 @@
 // src/features/cards/components/CardEdit.js
-import React, { useState } from 'react';
+import React from 'react';
+// eslint-disable-next-line no-unused-vars
+import { Box, Button, TextField, Typography } from '@mui/material';
+import useForm from '../../../hooks/useForm';
 import { updateCard } from '../services/cardService';
+import { showToast } from '../../../utils/toastUtils';
 
 const CardEdit = ({ card, token, onUpdate, onCancel }) => {
-  const [title, setTitle] = useState(card.title);
-  const [description, setDescription] = useState(card.description || '');
-  const [position, setPosition] = useState(card.position);
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setLoading(true);
-    try {
-      const updatedCard = await updateCard(token, card._id, title, description, position);
-      setMessage('Card updated successfully!');
-      onUpdate(updatedCard);
-    } catch (err) {
-      setMessage(err.response?.data.message || 'Failed to update card');
-    } finally {
-      setLoading(false);
-    }
+  const initialValues = {
+    title: card.title,
+    description: card.description || '',
+    position: card.position,
+  };
+  const validate = (values) => {
+    const errors = {};
+    if (!values.title) errors.title = 'Title is required';
+    if (values.position < 0) errors.position = 'Position cannot be negative';
+    return errors;
   };
 
+  const { values, errors, loading, handleChange, handleSubmit } = useForm({
+    initialValues,
+    validate,
+    onSubmit: async (values) => {
+      const updatedCard = await updateCard(token, card._id, values.title, values.description, values.position);
+      showToast('Card updated successfully!', 'success');
+      onUpdate(updatedCard);
+    },
+    onError: (err) => {
+      showToast(err.response?.data.message || 'Failed to update card', 'error');
+    },
+  });
+
   return (
-    <div>
+    <Box sx={{ p: 1 }}>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
+        <TextField
+          label="Card Title"
+          variant="outlined"
+          fullWidth
+          name="title"
+          value={values.title}
+          onChange={handleChange}
+          error={!!errors.title}
+          helperText={errors.title}
+          sx={{ mb: 2 }}
         />
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+        <TextField
+          label="Description (optional)"
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={2}
+          name="description"
+          value={values.description}
+          onChange={handleChange}
+          sx={{ mb: 2 }}
         />
-        <input
+        <TextField
+          label="Position"
+          variant="outlined"
+          fullWidth
           type="number"
-          value={position}
-          onChange={(e) => setPosition(Number(e.target.value))}
-          required
+          name="position"
+          value={values.position}
+          onChange={handleChange}
+          error={!!errors.position}
+          helperText={errors.position}
+          sx={{ mb: 2 }}
         />
-        <button type="submit" disabled={loading}>
-          {loading ? 'Updating...' : 'Update'}
-        </button>
-        <button type="button" onClick={onCancel} style={{ marginLeft: '10px' }}>
-          Cancel
-        </button>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
+            {loading ? 'Updating...' : 'Update'}
+          </Button>
+          <Button variant="outlined" onClick={onCancel} fullWidth>
+            Cancel
+          </Button>
+        </Box>
       </form>
-      {message && <p>{message}</p>}
-    </div>
+    </Box>
   );
 };
 

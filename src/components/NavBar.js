@@ -10,25 +10,25 @@ const Navbar = ({ token, handleLogout }) => {
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Tran Van Thuan - NT114
         </Typography>
-        <Box>
+        <Box sx={{ display: 'flex', gap: 1 }}>
           {token ? (
             <>
-              <Button color="inherit" component={Link} to="/dashboard">
+              <Button key="dashboard" sx={{ color: 'inherit' }} component={Link} to="/dashboard">
                 Dashboard
               </Button>
-              <Button color="inherit" component={Link} to="/boards">
+              <Button key="boards" sx={{ color: 'inherit' }} component={Link} to="/boards">
                 Boards
               </Button>
-              <Button color="inherit" onClick={handleLogout}>
+              <Button key="logout" sx={{ color: 'inherit' }} onClick={handleLogout}>
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Button color="inherit" component={Link} to="/login">
+              <Button key="login" sx={{ color: 'inherit' }} component={Link} to="/login">
                 Login
               </Button>
-              <Button color="inherit" component={Link} to="/register">
+              <Button key="register" sx={{ color: 'inherit' }} component={Link} to="/register">
                 Register
               </Button>
             </>

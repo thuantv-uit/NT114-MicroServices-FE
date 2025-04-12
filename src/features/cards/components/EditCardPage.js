@@ -1,17 +1,22 @@
-// src/features/cards/components/CreateCard.js
+// src/features/cards/components/EditCardPage.js
 import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
 import useForm from '../../../hooks/useForm';
-import { createCard } from '../services/cardService';
+import { updateCard } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 
-const CreateCard = ({ token }) => {
-  const { columnId } = useParams();
+const EditCardPage = ({ token }) => {
+  const { cardId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
-  const initialValues = { title: '', description: '', position: 0 };
+  const initialValues = {
+    title: state?.title || '',
+    description: state?.description || '',
+    position: state?.position || 0,
+  };
+
   const validate = (values) => {
     const errors = {};
     if (!values.title) errors.title = 'Title is required';
@@ -23,18 +28,18 @@ const CreateCard = ({ token }) => {
     initialValues,
     validate,
     onSubmit: async (values) => {
-      await createCard(token, values.title, values.description, columnId, values.position);
-      showToast('Card created successfully!', 'success');
+      await updateCard(token, cardId, values.title, values.description, values.position);
+      showToast('Card updated successfully!', 'success');
       setTimeout(() => navigate(`/boards/${boardId}`), 2000);
     },
     onError: (err) => {
-      showToast(err.response?.data.message || 'Failed to create card', 'error');
+      showToast(err.response?.data.message || 'Failed to update card', 'error');
     },
   });
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>Create New Card</Typography>
+      <Typography variant="h4" gutterBottom>Edit Card</Typography>
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>}
       <Paper elevation={3} sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
@@ -73,10 +78,21 @@ const CreateCard = ({ token }) => {
             sx={{ mb: 2 }}
           />
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
-              {loading ? 'Creating...' : 'Create Card'}
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={loading}
+              fullWidth
+            >
+              {loading ? 'Updating...' : 'Update Card'}
             </Button>
-            <Button variant="outlined" onClick={() => navigate(`/boards/${boardId}`)} fullWidth>
+            <Button
+              variant="outlined"
+              onClick={() => navigate(`/boards/${boardId}`)}
+              fullWidth
+              disabled={loading}
+            >
               Cancel
             </Button>
           </Box>
@@ -86,4 +102,4 @@ const CreateCard = ({ token }) => {
   );
 };
 
-export default CreateCard;
+export default EditCardPage;
