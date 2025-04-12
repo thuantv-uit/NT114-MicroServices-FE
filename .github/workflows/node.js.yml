@@ -1,30 +1,62 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+# Workflow for building and testing a Node.js project
+# Installs dependencies, caches them, builds the source code, and runs tests across multiple Node.js versions
+# Reference: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Thuan410
+name: Node.js CI
+
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+        # Supported Node.js versions: https://nodejs.org/en/about/releases/
+      fail-fast: false # Continue testing other versions even if one fails
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build
-# Hello Tran Van Thuan
+      # Check out the repository code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Set up Node.js environment
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm' # Cache npm dependencies for faster runs
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm ci # Use npm ci for clean, reproducible installs
+
+      # Build the project with verbose logging
+      - name: Build
+        run: npm run build -- --verbose # Enable verbose output for build
+        env:
+          NODE_ENV: production # Ensure production build for consistency
+        continue-on-error: false # Fail the step if build fails
+
+      # Run tests with detailed stack traces (optional, uncomment if tests exist)
+      # - name: Run tests
+      #   run: npm test -- --verbose # Enable verbose output for tests
+      #   env:
+      #     NODE_ENV: test
+      #   continue-on-error: false
+
+      # Display detailed error logs if build fails
+      - name: Show build error details
+        if: failure() # Run only if previous steps fail
+        run: |
+          echo "Checking for error logs..."
+          find . -type f -name "*.log" -exec cat {} \; || echo "No log files found"
+          echo "Listing files in build output (if applicable)..."
+          ls -la dist/ || echo "No dist/ directory found"
