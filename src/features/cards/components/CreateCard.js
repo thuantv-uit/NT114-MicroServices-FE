@@ -1,9 +1,8 @@
-// src/features/cards/components/CreateCard.js
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
 import useForm from '../../../hooks/useForm';
-import { createCard, fetchCards } from '../services/cardService';
+import { createCard } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 
 const CreateCard = ({ token }) => {
@@ -11,40 +10,19 @@ const CreateCard = ({ token }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
-  const [existingPositions, setExistingPositions] = useState([]); // Lưu danh sách position hiện có
 
-  // Lấy danh sách card để kiểm tra position
-  useEffect(() => {
-    const loadCards = async () => {
-      try {
-        const cards = await fetchCards(token, columnId);
-        const positions = cards.map(card => card.position);
-        setExistingPositions(positions);
-      } catch (err) {
-        showToast('Failed to load cards for position validation', 'error');
-      }
-    };
-    loadCards();
-  }, [token, columnId]);
-
-  const initialValues = { title: '', description: '', position: 0 };
+  const initialValues = { title: '', description: '' };
   const validate = (values) => {
     const errors = {};
     // Kiểm tra title
     if (!values.title) {
-      errors.title = 'Title is required';
+      errors.title = 'Tiêu đề là bắt buộc';
     } else if (values.title.length < 5) {
-      errors.title = 'Title must be at least 5 characters';
+      errors.title = 'Tiêu đề phải có ít nhất 5 ký tự';
     }
     // Kiểm tra description
     if (values.description && values.description.length < 5) {
-      errors.description = 'Description must be at least 5 characters';
-    }
-    // Kiểm tra position
-    if (values.position < 0) {
-      errors.position = 'Position cannot be negative';
-    } else if (existingPositions.includes(Number(values.position))) {
-      errors.position = 'Position must be unique';
+      errors.description = 'Mô tả phải có ít nhất 5 ký tự';
     }
     return errors;
   };
@@ -53,23 +31,23 @@ const CreateCard = ({ token }) => {
     initialValues,
     validate,
     onSubmit: async (values) => {
-      await createCard(token, values.title, values.description, columnId, values.position);
-      showToast('Card created successfully!', 'success');
+      await createCard(token, values.title, values.description, columnId);
+      showToast('Tạo card thành công!', 'success');
       setTimeout(() => navigate(`/boards/${boardId}`), 2000);
     },
     onError: (err) => {
-      showToast(err.response?.data.message || 'Unable to connect to server Card', 'error');
+      showToast(err.response?.data.message || 'Không thể kết nối tới server Card', 'error');
     },
   });
 
   return (
     <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>Create New Card</Typography>
+      <Typography variant="h4" gutterBottom>Tạo Card Mới</Typography>
       {loading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>}
       <Paper elevation={3} sx={{ p: 3 }}>
         <form onSubmit={handleSubmit}>
           <TextField
-            label="Card Title"
+            label="Tiêu đề Card"
             variant="outlined"
             fullWidth
             name="title"
@@ -80,7 +58,7 @@ const CreateCard = ({ token }) => {
             sx={{ mb: 2 }}
           />
           <TextField
-            label="Description (optional)"
+            label="Mô tả (tùy chọn)"
             variant="outlined"
             fullWidth
             multiline
@@ -92,24 +70,12 @@ const CreateCard = ({ token }) => {
             helperText={errors.description}
             sx={{ mb: 2 }}
           />
-          <TextField
-            label="Position"
-            variant="outlined"
-            fullWidth
-            type="number"
-            name="position"
-            value={values.position}
-            onChange={handleChange}
-            error={!!errors.position}
-            helperText={errors.position}
-            sx={{ mb: 2 }}
-          />
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
-              {loading ? 'Creating...' : 'Create Card'}
+              {loading ? 'Đang tạo...' : 'Tạo Card'}
             </Button>
             <Button variant="outlined" onClick={() => navigate(`/boards/${boardId}`)} fullWidth>
-              Cancel
+              Hủy
             </Button>
           </Box>
         </form>
