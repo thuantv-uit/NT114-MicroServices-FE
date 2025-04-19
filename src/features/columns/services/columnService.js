@@ -1,3 +1,4 @@
+// src/features/columns/services/columnService.js
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:3003/api/columns';
@@ -17,8 +18,8 @@ export const createColumn = async (token, title, boardId) => {
   return res.data;
 };
 
-export const updateColumn = async (token, columnId, title) => {
-  const res = await axios.put(`${BASE_URL}/${columnId}`, { title }, {
+export const updateColumn = async (token, columnId, title, cardOrderIds) => {
+  const res = await axios.put(`${BASE_URL}/${columnId}`, { title, cardOrderIds }, {
     headers: { Authorization: `Bearer ${token}` },
   });
   return res.data;
