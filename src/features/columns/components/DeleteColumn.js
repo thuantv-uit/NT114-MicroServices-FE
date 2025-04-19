@@ -1,7 +1,7 @@
-// src/features/columns/components/DeleteColumn.js
 import React from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { deleteColumn } from '../services/columnService';
+import { deleteColumn, updateBoardColumnOrder } from '../services/columnService';
+import { fetchBoard } from '../../boards/services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import { Box, Button, Typography, Paper, CircularProgress } from '@mui/material';
 import useForm from '../../../hooks/useForm';
@@ -16,6 +16,9 @@ const DeleteColumn = ({ token }) => {
     initialValues: {},
     onSubmit: async () => {
       await deleteColumn(token, columnId);
+      const board = await fetchBoard(token, boardId);
+      const newColumnOrderIds = board.columnOrderIds.filter(id => id !== columnId);
+      await updateBoardColumnOrder(token, boardId, newColumnOrderIds);
       showToast('Column deleted successfully!', 'success');
       setTimeout(() => navigate(`/boards/${boardId}`), 2000);
     },

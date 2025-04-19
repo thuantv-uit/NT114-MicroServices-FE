@@ -1,4 +1,3 @@
-// src/features/boards/services/boardService.js
 import axios from 'axios';
 
 const BASE_URL = 'http://localhost:3002/api/boards';
