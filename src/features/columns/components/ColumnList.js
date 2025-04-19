@@ -24,9 +24,11 @@ const ColumnList = ({ boardId, token }) => {
   const [columns, setColumns] = useState([]);
   const [orderedColumnIds, setOrderedColumnIds] = useState([]);
   const [loading, setLoading] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [activeDragItemId, setActiveDragItemId] = useState(null);
   const [activeDragItemType, setActiveDragItemType] = useState(null);
   const [activeDragItemData, setActiveDragItemData] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [sourceColumn, setSourceColumn] = useState(null);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
@@ -49,6 +51,7 @@ const ColumnList = ({ boardId, token }) => {
 
   useEffect(() => {
     loadColumns();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [boardId, token]);
 
   const findColumnByCardId = (cardId) => {
