@@ -8,7 +8,7 @@ import { Box, Typography, TextField, Button, Paper } from '@mui/material';
 const BoardCreate = ({ token }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [errors, setErrors] = useState({ title: '', description: '' }); // Thêm trạng thái lỗi
+  const [errors, setErrors] = useState({ title: '', description: '' });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -22,11 +22,6 @@ const BoardCreate = ({ token }) => {
       isValid = false;
     }
 
-    // Kiểm tra description
-    // if (!description.trim()) {
-    //   newErrors.description = 'Description is required';
-    //   isValid = false;
-    // }
     if (description.length <= 5) {
       newErrors.description = 'Description must be more than 5 characters';
       isValid = false;
