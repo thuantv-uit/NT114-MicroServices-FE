@@ -1,44 +1,81 @@
-import axios from 'axios';
+import { boardInstance } from '../../../services/axiosConfig';
+import { handleApiCall } from '../../../utils/apiHelper';
 
-const BASE_URL = 'http://localhost:3002/api/boards';
+/**
+ * Board service functions
+ */
 
-export const fetchBoards = async (token) => {
-  const res = await axios.get(`${BASE_URL}/list`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Fetch all boards
+ * @returns {Promise<Array>} List of boards
+ */
+export const fetchBoards = async () => {
+  return handleApiCall(
+    () => boardInstance.get('/list').then(res => res.data),
+    'Fetch boards'
+  );
 };
 
-export const createBoard = async (token, title, description) => {
-  const res = await axios.post(BASE_URL, { title, description }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Create a new board
+ * @param {string} title - Board title
+ * @param {string} description - Board description
+ * @returns {Promise<Object>} Created board
+ */
+export const createBoard = async (title, description) => {
+  return handleApiCall(
+    () => boardInstance.post('', { title, description }).then(res => res.data),
+    'Create board'
+  );
 };
 
-export const fetchBoard = async (token, boardId) => {
-  const res = await axios.get(`${BASE_URL}/${boardId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Fetch a board by ID
+ * @param {string} boardId - Board ID
+ * @returns {Promise<Object>} Board data
+ */
+export const fetchBoard = async (boardId) => {
+  return handleApiCall(
+    () => boardInstance.get(`/${boardId}`).then(res => res.data),
+    'Fetch board'
+  );
 };
 
-export const updateBoard = async (token, boardId, title, description) => {
-  const res = await axios.put(`${BASE_URL}/${boardId}`, { title, description }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Update a board
+ * @param {string} boardId - Board ID
+ * @param {string} title - Board title
+ * @param {string} description - Board description
+ * @returns {Promise<Object>} Updated board
+ */
+export const updateBoard = async (boardId, title, description) => {
+  return handleApiCall(
+    () => boardInstance.put(`/${boardId}`, { title, description }).then(res => res.data),
+    'Update board'
+  );
 };
 
-export const deleteBoard = async (token, boardId) => {
-  await axios.delete(`${BASE_URL}/${boardId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+/**
+ * Delete a board
+ * @param {string} boardId - Board ID
+ * @returns {Promise<void>}
+ */
+export const deleteBoard = async (boardId) => {
+  return handleApiCall(
+    () => boardInstance.delete(`/${boardId}`),
+    'Delete board'
+  );
 };
 
-export const inviteUser = async (token, boardId, email) => {
-  const res = await axios.post(`${BASE_URL}/invite`, { boardId, email }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Invite a user to a board
+ * @param {string} boardId - Board ID
+ * @param {string} email - User email
+ * @returns {Promise<Object>} Response data
+ */
+export const inviteUser = async (boardId, email) => {
+  return handleApiCall(
+    () => boardInstance.post('/invite', { boardId, email }).then(res => res.data),
+    'Invite user'
+  );
 };

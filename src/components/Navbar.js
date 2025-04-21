@@ -1,34 +1,47 @@
-// src/components/Navbar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box } from '@mui/material';
 
-const Navbar = ({ token, handleLogout }) => {
+/**
+ * Navigation bar component
+ * @param {Object} props
+ * @param {string} props.token - Authentication token
+ * @param {Function} props.logout - Logout function
+ * @returns {JSX.Element}
+ */
+const Navbar = ({ token, logout }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Tran Van Thuan - NT114
+        <Typography variant="h6" component={Link} to="/" sx={{ flexGrow: 1, textDecoration: 'none', color: 'inherit' }}>
+          Task Manager
         </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+        <Box>
           {token ? (
             <>
-              <Button key="dashboard" sx={{ color: 'inherit' }} component={Link} to="/dashboard">
+              <Button color="inherit" component={Link} to="/dashboard">
                 Dashboard
               </Button>
-              <Button key="boards" sx={{ color: 'inherit' }} component={Link} to="/boards">
+              <Button color="inherit" component={Link} to="/boards">
                 Boards
               </Button>
-              <Button key="logout" sx={{ color: 'inherit' }} onClick={handleLogout}>
+              <Button color="inherit" onClick={handleLogout}>
                 Logout
               </Button>
             </>
           ) : (
             <>
-              <Button key="login" sx={{ color: 'inherit' }} component={Link} to="/login">
+              <Button color="inherit" component={Link} to="/login">
                 Login
               </Button>
-              <Button key="register" sx={{ color: 'inherit' }} component={Link} to="/register">
+              <Button color="inherit" component={Link} to="/register">
                 Register
               </Button>
             </>

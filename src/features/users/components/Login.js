@@ -1,78 +1,45 @@
-// src/features/users/components/Login.js
 import React from 'react';
-import { Box, Typography, TextField, Button, Paper } from '@mui/material';
-import useForm from '../../../hooks/useForm';
+import { useNavigate } from 'react-router-dom';
 import { loginUser } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
+import FormContainer from '../../../components/FormContainer';
+import GenericForm from '../../../components/GenericForm';
+import { validateUserForm } from '../../../utils/validateUtils';
 
+/**
+ * Component for user login
+ * @param {Object} props
+ * @param {Function} props.setToken - Function to set authentication token
+ * @returns {JSX.Element}
+ */
 const Login = ({ setToken }) => {
+  const navigate = useNavigate();
   const initialValues = { email: '', password: '' };
-  const validate = (values) => {
-    const errors = {};
-    // Kiểm tra email
-    if (!values.email) {
-      errors.email = 'Email is required';
-    } else if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(values.email)) {
-      errors.email = 'Email is invalid';
-    }
-    // Kiểm tra password
-    if (!values.password) {
-      errors.password = 'Password is required';
-    } else if (values.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
-    }
-    return errors;
-  };
-
-  const { values, errors, loading, handleChange, handleSubmit } = useForm({
-    initialValues,
-    validate,
-    onSubmit: async (values) => {
-      const data = await loginUser(values.email, values.password);
-      setToken(data.token);
-      localStorage.setItem('token', data.token);
-      showToast('Login successful!', 'success');
-    },
-    onError: (err) => {
-      showToast(err.response?.data.message || 'Unable to connect to server User', 'error');
-    },
-  });
+  const fields = [
+    { name: 'email', label: 'Email', type: 'email', required: true },
+    { name: 'password', label: 'Password', type: 'password', required: true },
+  ];
 
   return (
-    <Box sx={{ maxWidth: 400, mx: 'auto', my: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h5" gutterBottom>Login</Typography>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            type="email"
-            name="email"
-            value={values.email}
-            onChange={handleChange}
-            error={!!errors.email}
-            helperText={errors.email}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Password"
-            variant="outlined"
-            fullWidth
-            type="password"
-            name="password"
-            value={values.password}
-            onChange={handleChange}
-            error={!!errors.password}
-            helperText={errors.password}
-            sx={{ mb: 2 }}
-          />
-          <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
-            {loading ? 'Logging in...' : 'Login'}
-          </Button>
-        </form>
-      </Paper>
-    </Box>
+    <FormContainer title="Login">
+      <GenericForm
+        initialValues={initialValues}
+        validate={(values) => {
+          const errors = validateUserForm({ ...values, username: 'dummy' });
+          return { email: errors.email, password: errors.password };
+        }}
+        onSubmit={async (values) => {
+          const { token } = await loginUser(values.email, values.password);
+          setToken(token);
+          localStorage.setItem('token', token);
+          showToast('Login successful!', 'success');
+          setTimeout(() => navigate('/dashboard'), 2000);
+        }}
+        submitLabel="Login"
+        cancelPath="/"
+        fields={fields}
+      />
+    </FormContainer>
   );
 };
 

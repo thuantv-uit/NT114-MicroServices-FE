@@ -1,39 +1,70 @@
-// src/features/columns/services/columnService.js
-import axios from 'axios';
+import { columnInstance, boardInstance } from '../../../services/axiosConfig';
+import { handleApiCall } from '../../../utils/apiHelper';
 
-const BASE_URL = 'http://localhost:3003/api/columns';
-const BOARD_URL = 'http://localhost:3002/api/boards';
+/**
+ * Column service functions
+ */
 
-export const fetchColumns = async (token, boardId) => {
-  const res = await axios.get(`${BASE_URL}/board/${boardId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Fetch columns by board ID
+ * @param {string} boardId - Board ID
+ * @returns {Promise<Array>} List of columns
+ */
+export const fetchColumns = async (boardId) => {
+  return handleApiCall(
+    () => columnInstance.get(`/board/${boardId}`).then(res => res.data),
+    'Fetch columns'
+  );
 };
 
-export const createColumn = async (token, title, boardId) => {
-  const res = await axios.post(BASE_URL, { title, boardId }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Create a new column
+ * @param {string} title - Column title
+ * @param {string} boardId - Board ID
+ * @returns {Promise<Object>} Created column
+ */
+export const createColumn = async (title, boardId) => {
+  return handleApiCall(
+    () => columnInstance.post('', { title, boardId }).then(res => res.data),
+    'Create column'
+  );
 };
 
-export const updateColumn = async (token, columnId, title, cardOrderIds) => {
-  const res = await axios.put(`${BASE_URL}/${columnId}`, { title, cardOrderIds }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Update a column
+ * @param {string} columnId - Column ID
+ * @param {string} title - Column title
+ * @param {Array} cardOrderIds - Order of card IDs
+ * @returns {Promise<Object>} Updated column
+ */
+export const updateColumn = async (columnId, title, cardOrderIds) => {
+  return handleApiCall(
+    () => columnInstance.put(`/${columnId}`, { title, cardOrderIds }).then(res => res.data),
+    'Update column'
+  );
 };
 
-export const deleteColumn = async (token, columnId) => {
-  await axios.delete(`${BASE_URL}/${columnId}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+/**
+ * Delete a column
+ * @param {string} columnId - Column ID
+ * @returns {Promise<void>}
+ */
+export const deleteColumn = async (columnId) => {
+  return handleApiCall(
+    () => columnInstance.delete(`/${columnId}`),
+    'Delete column'
+  );
 };
 
-export const updateBoardColumnOrder = async (token, boardId, columnOrderIds) => {
-  const res = await axios.put(`${BOARD_URL}/${boardId}`, { columnOrderIds }, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  return res.data;
+/**
+ * Update board column order
+ * @param {string} boardId - Board ID
+ * @param {Array} columnOrderIds - Order of column IDs
+ * @returns {Promise<Object>} Updated board
+ */
+export const updateBoardColumnOrder = async (boardId, columnOrderIds) => {
+  return handleApiCall(
+    () => boardInstance.put(`/${boardId}`, { columnOrderIds }).then(res => res.data),
+    'Update column order'
+  );
 };

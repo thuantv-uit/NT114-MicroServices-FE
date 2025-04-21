@@ -1,4 +1,3 @@
-// src/features/columns/components/Column.jsx
 import React from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
 import { useSortable } from '@dnd-kit/sortable';
@@ -7,7 +6,17 @@ import { useNavigate } from 'react-router-dom';
 import ColumnMenu from './ColumnMenu';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import CardList from '../../cards/components/CardList';
+import { COLUMN_STYLE, COLUMN_HEADER_STYLE } from '../../../constants/styles';
 
+/**
+ * Component to display a column
+ * @param {Object} props
+ * @param {Object} props.column - Column data
+ * @param {string} props.boardId - Board ID
+ * @param {string} props.token - Authentication token
+ * @param {Function} props.onRefresh - Refresh callback
+ * @returns {JSX.Element}
+ */
 function Column({ column, boardId, token, onRefresh }) {
   const navigate = useNavigate();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -24,27 +33,8 @@ function Column({ column, boardId, token, onRefresh }) {
 
   return (
     <div ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
-      <Box
-        sx={{
-          minWidth: '300px',
-          maxWidth: '300px',
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333643' : '#ebecf0'),
-          ml: 2,
-          borderRadius: '6px',
-          height: 'fit-content',
-          maxHeight: (theme) => `calc(100vh - ${theme.spacing(5)})`,
-        }}
-      >
-        {/* Tiêu đề cột */}
-        <Box
-          sx={{
-            height: '60px',
-            p: 2,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
+      <Box sx={COLUMN_STYLE}>
+        <Box sx={COLUMN_HEADER_STYLE}>
           <Typography variant="h6">{column.title}</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <ColumnMenu
@@ -54,14 +44,12 @@ function Column({ column, boardId, token, onRefresh }) {
               onEdit={() => navigate(`/columns/${column._id}/edit`, { state: { title: column.title, boardId } })}
               onDelete={() => navigate(`/columns/${column._id}/delete`, { state: { boardId } })}
               onAddCard={() => navigate(`/columns/${column._id}/cards/create`, { state: { boardId } })}
-              onRefresh={onRefresh}
             />
-            <Tooltip title="Kéo để di chuyển">
+            <Tooltip title="Drag to move">
               <DragHandleIcon sx={{ cursor: 'pointer' }} {...listeners} />
             </Tooltip>
           </Box>
         </Box>
-        {/* Danh sách card */}
         <CardList columnId={column._id} boardId={boardId} token={token} column={column} onRefresh={onRefresh} />
       </Box>
     </div>
@@ -69,4 +57,3 @@ function Column({ column, boardId, token, onRefresh }) {
 }
 
 export default Column;
-

@@ -1,13 +1,18 @@
-// src/features/boards/components/BoardList.js
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchBoards, deleteBoard } from '../services/boardService';
-import { toast } from 'react-toastify';
+import { showToast } from '../../../utils/toastUtils';
 import {
   Box, Typography, Button, List, ListItem, ListItemText, ListItemSecondaryAction, IconButton, CircularProgress, Paper
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 
+/**
+ * Component to list all boards
+ * @param {Object} props
+ * @param {string} props.token - Authentication token
+ * @returns {JSX.Element}
+ */
 const BoardList = ({ token }) => {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,25 +21,25 @@ const BoardList = ({ token }) => {
     const loadBoards = async () => {
       setLoading(true);
       try {
-        const data = await fetchBoards(token);
+        const data = await fetchBoards();
         setBoards(data);
       } catch (err) {
-        toast.error(err.response?.data.message || 'Failed to fetch boards');
+        showToast(err.message, 'error');
       } finally {
         setLoading(false);
       }
     };
     loadBoards();
-  }, [token]);
+  }, []);
 
   const handleDelete = async (boardId) => {
     if (!window.confirm('Are you sure you want to delete this board?')) return;
     try {
-      await deleteBoard(token, boardId);
+      await deleteBoard(boardId);
       setBoards(boards.filter((board) => board._id !== boardId));
-      toast.success('Board deleted successfully!');
+      showToast('Board deleted successfully!', 'success');
     } catch (err) {
-      toast.error(err.response?.data.message || 'Failed to delete board');
+      showToast(err.message, 'error');
     }
   };
 

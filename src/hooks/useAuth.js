@@ -1,15 +1,23 @@
-// src/hooks/useAuth.js
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-const useAuth = () => {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+/**
+ * Custom hook for authentication
+ * @returns {Object} Authentication state and functions
+ */
+export const useAuth = () => {
+  const [token, setToken] = useState(localStorage.getItem('token'));
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken('');
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('token', token);
+    } else {
+      localStorage.removeItem('token');
+    }
+  }, [token]);
+
+  const logout = () => {
+    setToken(null);
   };
 
-  return { token, setToken, handleLogout };
+  return { token, setToken, logout };
 };
-
-export default useAuth;

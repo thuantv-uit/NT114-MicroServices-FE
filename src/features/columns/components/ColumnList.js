@@ -1,10 +1,11 @@
-// src/features/columns/components/ColumnList.js
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchColumns, updateBoardColumnOrder, updateColumn } from '../services/columnService';
 import { fetchBoard } from '../../boards/services/boardService';
-import { toast } from 'react-toastify';
+import { showToast } from '../../../utils/toastUtils';
 import { Box, Typography, CircularProgress, Button } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import Column from './Column';
 import {
   DndContext,
@@ -19,16 +20,21 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { arrayMove } from '@dnd-kit/sortable';
 import Card from '../../cards/components/Card';
 
+/**
+ * Component to list columns in a board
+ * @param {Object} props
+ * @param {string} props.boardId - Board ID
+ * @param {string} props.token - Authentication token
+ * @returns {JSX.Element}
+ */
 const ColumnList = ({ boardId, token }) => {
   const navigate = useNavigate();
   const [columns, setColumns] = useState([]);
   const [orderedColumnIds, setOrderedColumnIds] = useState([]);
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line no-unused-vars
   const [activeDragItemId, setActiveDragItemId] = useState(null);
   const [activeDragItemType, setActiveDragItemType] = useState(null);
   const [activeDragItemData, setActiveDragItemData] = useState(null);
-  // eslint-disable-next-line no-unused-vars
   const [sourceColumn, setSourceColumn] = useState(null);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
@@ -38,12 +44,14 @@ const ColumnList = ({ boardId, token }) => {
   const loadColumns = async () => {
     setLoading(true);
     try {
-      const data = await fetchColumns(token, boardId);
-      const board = await fetchBoard(token, boardId);
+      const [data, board] = await Promise.all([
+        fetchColumns(boardId),
+        fetchBoard(boardId),
+      ]);
       setColumns(data);
       setOrderedColumnIds(board.columnOrderIds || data.map((c) => c._id));
     } catch (err) {
-      toast.error(err.response?.data.message || 'Không thể tải danh sách cột');
+      showToast(err.message, 'error');
     } finally {
       setLoading(false);
     }
@@ -51,8 +59,7 @@ const ColumnList = ({ boardId, token }) => {
 
   useEffect(() => {
     loadColumns();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boardId, token]);
+  }, [boardId]);
 
   const findColumnByCardId = (cardId) => {
     return columns.find((column) => column?.cardOrderIds?.includes(cardId));
@@ -86,11 +93,11 @@ const ColumnList = ({ boardId, token }) => {
       setOrderedColumnIds(newOrderedColumnIds);
 
       try {
-        await updateBoardColumnOrder(token, boardId, newOrderedColumnIds);
-        toast.success('Cập nhật thứ tự cột thành công!');
+        await updateBoardColumnOrder(boardId, newOrderedColumnIds);
+        showToast('Column order updated successfully!', 'success');
       } catch (err) {
         setOrderedColumnIds(prevOrderedColumnIds);
-        toast.error(err.response?.data.message || 'Không thể cập nhật thứ tự cột');
+        showToast(err.message, 'error');
       }
     } else if (activeDragItemType === 'CARD') {
       const sourceCol = findColumnByCardId(active.id);
@@ -99,7 +106,6 @@ const ColumnList = ({ boardId, token }) => {
       if (!sourceCol || !destCol) return;
 
       if (sourceCol._id === destCol._id) {
-        // Sắp xếp lại trong cùng cột
         const oldIndex = sourceCol.cardOrderIds.findIndex((id) => id === active.id);
         const newIndex = sourceCol.cardOrderIds.findIndex((id) => id === over.id);
         const newCardOrderIds = arrayMove(sourceCol.cardOrderIds, oldIndex, newIndex);
@@ -111,14 +117,13 @@ const ColumnList = ({ boardId, token }) => {
         );
 
         try {
-          await updateColumn(token, sourceCol._id, sourceCol.title, newCardOrderIds);
-          toast.success('Cập nhật thứ tự card thành công!');
+          await updateColumn(sourceCol._id, sourceCol.title, newCardOrderIds);
+          showToast('Card order updated successfully!', 'success');
         } catch (err) {
-          setColumns(columns); // Khôi phục
-          toast.error(err.response?.data.message || 'Không thể cập nhật thứ tự card');
+          setColumns(columns);
+          showToast(err.message, 'error');
         }
       } else {
-        // Di chuyển giữa các cột
         const sourceCardOrderIds = sourceCol.cardOrderIds.filter((id) => id !== active.id);
         const destCardOrderIds = [...destCol.cardOrderIds];
         const overIndex = destCol.cardOrderIds.findIndex((id) => id === over.id);
@@ -137,13 +142,13 @@ const ColumnList = ({ boardId, token }) => {
 
         try {
           await Promise.all([
-            updateColumn(token, sourceCol._id, sourceCol.title, sourceCardOrderIds),
-            updateColumn(token, destCol._id, destCol.title, destCardOrderIds),
+            updateColumn(sourceCol._id, sourceCol.title, sourceCardOrderIds),
+            updateColumn(destCol._id, destCol.title, destCardOrderIds),
           ]);
-          toast.success('Di chuyển card thành công!');
+          showToast('Card moved successfully!', 'success');
         } catch (err) {
-          setColumns(columns); // Khôi phục
-          toast.error(err.response?.data.message || 'Không thể cập nhật thứ tự card');
+          setColumns(columns);
+          showToast(err.message, 'error');
         }
       }
     }
@@ -184,12 +189,12 @@ const ColumnList = ({ boardId, token }) => {
                   })
                 ) : (
                   <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography>Không tìm thấy cột nào.</Typography>
+                    <Typography>No columns found.</Typography>
                     <Button
                       variant="contained"
                       onClick={() => navigate(`/boards/${boardId}/columns/create`)}
                     >
-                      Tạo cột mới
+                      Create New Column
                     </Button>
                   </Box>
                 )}
