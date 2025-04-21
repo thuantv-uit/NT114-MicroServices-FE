@@ -1,23 +1,45 @@
-import {
-    MouseSensor as DndKitMouseSensor,
-    TouchSensor as DndKitTouchSensor
-  } from '@dnd-kit/core'
-  
-  const handler = ({ nativeEvent: event }) => {
-    let cur = event.target
-    while (cur) {
-      if (cur.dataset && cur.dataset.noDnd) {
-        return false
-      }
-      cur = cur.parentElement
+import { MouseSensor as LibMouseSensor, TouchSensor as LibTouchSensor } from '@dnd-kit/core';
+
+/**
+ * Custom MouseSensor to ignore elements with data-no-dnd
+ */
+export class MouseSensor extends LibMouseSensor {
+  static activators = [
+    {
+      eventName: 'onMouseDown',
+      handler: ({ nativeEvent: event }) => {
+        return shouldHandleEvent(event.target);
+      },
+    },
+  ];
+}
+
+/**
+ * Custom TouchSensor to ignore elements with data-no-dnd
+ */
+export class TouchSensor extends LibTouchSensor {
+  static activators = [
+    {
+      eventName: 'onTouchStart',
+      handler: ({ nativeEvent: event }) => {
+        return shouldHandleEvent(event.target);
+      },
+    },
+  ];
+}
+
+/**
+ * Check if element should be handled for drag and drop
+ * @param {HTMLElement} element - DOM element
+ * @returns {boolean}
+ */
+function shouldHandleEvent(element) {
+  let current = element;
+  while (current) {
+    if (current.dataset && current.dataset.noDnd) {
+      return false;
     }
-    return true
+    current = current.parentElement;
   }
-  
-  export class MouseSensor extends DndKitMouseSensor {
-    static activators = [{ eventName: 'onMouseDown', handler }]
-  }
-  
-  export class TouchSensor extends DndKitTouchSensor {
-    static activators = [{ eventName: 'onTouchStart', handler }]
-  }
+  return true;
+}

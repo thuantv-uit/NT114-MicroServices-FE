@@ -1,0 +1,41 @@
+/* Global styles */
+.navbar {
+  background-color: #1976d2;
+}
+
+.navbar a {
+  color: white !important;
+  text-decoration: none;
+}
+
+.auth-container {
+  max-width: 400px;
+  margin: 2rem auto;
+}
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 2rem auto;
+}
+
+.board-list {
+  max-width: 1200px;
+  margin: 2rem auto;
+}
+
+.board-detail {
+  max-width: 1800px;
+  margin: 2rem auto;
+}
+
+.column-container {
+  display: inline-flex;
+  gap: 1rem;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding-bottom: 1rem;
+}
+
+.card-container {
+  margin-bottom: 1rem;
+}

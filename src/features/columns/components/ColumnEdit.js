@@ -1,71 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
-import useForm from '../../../hooks/useForm';
-import { updateColumn } from '../services/columnService';
+import { updateColumn, fetchColumns } from '../services/columnService';
 import { showToast } from '../../../utils/toastUtils';
+import FormContainer from '../../../components/FormContainer';
+import GenericForm from '../../../components/GenericForm';
+import { validateColumnForm } from '../../../utils/validateUtils';
 
+/**
+ * Component to edit a column
+ * @param {Object} props
+ * @param {string} props.token - Authentication token
+ * @returns {JSX.Element}
+ */
 const ColumnEdit = ({ token }) => {
   const { columnId } = useParams();
   const navigate = useNavigate();
   const { state } = useLocation();
-
-  const initialValues = {
-    title: state?.title || '',
-  };
   const boardId = state?.boardId || '';
+  const [initialValues, setInitialValues] = useState({ title: state?.title || '' });
+  const [loading, setLoading] = useState(false);
+  const fields = [
+    { name: 'title', label: 'Column Title', required: true },
+  ];
 
-  const validate = (values) => {
-    const errors = {};
-    if (!values.title) {
-      errors.title = 'Title is required';
-    } else if (values.title.length <= 5) {
-      errors.title = 'Title must be more than 5 characters';
+  useEffect(() => {
+    const loadColumn = async () => {
+      setLoading(true);
+      try {
+        const columns = await fetchColumns(boardId);
+        const column = columns.find(c => c._id === columnId);
+        if (column) {
+          setInitialValues({ title: column.title });
+        } else {
+          showToast('Column not found', 'error');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (!state?.title) {
+      loadColumn();
     }
-    return errors;
-  };
-
-  const { values, errors, loading, handleChange, handleSubmit } = useForm({
-    initialValues,
-    validate,
-    onSubmit: async (values) => {
-      await updateColumn(token, columnId, values.title);
-      showToast('Column updated successfully!', 'success');
-      setTimeout(() => navigate(`/boards/${boardId}`), 2000);
-    },
-    onError: (err) => {
-      showToast(err.response?.data.message || 'Failed to update column', 'error');
-    },
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [columnId, boardId]);
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>Edit Column</Typography>
-      {loading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>}
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Column Title"
-            variant="outlined"
-            fullWidth
-            name="title"
-            value={values.title}
-            onChange={handleChange}
-            error={!!errors.title}
-            helperText={errors.title}
-            sx={{ mb: 2 }}
-          />
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
-              {loading ? 'Updating...' : 'Update'}
-            </Button>
-            <Button variant="outlined" onClick={() => navigate(`/boards/${boardId}`)} fullWidth disabled={loading}>
-              Cancel
-            </Button>
-          </Box>
-        </form>
-      </Paper>
-    </Box>
+    <FormContainer title="Edit Column" loading={loading}>
+      <GenericForm
+        initialValues={initialValues}
+        validate={validateColumnForm}
+        onSubmit={async (values) => {
+          await updateColumn(columnId, values.title, initialValues.cardOrderIds || []);
+          showToast('Column updated successfully!', 'success');
+          setTimeout(() => navigate(`/boards/${boardId}`), 2000);
+        }}
+        submitLabel="Update Column"
+        cancelPath={`/boards/${boardId}`}
+        fields={fields}
+      />
+    </FormContainer>
   );
 };
 

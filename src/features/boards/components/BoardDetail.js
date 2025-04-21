@@ -1,8 +1,7 @@
-// src/features/boards/components/BoardDetail.js
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchBoard } from '../services/boardService';
-import { toast } from 'react-toastify';
+import { showToast } from '../../../utils/toastUtils';
 import ColumnList from '../../columns/components/ColumnList';
 import {
   Box,
@@ -19,11 +18,16 @@ import {
 } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
+/**
+ * Component to display board details
+ * @param {Object} props
+ * @param {string} props.token - Authentication token
+ * @returns {JSX.Element}
+ */
 const BoardDetail = ({ token }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [board, setBoard] = useState(null);
-  const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -32,17 +36,16 @@ const BoardDetail = ({ token }) => {
     const loadBoard = async () => {
       setLoading(true);
       try {
-        const data = await fetchBoard(token, id);
+        const data = await fetchBoard(id);
         setBoard(data);
       } catch (err) {
-        setMessage(err.response?.data.message || 'Failed to fetch board');
-        toast.error(err.response?.data.message || 'Failed to fetch board');
+        showToast(err.message, 'error');
       } finally {
         setLoading(false);
       }
     };
     loadBoard();
-  }, [id, token]);
+  }, [id]);
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -60,7 +63,6 @@ const BoardDetail = ({ token }) => {
   return (
     <Box sx={{ maxWidth: 1800, mx: 'auto', mt: 4, p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        {/* Thay "Board Details" bằng title và description của board */}
         <Box>
           {board ? (
             <>
@@ -84,11 +86,7 @@ const BoardDetail = ({ token }) => {
         >
           Actions
         </Button>
-        <Menu
-          anchorEl={anchorEl}
-          open={open}
-          onClose={handleMenuClose}
-        >
+        <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
           <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/update`)}>Update Board</MenuItem>
           <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/delete`)}>Delete Board</MenuItem>
           <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/invite`)}>Invite User</MenuItem>
@@ -102,16 +100,8 @@ const BoardDetail = ({ token }) => {
         </Box>
       )}
 
-      {message && (
-        <Typography color={message.includes('successfully') ? 'success.main' : 'error'} sx={{ mb: 2 }}>
-          {message}
-        </Typography>
-      )}
-
       {board ? (
         <>
-          {/* Board Details Section - Đã được thay thế bằng title và description ở trên */}
-          {/* Columns Section */}
           <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
               Columns in this Board
@@ -120,7 +110,6 @@ const BoardDetail = ({ token }) => {
             <ColumnList boardId={id} token={token} />
           </Paper>
 
-          {/* Members Section */}
           <Paper elevation={3} sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
               Members

@@ -4,12 +4,18 @@ import { CSS } from '@dnd-kit/utilities';
 import { Box, Typography, Paper, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { useNavigate } from 'react-router-dom';
 import { CARD_PAPER_STYLE } from '../../../constants/styles';
 
+/**
+ * Component to display a card
+ * @param {Object} props
+ * @param {Object} props.card - Card data
+ * @param {string} props.boardId - Board ID
+ * @param {Function} props.onEdit - Edit handler
+ * @param {Function} props.onDelete - Delete handler
+ * @returns {JSX.Element}
+ */
 const Card = ({ card, boardId, onEdit, onDelete }) => {
-  // eslint-disable-next-line no-unused-vars
-  const navigate = useNavigate();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
     data: { ...card, type: 'CARD' },

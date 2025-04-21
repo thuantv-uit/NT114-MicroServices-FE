@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { fetchCards } from '../services/cardService';
 import { updateColumn } from '../../columns/services/columnService';
 import { showToast } from '../../../utils/toastUtils';
 import { Box, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import {
   DndContext,
   closestCorners,
@@ -17,6 +17,16 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
 import Card from './Card';
 
+/**
+ * Component to list cards in a column
+ * @param {Object} props
+ * @param {string} props.columnId - Column ID
+ * @param {string} props.token - Authentication token
+ * @param {string} props.boardId - Board ID
+ * @param {Object} props.column - Column data
+ * @param {Function} props.onRefresh - Refresh callback
+ * @returns {JSX.Element}
+ */
 const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -32,22 +42,21 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
     const loadCards = async () => {
       setLoading(true);
       try {
-        const data = await fetchCards(token, columnId);
-        // Sắp xếp card theo cardOrderIds từ column
+        const data = await fetchCards(columnId);
         const sortedCards = column.cardOrderIds
           ? column.cardOrderIds
               .map((cardId) => data.find((card) => card._id === cardId))
-              .filter((card) => card) // Lọc bỏ card không tồn tại
+              .filter((card) => card)
           : data;
         setCards(sortedCards);
       } catch (err) {
-        showToast(err.response?.data.message || 'Không thể tải danh sách card', 'error');
+        showToast(err.message, 'error');
       } finally {
         setLoading(false);
       }
     };
     loadCards();
-  }, [columnId, token, column.cardOrderIds]);
+  }, [columnId, column.cardOrderIds]);
 
   const handleEdit = (card) => {
     navigate(`/cards/${card._id}/edit`, {
@@ -85,12 +94,12 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
     setCards(newCards);
 
     try {
-      await updateColumn(token, columnId, column.title, newCardOrderIds);
-      showToast('Cập nhật thứ tự card thành công!', 'success');
+      await updateColumn(columnId, column.title, newCardOrderIds);
+      showToast('Card order updated successfully!', 'success');
       onRefresh();
     } catch (err) {
-      setCards(cards); // Khôi phục nếu lỗi
-      showToast(err.response?.data.message || 'Không thể cập nhật thứ tự card', 'error');
+      setCards(cards);
+      showToast(err.message, 'error');
     }
   };
 
@@ -107,7 +116,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
     >
       <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
         <Box sx={{ mb: 2 }}>
-          {loading && <Typography variant="body2" color="textSecondary">Đang tải card...</Typography>}
+          {loading && <Typography variant="body2" color="textSecondary">Loading cards...</Typography>}
           {cards.length > 0 ? (
             cards.map((card) => (
               <Card
@@ -119,7 +128,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
               />
             ))
           ) : (
-            <Typography variant="body2" color="textSecondary">Không có card trong cột này.</Typography>
+            <Typography variant="body2" color="textSecondary">No cards in this column.</Typography>
           )}
         </Box>
       </SortableContext>

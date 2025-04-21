@@ -2,6 +2,17 @@ import React, { useState } from 'react';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
+/**
+ * Menu component for column actions
+ * @param {Object} props
+ * @param {Object} props.column - Column data
+ * @param {string} props.boardId - Board ID
+ * @param {string} props.token - Authentication token
+ * @param {Function} props.onEdit - Edit handler
+ * @param {Function} props.onDelete - Delete handler
+ * @param {Function} props.onAddCard - Add card handler
+ * @returns {JSX.Element}
+ */
 const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);

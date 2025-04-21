@@ -1,66 +1,40 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Button, TextField, Typography, Paper, CircularProgress } from '@mui/material';
-import useForm from '../../../hooks/useForm';
 import { createColumn } from '../services/columnService';
 import { showToast } from '../../../utils/toastUtils';
+import FormContainer from '../../../components/FormContainer';
+import GenericForm from '../../../components/GenericForm';
+import { validateColumnForm } from '../../../utils/validateUtils';
 
+/**
+ * Component to create a new column
+ * @param {Object} props
+ * @param {string} props.token - Authentication token
+ * @returns {JSX.Element}
+ */
 const CreateColumn = ({ token }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-
   const initialValues = { title: '' };
-  const validate = (values) => {
-    const errors = {};
-    if (!values.title) {
-      errors.title = 'Title is required';
-    } else if (values.title.length <= 5) {
-      errors.title = 'Title must be more than 5 characters';
-    }
-    return errors;
-  };
-
-  const { values, errors, loading, handleChange, handleSubmit } = useForm({
-    initialValues,
-    validate,
-    onSubmit: async (values) => {
-      await createColumn(token, values.title, id);
-      showToast('Column created successfully!', 'success');
-      setTimeout(() => navigate(`/boards/${id}`), 2000);
-    },
-    onError: (err) => {
-      showToast(err.response?.data.message || 'Unable to connect to server Column', 'error');
-    },
-  });
+  const fields = [
+    { name: 'title', label: 'Column Title', required: true },
+  ];
 
   return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>Create New Column</Typography>
-      {loading && <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}><CircularProgress /></Box>}
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <form onSubmit={handleSubmit}>
-          <TextField
-            label="Column Title"
-            fullWidth
-            name="title"
-            value={values.title}
-            onChange={handleChange}
-            error={!!errors.title}
-            helperText={errors.title}
-            sx={{ mb: 2 }}
-            variant="outlined"
-          />
-          <Box sx={{ display: 'flex', gap: 2 }}>
-            <Button type="submit" variant="contained" color="primary" disabled={loading} sx={{ flex: 1 }}>
-              {loading ? 'Creating...' : 'Create Column'}
-            </Button>
-            <Button variant="outlined" onClick={() => navigate(`/boards/${id}`)} sx={{ flex: 1 }}>
-              Cancel
-            </Button>
-          </Box>
-        </form>
-      </Paper>
-    </Box>
+    <FormContainer title="Create New Column">
+      <GenericForm
+        initialValues={initialValues}
+        validate={validateColumnForm}
+        onSubmit={async (values) => {
+          await createColumn(values.title, id);
+          showToast('Column created successfully!', 'success');
+          setTimeout(() => navigate(`/boards/${id}`), 2000);
+        }}
+        submitLabel="Create Column"
+        cancelPath={`/boards/${id}`}
+        fields={fields}
+      />
+    </FormContainer>
   );
 };
 
