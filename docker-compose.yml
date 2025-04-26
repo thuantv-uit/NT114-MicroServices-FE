@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   frontend:
-    image: frontend:latest
+    image: nt114-frontend:latest
     ports:
       - "3000:3000" # Ánh xạ cổng 3000 của container ra cổng 3000 của host
     networks:
