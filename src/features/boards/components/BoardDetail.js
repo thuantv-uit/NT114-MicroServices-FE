@@ -1,37 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchBoard, updateBoard } from '../services/boardService';
+import { fetchBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import ColumnList from '../../columns/components/ColumnList';
 import {
   Box,
-  Button,
   Typography,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
   CircularProgress,
   Divider,
-  Menu,
-  MenuItem,
-  TextField,
+  IconButton,
 } from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import PaletteIcon from '@mui/icons-material/Palette'; // Icon cho Change Color
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import AddIcon from '@mui/icons-material/Add';
 
 /**
  * Component to display board details
  * @param {Object} props
  * @param {string} props.token - Authentication token
+ * @param {Function} props.setBackgroundColor - Function to set background color in App.js
  * @returns {JSX.Element}
  */
-const BoardDetail = ({ token }) => {
+const BoardDetail = ({ token, setBackgroundColor }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
 
   useEffect(() => {
     const loadBoard = async () => {
@@ -39,6 +36,7 @@ const BoardDetail = ({ token }) => {
       try {
         const data = await fetchBoard(id);
         setBoard(data);
+        setBackgroundColor(data.backgroundColor || '#FFFFFF'); // Truyền màu nền lên App.js
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
@@ -46,114 +44,100 @@ const BoardDetail = ({ token }) => {
       }
     };
     loadBoard();
-  }, [id]);
+  }, [id, setBackgroundColor]);
 
-  const handleMenuClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleMenuItemClick = (path) => {
+  const handleNavigation = (path) => {
     navigate(path);
-    handleMenuClose();
-  };
-
-  const handleColorChange = async (event) => {
-    const newColor = event.target.value;
-    try {
-      const updatedBoard = await updateBoard(id, board.title, board.description, newColor);
-      setBoard(updatedBoard);
-      showToast('Background color updated!', 'success');
-    } catch (err) {
-      showToast(err.message, 'error');
-    }
   };
 
   return (
-    <Box sx={{ maxWidth: 1800, mx: 'auto', mt: 4, p: 2, backgroundColor: board?.backgroundColor || '#FFFFFF', minHeight: '100vh' }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box>
-          {board ? (
-            <>
-              <Typography variant="h4" gutterBottom>
-                {board.title}
-              </Typography>
-              <Typography variant="body1" color="textSecondary">
-                {board.description || 'No description provided.'}
-              </Typography>
-            </>
-          ) : (
+    <Box sx={{ backgroundColor: board?.backgroundColor || '#FFFFFF', minHeight: '100vh', p: 2 }}>
+      {/* Header Section: Board Title and Description */}
+      <Box sx={{ mb: 2 }}>
+        {board ? (
+          <>
             <Typography variant="h4" gutterBottom>
-              Loading...
+              {board.title}
             </Typography>
-          )}
-        </Box>
-        <Button
-          variant="outlined"
-          onClick={handleMenuClick}
-          startIcon={<MoreVertIcon />}
-        >
-          Actions
-        </Button>
-        <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-          <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/update`)}>Update Board</MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/delete`)}>Delete Board</MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/invite`)}>Invite User</MenuItem>
-          <MenuItem onClick={() => handleMenuItemClick(`/boards/${id}/columns/create`)}>Create Column</MenuItem>
-        </Menu>
+            <Typography variant="body1" color="textSecondary" gutterBottom>
+              {board.description || 'No description provided.'}
+            </Typography>
+          </>
+        ) : (
+          <Typography variant="h4" gutterBottom>
+            Loading...
+          </Typography>
+        )}
       </Box>
 
-      {/* Background Color Picker Section */}
-      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Change Background Color
-        </Typography>
-        <TextField
-          type="color"
-          label="Select Background Color"
-          value={board?.backgroundColor || '#FFFFFF'}
-          onChange={handleColorChange}
-          sx={{ width: 200 }}
-          InputLabelProps={{ shrink: true }}
-        />
-      </Paper>
-
+      {/* Loading Indicator */}
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
           <CircularProgress />
         </Box>
       )}
 
+      {/* Main Content: Action Buttons (Vertical) and Columns (Horizontal) Side by Side */}
       {board ? (
-        <>
-          <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Columns in this Board
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-            <ColumnList boardId={id} token={token} />
-          </Paper>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          {/* Vertical Action Buttons */}
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 60 }}>
+            <IconButton
+              color="primary"
+              onClick={() => handleNavigation(`/boards/${id}/change-color`)}
+              title="Change Color"
+            >
+              <PaletteIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
+              onClick={() => handleNavigation(`/boards/${id}/update`)}
+              title="Update Board"
+            >
+              <EditIcon />
+            </IconButton>
+            <IconButton
+              color="error"
+              onClick={() => handleNavigation(`/boards/${id}/delete`)}
+              title="Delete Board"
+            >
+              <DeleteIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
+              onClick={() => handleNavigation(`/boards/${id}/invite`)}
+              title="Invite User"
+            >
+              <PersonAddIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
+              onClick={() => handleNavigation(`/boards/${id}/columns/create`)}
+              title="Create Column"
+            >
+              <AddIcon />
+            </IconButton>
+          </Box>
 
-          <Paper elevation={3} sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Members
-            </Typography>
-            <List>
-              {board.memberIds && board.memberIds.length > 0 ? (
-                board.memberIds.map((memberId) => (
-                  <ListItem key={memberId}>
-                    <ListItemText primary={memberId} />
-                  </ListItem>
-                ))
-              ) : (
-                <Typography>No members found.</Typography>
-              )}
-            </List>
-          </Paper>
-        </>
+          {/* Columns Section (Horizontal) */}
+          <Box sx={{ flex: 1, display: 'flex', overflowX: 'auto', gap: 2, pb: 2 }}>
+            <Paper
+              elevation={3}
+              sx={{
+                minWidth: 270,
+                p: 2,
+                borderRadius: 1,
+                height: 'fit-content',
+              }}
+            >
+              <Typography variant="h6" gutterBottom>
+                Columns in this Board
+              </Typography>
+              <Divider sx={{ my: 1 }} />
+              <ColumnList boardId={id} token={token} />
+            </Paper>
+          </Box>
+        </Box>
       ) : (
         <Typography color="error">Board not found</Typography>
       )}
