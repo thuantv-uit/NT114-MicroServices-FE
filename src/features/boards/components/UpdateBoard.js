@@ -15,11 +15,12 @@ import { validateBoardForm } from '../../../utils/validateUtils';
 const UpdateBoard = ({ token }) => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [initialValues, setInitialValues] = useState({ title: '', description: '' });
+  const [initialValues, setInitialValues] = useState({ title: '', description: '', backgroundColor: '#FFFFFF' });
   const [loading, setLoading] = useState(false);
   const fields = [
     { name: 'title', label: 'Board Title', required: true },
     { name: 'description', label: 'Description', required: true, multiline: true, rows: 4 },
+    { name: 'backgroundColor', label: 'Background Color', type: 'color', required: true },
   ];
 
   useEffect(() => {
@@ -27,7 +28,11 @@ const UpdateBoard = ({ token }) => {
       setLoading(true);
       try {
         const data = await fetchBoard(id);
-        setInitialValues({ title: data.title, description: data.description || '' });
+        setInitialValues({
+          title: data.title,
+          description: data.description || '',
+          backgroundColor: data.backgroundColor || '#FFFFFF',
+        });
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
@@ -43,7 +48,7 @@ const UpdateBoard = ({ token }) => {
         initialValues={initialValues}
         validate={validateBoardForm}
         onSubmit={async (values) => {
-          await updateBoard(id, values.title, values.description);
+          await updateBoard(id, values.title, values.description, values.backgroundColor);
           showToast('Board updated successfully!', 'success');
           setTimeout(() => navigate(`/boards/${id}`), 2000);
         }}

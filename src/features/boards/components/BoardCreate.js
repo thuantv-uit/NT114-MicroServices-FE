@@ -14,10 +14,11 @@ import { validateBoardForm } from '../../../utils/validateUtils';
  */
 const BoardCreate = ({ token }) => {
   const navigate = useNavigate();
-  const initialValues = { title: '', description: '' };
+  const initialValues = { title: '', description: '', backgroundColor: '#FFFFFF' };
   const fields = [
     { name: 'title', label: 'Board Title', required: true },
     { name: 'description', label: 'Description', required: true, multiline: true, rows: 4 },
+    { name: 'backgroundColor', label: 'Background Color', type: 'color', required: true },
   ];
 
   return (
@@ -26,7 +27,7 @@ const BoardCreate = ({ token }) => {
         initialValues={initialValues}
         validate={validateBoardForm}
         onSubmit={async (values) => {
-          await createBoard(values.title, values.description);
+          await createBoard(values.title, values.description, values.backgroundColor);
           showToast('Board created successfully!', 'success');
           setTimeout(() => navigate('/boards'), 2000);
         }}

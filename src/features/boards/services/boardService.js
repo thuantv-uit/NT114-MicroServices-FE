@@ -20,11 +20,12 @@ export const fetchBoards = async () => {
  * Create a new board
  * @param {string} title - Board title
  * @param {string} description - Board description
+ * @param {string} backgroundColor - Board background color (hex code)
  * @returns {Promise<Object>} Created board
  */
-export const createBoard = async (title, description) => {
+export const createBoard = async (title, description, backgroundColor = '#FFFFFF') => {
   return handleApiCall(
-    () => boardInstance.post('', { title, description }).then(res => res.data),
+    () => boardInstance.post('', { title, description, backgroundColor }).then(res => res.data),
     'Create board'
   );
 };
@@ -46,11 +47,12 @@ export const fetchBoard = async (boardId) => {
  * @param {string} boardId - Board ID
  * @param {string} title - Board title
  * @param {string} description - Board description
+ * @param {string} backgroundColor - Board background color (hex code)
  * @returns {Promise<Object>} Updated board
  */
-export const updateBoard = async (boardId, title, description) => {
+export const updateBoard = async (boardId, title, description, backgroundColor) => {
   return handleApiCall(
-    () => boardInstance.put(`/${boardId}`, { title, description }).then(res => res.data),
+    () => boardInstance.put(`/${boardId}`, { title, description, backgroundColor }).then(res => res.data),
     'Update board'
   );
 };
