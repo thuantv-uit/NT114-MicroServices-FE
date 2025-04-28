@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { PrivateRoute, PublicRoute } from './utils/RouteUtils';
@@ -12,6 +12,7 @@ import BoardCreate from './features/boards/components/BoardCreate';
 import UpdateBoard from './features/boards/components/UpdateBoard';
 import DeleteBoard from './features/boards/components/DeleteBoard';
 import InviteUser from './features/boards/components/InviteUser';
+import ChangeColor from './features/boards/components/ChangeColor';
 import CreateColumn from './features/columns/components/CreateColumn';
 import ColumnEdit from './features/columns/components/ColumnEdit';
 import DeleteColumn from './features/columns/components/DeleteColumn';
@@ -25,10 +26,11 @@ import DeleteCardPage from './features/cards/components/DeleteCardPage';
  */
 function App() {
   const { token, setToken, logout } = useAuth();
+  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF'); // State lưu màu nền
 
   return (
     <>
-      <Navbar token={token} logout={logout} />
+      <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />
       <Routes>
         <Route
           path="/login"
@@ -57,7 +59,10 @@ function App() {
         <Route
           path="/boards/:id"
           element={
-            <PrivateRoute token={token} component={<BoardDetail token={token} />} />
+            <PrivateRoute
+              token={token}
+              component={<BoardDetail token={token} setBackgroundColor={setBackgroundColor} />}
+            />
           }
         />
         <Route
@@ -82,6 +87,12 @@ function App() {
           path="/boards/:id/invite"
           element={
             <PrivateRoute token={token} component={<InviteUser token={token} />} />
+          }
+        />
+        <Route
+          path="/boards/:id/change-color"
+          element={
+            <PrivateRoute token={token} component={<ChangeColor token={token} />} />
           }
         />
         <Route
