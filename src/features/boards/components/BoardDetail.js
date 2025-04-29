@@ -55,7 +55,17 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   };
 
   return (
-    <Box sx={{ backgroundColor: board?.backgroundColor || '#FFFFFF', minHeight: '100vh', height: '100vh', width: '100%', position: 'fixed', top: 0, left: 0, p: 2, overflow: 'auto' }}>
+    <Box
+      sx={{
+        backgroundColor: board?.backgroundColor || '#FFFFFF',
+        minHeight: '100vh',
+        width: '100%',
+        pt: 8, // Thêm padding-top 64px (8 * 8px) để tránh che navbar
+        p: 2,
+        boxSizing: 'border-box',
+        overflow: 'auto',
+      }}
+    >
       {/* Header Section: Board Title and Description */}
       <Box sx={{ mb: 2 }}>
         {board ? (
