@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { IconButton, Menu, MenuItem } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 
@@ -14,6 +15,7 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
  * @returns {JSX.Element}
  */
 const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -34,6 +36,9 @@ const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => 
         <MenuItem onClick={() => { onEdit(); handleMenuClose(); }}>Edit Column</MenuItem>
         <MenuItem onClick={() => { onDelete(); handleMenuClose(); }}>Delete Column</MenuItem>
         <MenuItem onClick={() => { onAddCard(); handleMenuClose(); }}>Add Card</MenuItem>
+        <MenuItem onClick={() => { navigate(`/columns/${column._id}/invite-to-column`, { state: { boardId } }); handleMenuClose(); }}>
+          Invite User to Column
+        </MenuItem>
       </Menu>
     </>
   );

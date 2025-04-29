@@ -11,7 +11,6 @@ import BoardDetail from './features/boards/components/BoardDetail';
 import BoardCreate from './features/boards/components/BoardCreate';
 import UpdateBoard from './features/boards/components/UpdateBoard';
 import DeleteBoard from './features/boards/components/DeleteBoard';
-import InviteUser from './features/boards/components/InviteUser';
 import ChangeColor from './features/boards/components/ChangeColor';
 import CreateColumn from './features/columns/components/CreateColumn';
 import ColumnEdit from './features/columns/components/ColumnEdit';
@@ -19,6 +18,10 @@ import DeleteColumn from './features/columns/components/DeleteColumn';
 import CreateCard from './features/cards/components/CreateCard';
 import EditCardPage from './features/cards/components/EditCardPage';
 import DeleteCardPage from './features/cards/components/DeleteCardPage';
+import InviteToBoardPage from './features/invitations/components/InviteToBoardPage';
+import InviteToColumnPage from './features/invitations/components/InviteToColumnPage';
+import AssignToCardPage from './features/invitations/components/AssignToCardPage';
+import AcceptRejectInvitationPage from './features/invitations/components/AcceptRejectInvitationPage';
 
 /**
  * Main application component
@@ -84,9 +87,21 @@ function App() {
           }
         />
         <Route
-          path="/boards/:id/invite"
+          path="/boards/:id/invite-to-board"
           element={
-            <PrivateRoute token={token} component={<InviteUser token={token} />} />
+            <PrivateRoute token={token} component={<InviteToBoardPage token={token} />} />
+          }
+        />
+        <Route
+          path="/boards/:id/invite-to-column"
+          element={
+            <PrivateRoute token={token} component={<InviteToColumnPage token={token} />} />
+          }
+        />
+        <Route
+          path="/boards/:id/assign-to-card"
+          element={
+            <PrivateRoute token={token} component={<AssignToCardPage token={token} />} />
           }
         />
         <Route
@@ -114,6 +129,12 @@ function App() {
           }
         />
         <Route
+          path="/columns/:columnId/invite-to-column"
+          element={
+            <PrivateRoute token={token} component={<InviteToColumnPage token={token} />} />
+          }
+        />
+        <Route
           path="/columns/:columnId/cards/create"
           element={
             <PrivateRoute token={token} component={<CreateCard token={token} />} />
@@ -129,6 +150,24 @@ function App() {
           path="/cards/:cardId/delete"
           element={
             <PrivateRoute token={token} component={<DeleteCardPage token={token} />} />
+          }
+        />
+        <Route
+          path="/cards/:cardId/assign-to-card"
+          element={
+            <PrivateRoute token={token} component={<AssignToCardPage token={token} />} />
+          }
+        />
+        <Route
+          path="/invitations/:invitationId/accept"
+          element={
+            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} action="accept" />} />
+          }
+        />
+        <Route
+          path="/invitations/:invitationId/reject"
+          element={
+            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} action="reject" />} />
           }
         />
       </Routes>

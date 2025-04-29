@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import ColumnList from '../../columns/components/ColumnList';
+import InviteToBoard from '../../invitations/components/InviteToBoard'; // Thêm import
 import {
   Box,
   Typography,
@@ -11,10 +12,12 @@ import {
   Divider,
   IconButton,
 } from '@mui/material';
-import PaletteIcon from '@mui/icons-material/Palette'; // Icon cho Change Color
+import PaletteIcon from '@mui/icons-material/Palette';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AddIcon from '@mui/icons-material/Add';
 
 /**
@@ -29,6 +32,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   const navigate = useNavigate();
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [openInviteBoard, setOpenInviteBoard] = useState(false);
 
   useEffect(() => {
     const loadBoard = async () => {
@@ -36,7 +40,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       try {
         const data = await fetchBoard(id);
         setBoard(data);
-        setBackgroundColor(data.backgroundColor || '#FFFFFF'); // Truyền màu nền lên App.js
+        setBackgroundColor(data.backgroundColor || '#FFFFFF');
       } catch (err) {
         showToast(err.message, 'error');
       } finally {
@@ -105,10 +109,24 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
             </IconButton>
             <IconButton
               color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/invite`)}
-              title="Invite User"
+              onClick={() => handleNavigation(`/boards/${id}/invite-to-board`)}
+              title="Invite User to Board"
             >
               <PersonAddIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
+              onClick={() => handleNavigation(`/boards/${id}/invite-to-column`)}
+              title="Invite User to Column"
+            >
+              <GroupAddIcon />
+            </IconButton>
+            <IconButton
+              color="primary"
+              onClick={() => handleNavigation(`/boards/${id}/assign-to-card`)}
+              title="Assign User to Card"
+            >
+              <AssignmentIndIcon />
             </IconButton>
             <IconButton
               color="primary"
@@ -141,6 +159,13 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       ) : (
         <Typography color="error">Board not found</Typography>
       )}
+
+      {/* Dialog để mời user vào board (sẽ được chuyển sang page riêng) */}
+      <InviteToBoard
+        boardId={id}
+        open={openInviteBoard}
+        onClose={() => setOpenInviteBoard(false)}
+      />
     </Box>
   );
 };
