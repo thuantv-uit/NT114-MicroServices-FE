@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { fetchBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import ColumnList from '../../columns/components/ColumnList';
-import InviteToBoard from '../../invitations/components/InviteToBoard'; // Thêm import
+import InviteToBoard from '../../invitations/components/InviteToBoard';
 import {
   Box,
   Typography,
@@ -55,7 +55,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   };
 
   return (
-    <Box sx={{ backgroundColor: board?.backgroundColor || '#FFFFFF', minHeight: '100vh', p: 2 }}>
+    <Box sx={{ backgroundColor: board?.backgroundColor || '#FFFFFF', minHeight: '100vh', height: '100vh', width: '100%', position: 'fixed', top: 0, left: 0, p: 2, overflow: 'auto' }}>
       {/* Header Section: Board Title and Description */}
       <Box sx={{ mb: 2 }}>
         {board ? (

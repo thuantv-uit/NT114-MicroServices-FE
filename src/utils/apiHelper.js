@@ -24,23 +24,8 @@ export const handleApiCall = async (apiCall, action) => {
  * @returns {Error} Formatted error
  */
 export const handleApiError = (error, action) => {
-  if (error.code === 'ERR_NETWORK' || !error.response) {
-    return new Error(`Cannot connect to server. Please try again.`);
+  if (error.response?.status === 403) {
+    return new Error(`You don't have permission to perform this action.`);
   }
-  switch (error.response?.status) {
-    case 401:
-      localStorage.removeItem('token');
-      window.location.href = '/login';
-      return new Error('Session expired. Please login again.');
-    case 403:
-      return new Error(`You don't have permission to perform this action.`);
-    case 404:
-      return new Error(`Failed to ${action.toLowerCase()}: Resource not found.`);
-    case 400:
-      return new Error(error.response?.data.message || `Failed to ${action.toLowerCase()}: Invalid request.`);
-    case 500:
-      return new Error(`Failed to ${action.toLowerCase()}: Server error. Please try again.`);
-    default:
-      return new Error(error.response?.data.message || `Failed to ${action.toLowerCase()}.`);
-  }
+  return new Error(`Cannot connect to server. Please try again.`);
 };
