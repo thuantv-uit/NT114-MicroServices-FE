@@ -47,3 +47,4 @@ export const userInstance = createAxiosInstance('http://localhost:3001/api/users
 export const boardInstance = createAxiosInstance('http://localhost:3002/api/boards');
 export const columnInstance = createAxiosInstance('http://localhost:3003/api/columns');
 export const cardInstance = createAxiosInstance('http://localhost:3004/api/cards');
+export const invitationInstance = createAxiosInstance('http://localhost:3005/api/invitations');
