@@ -9,16 +9,54 @@ import {
   Typography,
   Paper,
   CircularProgress,
-  Divider,
   IconButton,
+  styled,
 } from '@mui/material';
 import PaletteIcon from '@mui/icons-material/Palette';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import GroupAddIcon from '@mui/icons-material/GroupAdd';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import AddIcon from '@mui/icons-material/Add';
+
+// Styled component cho Column Container
+const ColumnContainer = styled(Box)(({ theme }) => ({
+  minWidth: 270,
+  maxWidth: 270,
+  backgroundColor: theme.palette.grey[200], // Màu xám nhạt giống Trello
+  borderRadius: '8px', // Bo góc giống Trello
+  padding: theme.spacing(1.5),
+  transition: 'box-shadow 0.2s ease-in-out',
+  '&:hover': {
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+  },
+}));
+
+// Styled component cho Card
+const CardContainer = styled(Box)(({ theme }) => ({
+  backgroundColor: theme.palette.background.paper, // Màu trắng giống card của Trello
+  borderRadius: '20px', // Bo góc nhẹ cho card
+  padding: theme.spacing(1),
+  marginBottom: theme.spacing(1),
+  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+  transition: 'box-shadow 0.2s ease-in-out',
+  '&:hover': {
+    boxShadow: '0 3px 8px rgba(0, 0, 0, 0.15)',
+  },
+}));
+
+// Styled component cho khung bao quanh Columns
+const ColumnsWrapper = styled(Paper)(({ theme }) => ({
+  padding: theme.spacing(2),
+  backgroundColor: 'rgba(255, 255, 255, 0.1)', // Nền mờ giống Trello
+  borderRadius: '12px',
+  boxShadow: 'none', // Loại bỏ bóng để giống Trello
+  width: '100%',
+  maxWidth: 'calc(100vw - 64px)', // Trừ padding và margin
+  minHeight: 'calc(100vh - 150px)', // Chiếm gần hết chiều cao
+  overflowX: 'auto',
+  display: 'flex',
+  alignItems: 'flex-start',
+}));
 
 /**
  * Component to display board details
@@ -60,28 +98,93 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         backgroundColor: board?.backgroundColor || '#FFFFFF',
         minHeight: '100vh',
         width: '100%',
-        pt: 8, // Thêm padding-top 64px (8 * 8px) để tránh che navbar
-        p: 2,
+        pt: 0, // Giảm padding-top để header sát navbar
+        px: 2,
         boxSizing: 'border-box',
         overflow: 'auto',
       }}
     >
-      {/* Header Section: Board Title and Description */}
-      <Box sx={{ mb: 2 }}>
-        {board ? (
-          <>
-            <Typography variant="h4" gutterBottom>
-              {board.title}
-            </Typography>
-            <Typography variant="body1" color="textSecondary" gutterBottom>
-              {board.description || 'No description provided.'}
-            </Typography>
-          </>
-        ) : (
-          <Typography variant="h4" gutterBottom>
-            Loading...
-          </Typography>
-        )}
+      {/* Header Section: Board Title, Description, and Action Buttons */}
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          mb: 0.5, // Giảm margin-bottom để ColumnsWrapper sát header
+          minHeight: 'auto', // Thu nhỏ chiều cao khung
+          // Điều chỉnh khoảng cách giữa navbar và title tại đây:
+          // Thay đổi 'mt' (margin-top) để kiểm soát khoảng cách với navbar
+          mt: 1, // 8px, sát navbar
+        }}
+      >
+        <Box>
+          {board ? (
+            <>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 'bold',
+                  color: 'text.primary',
+                  lineHeight: 1.2, // Bó sát chữ
+                }}
+              >
+                {board.title}
+              </Typography>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                sx={{ lineHeight: 1.2 }} // Bó sát chữ
+              >
+                {board.description || 'No description provided.'}
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="h5">Loading...</Typography>
+          )}
+        </Box>
+        {/* Action Buttons (bao gồm Create Column) */}
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <IconButton
+            color="primary"
+            onClick={() => handleNavigation(`/boards/${id}/change-color`)}
+            title="Change Color"
+            sx={{ bgcolor: 'rgba(0, 0, 0, 0.05)', '&:hover': { bgcolor: 'primary.light' } }}
+          >
+            <PaletteIcon />
+          </IconButton>
+          <IconButton
+            color="primary"
+            onClick={() => handleNavigation(`/boards/${id}/update`)}
+            title="Update Board"
+            sx={{ bgcolor: 'rgba(0, 0, 0, 0.05)', '&:hover': { bgcolor: 'primary.light' } }}
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            color="error"
+            onClick={() => handleNavigation(`/boards/${id}/delete`)}
+            title="Delete Board"
+            sx={{ bgcolor: 'rgba(0, 0, 0, 0.05)', '&:hover': { bgcolor: 'error.light' } }}
+          >
+            <DeleteIcon />
+          </IconButton>
+          <IconButton
+            color="primary"
+            onClick={() => handleNavigation(`/boards/${id}/invite-to-board`)}
+            title="Invite User to Board"
+            sx={{ bgcolor: 'rgba(0, 0, 0, 0.05)', '&:hover': { bgcolor: 'primary.light' } }}
+          >
+            <PersonAddIcon />
+          </IconButton>
+          <IconButton
+            color="primary"
+            onClick={() => handleNavigation(`/boards/${id}/columns/create`)}
+            title="Create Column"
+            sx={{ bgcolor: 'rgba(0, 0, 0, 0.05)', '&:hover': { bgcolor: 'primary.light' } }}
+          >
+            <AddIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Loading Indicator */}
@@ -91,86 +194,29 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         </Box>
       )}
 
-      {/* Main Content: Action Buttons (Vertical) and Columns (Horizontal) Side by Side */}
+      {/* Columns Section */}
       {board ? (
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          {/* Vertical Action Buttons */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, maxWidth: 60 }}>
-            <IconButton
-              color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/change-color`)}
-              title="Change Color"
-            >
-              <PaletteIcon />
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/update`)}
-              title="Update Board"
-            >
-              <EditIcon />
-            </IconButton>
-            <IconButton
-              color="error"
-              onClick={() => handleNavigation(`/boards/${id}/delete`)}
-              title="Delete Board"
-            >
-              <DeleteIcon />
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/invite-to-board`)}
-              title="Invite User to Board"
-            >
-              <PersonAddIcon />
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/invite-to-column`)}
-              title="Invite User to Column"
-            >
-              <GroupAddIcon />
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/assign-to-card`)}
-              title="Assign User to Card"
-            >
-              <AssignmentIndIcon />
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/columns/create`)}
-              title="Create Column"
-            >
-              <AddIcon />
-            </IconButton>
+        <ColumnsWrapper
+          sx={{
+            // Điều chỉnh khoảng cách giữa header (title) và ColumnsWrapper tại đây:
+            // Thay đổi 'mt' (margin-top) để kiểm soát khoảng cách với header
+            mt: 0.5, // 4px, sát header
+          }}
+        >
+          <Box sx={{ display: 'flex', gap: 2, p: 1 }}>
+            <ColumnList
+              boardId={id}
+              token={token}
+              ColumnContainer={ColumnContainer}
+              CardContainer={CardContainer}
+            />
           </Box>
-
-          {/* Columns Section (Horizontal) */}
-          <Box sx={{ flex: 1, display: 'flex', overflowX: 'auto', gap: 2, pb: 2 }}>
-            <Paper
-              elevation={3}
-              sx={{
-                minWidth: 270,
-                p: 2,
-                borderRadius: 1,
-                height: 'fit-content',
-              }}
-            >
-              <Typography variant="h6" gutterBottom>
-                Columns in this Board
-              </Typography>
-              <Divider sx={{ my: 1 }} />
-              <ColumnList boardId={id} token={token} />
-            </Paper>
-          </Box>
-        </Box>
+        </ColumnsWrapper>
       ) : (
         <Typography color="error">Board not found</Typography>
       )}
 
-      {/* Dialog để mời user vào board (sẽ được chuyển sang page riêng) */}
+      {/* Dialog để mời user vào board */}
       <InviteToBoard
         boardId={id}
         open={openInviteBoard}
