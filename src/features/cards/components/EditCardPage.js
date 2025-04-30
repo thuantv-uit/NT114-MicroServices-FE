@@ -31,6 +31,11 @@ const EditCardPage = ({ token }) => {
 
   useEffect(() => {
     const loadCard = async () => {
+      if (!token) {
+        showToast('Authentication token is missing', 'error');
+        navigate(`/boards/${boardId}`);
+        return;
+      }
       setLoading(true);
       try {
         const cards = await fetchCards(columnId);
@@ -39,9 +44,11 @@ const EditCardPage = ({ token }) => {
           setInitialValues({ title: card.title, description: card.description || '' });
         } else {
           showToast('Card not found', 'error');
+          navigate(`/boards/${boardId}`);
         }
       } catch (err) {
-        showToast(err.message, 'error');
+        showToast(err.message || 'Failed to load card', 'error');
+        navigate(`/boards/${boardId}`);
       } finally {
         setLoading(false);
       }
@@ -49,18 +56,31 @@ const EditCardPage = ({ token }) => {
     if (!state?.title && columnId) {
       loadCard();
     }
-  }, [cardId, columnId]);
+  }, [cardId, columnId, boardId, token]);
+
+  const handleSubmit = async (values) => {
+    if (!token) {
+      showToast('Authentication token is missing', 'error');
+      return;
+    }
+    setLoading(true);
+    try {
+      await updateCard(cardId, values.title, values.description);
+      showToast('Card updated successfully!', 'success');
+      setTimeout(() => navigate(`/boards/${boardId}`), 1500);
+    } catch (err) {
+      showToast(err.message || 'Failed to update card', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <FormContainer title="Edit Card" loading={loading}>
       <GenericForm
         initialValues={initialValues}
         validate={validateCardForm}
-        onSubmit={async (values) => {
-          await updateCard(cardId, values.title, values.description);
-          showToast('Card updated successfully!', 'success');
-          setTimeout(() => navigate(`/boards/${boardId}`), 2000);
-        }}
+        onSubmit={handleSubmit}
         submitLabel="Update Card"
         cancelPath={`/boards/${boardId}`}
         fields={fields}

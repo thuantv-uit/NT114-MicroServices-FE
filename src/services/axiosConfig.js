@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { toast } from 'react-toastify';
-import { handleApiError } from '../utils/apiHelper';
+// import { toast } from 'react-toastify';
+// import { handleApiError } from '../utils/apiHelper';
 
 /**
  * Create an Axios instance with interceptors
@@ -30,12 +30,12 @@ const createAxiosInstance = (baseURL) => {
     (response) => response,
     (error) => {
       // Only show toast for errors that haven't been handled by components
-      if (error.response || error.code === 'ERR_NETWORK') {
-        const action = error.config?.url?.split('/').pop() || 'perform action';
-        toast.error(handleApiError(error, action).message, {
-          toastId: `${action}-${error.response?.status || 'network'}`, // Prevent duplicate toasts
-        });
-      }
+      // if (error.response || error.code === 'ERR_NETWORK') {
+      //   const action = error.config?.url?.split('/').pop() || 'perform action';
+      //   toast.error(handleApiError(error, action).message, {
+      //     toastId: `${action}-${error.response?.status || 'network'}`, // Prevent duplicate toasts
+      //   });
+      // }
       return Promise.reject(error);
     }
   );
