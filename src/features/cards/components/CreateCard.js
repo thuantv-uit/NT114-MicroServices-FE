@@ -23,16 +23,26 @@ const CreateCard = ({ token }) => {
     { name: 'description', label: 'Description (optional)', multiline: true, rows: 2 },
   ];
 
+  const handleSubmit = async (values) => {
+    if (!token) {
+      showToast('Authentication token is missing', 'error');
+      return;
+    }
+    try {
+      await createCard(values.title, values.description, columnId);
+      showToast('Card created successfully!', 'success');
+      setTimeout(() => navigate(`/boards/${boardId}`), 1500);
+    } catch (err) {
+      showToast(err.message || 'Failed to create card', 'error');
+    }
+  };
+
   return (
     <FormContainer title="Create New Card">
       <GenericForm
         initialValues={initialValues}
         validate={validateCardForm}
-        onSubmit={async (values) => {
-          await createCard(values.title, values.description, columnId);
-          showToast('Card created successfully!', 'success');
-          setTimeout(() => navigate(`/boards/${boardId}`), 2000);
-        }}
+        onSubmit={handleSubmit}
         submitLabel="Create Card"
         cancelPath={`/boards/${boardId}`}
         fields={fields}

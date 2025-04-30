@@ -40,8 +40,19 @@ export const createCard = async (title, description, columnId) => {
  */
 export const updateCard = async (cardId, title, description) => {
   return handleApiCall(
-    () => cardInstance.put(`/${cardId}`, { title, description }).then(res => res.data),
-    'Update card'
+    async () => {
+      const response = await cardInstance.put(`/${cardId}`, { title, description });
+      return response.data;
+    },
+    'Update card',
+    (error) => {
+      // Xử lý lỗi chi tiết
+      if (error.response) {
+        const message = error.response.data.message || 'Failed to update card';
+        throw new Error(message);
+      }
+      throw error;
+    }
   );
 };
 
@@ -52,7 +63,18 @@ export const updateCard = async (cardId, title, description) => {
  */
 export const deleteCard = async (cardId) => {
   return handleApiCall(
-    () => cardInstance.delete(`/${cardId}`),
-    'Delete card'
+    async () => {
+      await cardInstance.delete(`/${cardId}`);
+      return { message: 'Card deleted successfully' };
+    },
+    'Delete card',
+    (error) => {
+      // Xử lý lỗi chi tiết
+      if (error.response) {
+        const message = error.response.data.message || 'Failed to delete card';
+        throw new Error(message);
+      }
+      throw error;
+    }
   );
 };

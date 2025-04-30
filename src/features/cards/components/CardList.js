@@ -40,6 +40,10 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
 
   useEffect(() => {
     const loadCards = async () => {
+      if (!token) {
+        showToast('Authentication token is missing', 'error');
+        return;
+      }
       setLoading(true);
       try {
         const data = await fetchCards(columnId);
@@ -50,13 +54,13 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
           : data;
         setCards(sortedCards);
       } catch (err) {
-        showToast(err.message, 'error');
+        showToast(err.message || 'Failed to load cards', 'error');
       } finally {
         setLoading(false);
       }
     };
     loadCards();
-  }, [columnId, column.cardOrderIds]);
+  }, [columnId, column.cardOrderIds, token]);
 
   const handleEdit = (card) => {
     navigate(`/cards/${card._id}/edit`, {
@@ -99,7 +103,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
       onRefresh();
     } catch (err) {
       setCards(cards);
-      showToast(err.message, 'error');
+      showToast(err.message || 'Failed to update card order', 'error');
     }
   };
 
@@ -123,8 +127,11 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
                 key={card._id}
                 card={card}
                 boardId={boardId}
+                columnId={columnId}
+                token={token}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onRefresh={onRefresh}
               />
             ))
           ) : (
@@ -134,7 +141,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
       </SortableContext>
       <DragOverlay dropAnimation={customDropAnimation}>
         {activeCardId && activeCardData ? (
-          <Card card={activeCardData} boardId={boardId} onEdit={() => {}} onDelete={() => {}} />
+          <Card card={activeCardData} boardId={boardId} columnId={columnId} token={token} onEdit={() => {}} onDelete={() => {}} onRefresh={() => {}} />
         ) : null}
       </DragOverlay>
     </DndContext>
