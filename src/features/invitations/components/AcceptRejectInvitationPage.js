@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import AcceptRejectInvitation from './AcceptRejectInvitation';
 
 /**
@@ -11,9 +11,19 @@ import AcceptRejectInvitation from './AcceptRejectInvitation';
  */
 const AcceptRejectInvitationPage = ({ token, action }) => {
   const { invitationId } = useParams();
+  const navigate = useNavigate();
+
+  const handleClose = () => {
+    navigate('/dashboard'); // Điều hướng về dashboard khi đóng
+  };
 
   return (
-    <AcceptRejectInvitation invitationId={invitationId} open={true} onClose={() => {}} action={action} />
+    <AcceptRejectInvitation
+      invitationId={invitationId}
+      open={true}
+      onClose={handleClose}
+      action={action}
+    />
   );
 };
 

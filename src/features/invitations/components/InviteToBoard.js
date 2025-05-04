@@ -25,8 +25,13 @@ const InviteToBoard = ({ boardId, open, onClose }) => {
   const [email, setEmail] = useState('');
   const [submitEmail, setSubmitEmail] = useState('');
 
-  const handleSubmit = () => {
-    setSubmitEmail(email);
+  const handleSubmit = (event) => {
+    event.preventDefault(); // Ngăn chặn hành vi mặc định
+    if (email.trim()) {
+      setSubmitEmail(email);
+    } else {
+      showToast('Please enter a valid email', 'error');
+    }
   };
 
   const handleSuccess = () => {
@@ -38,16 +43,16 @@ const InviteToBoard = ({ boardId, open, onClose }) => {
   };
 
   const handleError = (err) => {
-    showToast(err.message, 'error');
+    showToast(err.message || 'Failed to invite user', 'error');
     setSubmitEmail('');
   };
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
         <DialogTitle>Invite User to Board</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <TextField
               label="User Email"
               value={email}
@@ -55,14 +60,18 @@ const InviteToBoard = ({ boardId, open, onClose }) => {
               fullWidth
               margin="normal"
               type="email"
+              autoFocus
+              required
+              error={!email.trim() && submitEmail}
+              helperText={!email.trim() && submitEmail ? 'Email is required' : ''}
             />
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="secondary">
+          <Button onClick={onClose} color="secondary" variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleSubmit} color="primary">
+          <Button onClick={handleSubmit} color="primary" variant="contained" disabled={!email.trim()}>
             Invite
           </Button>
         </DialogActions>

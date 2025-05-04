@@ -25,38 +25,52 @@ const AcceptRejectInvitation = ({ invitationId, open, onClose, action }) => {
   const navigate = useNavigate();
   const [submitAction, setSubmitAction] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = (event) => {
+    event.preventDefault();
     setSubmitAction(action);
   };
 
   const handleSuccess = () => {
-    showToast(`Invitation ${action === 'accept' ? 'accepted' : 'rejected'} successfully!`, 'success');
+    const message = action === 'accept' ? 'Invitation accepted successfully!' : 'Invitation rejected successfully!';
+    showToast(message, 'success');
     setSubmitAction('');
     onClose();
     setTimeout(() => navigate('/dashboard'), 2000);
   };
 
   const handleError = (err) => {
-    showToast(err.message, 'error');
+    showToast(err.message || `Failed to ${action} invitation`, 'error');
     setSubmitAction('');
   };
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle>{action === 'accept' ? 'Accept Invitation' : 'Reject Invitation'}</DialogTitle>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle sx={{ bgcolor: action === 'accept' ? 'primary.light' : 'error.light', color: 'white' }}>
+          {action === 'accept' ? 'Accept Invitation' : 'Reject Invitation'}
+        </DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography>
-              Are you sure you want to {action === 'accept' ? 'accept' : 'reject'} this invitation?
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+            <Typography variant="body1">
+              Are you sure you want to <strong>{action === 'accept' ? 'accept' : 'reject'}</strong> this invitation?
             </Typography>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="secondary">
+          <Button
+            onClick={onClose}
+            color="secondary"
+            variant="outlined"
+            sx={{ minWidth: 100 }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} color={action === 'accept' ? 'primary' : 'error'}>
+          <Button
+            onClick={handleSubmit}
+            color={action === 'accept' ? 'primary' : 'error'}
+            variant="contained"
+            sx={{ minWidth: 100 }}
+          >
             {action === 'accept' ? 'Accept' : 'Reject'}
           </Button>
         </DialogActions>

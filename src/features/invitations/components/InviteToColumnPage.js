@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import InviteToColumn from './InviteToColumn';
 
 /**
@@ -10,11 +10,16 @@ import InviteToColumn from './InviteToColumn';
  */
 const InviteToColumnPage = ({ token }) => {
   const { columnId } = useParams();
+  const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
 
+  const handleClose = () => {
+    navigate(`/boards/${boardId}`); // Điều hướng về trang board
+  };
+
   return (
-    <InviteToColumn boardId={boardId} columnId={columnId} open={true} onClose={() => {}} />
+    <InviteToColumn boardId={boardId} columnId={columnId} open={true} onClose={handleClose} />
   );
 };
 
