@@ -9,36 +9,13 @@ import Modal from '@mui/material/Modal';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
-// import Divider from '@mui/material/Divider';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
 import SubjectRoundedIcon from '@mui/icons-material/SubjectRounded';
 import SaveIcon from '@mui/icons-material/Save';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { styled } from '@mui/material/styles';
 import CardDescriptionMdEditor from './CardDescriptionMdEditor';
-
-const SidebarItem = styled(Box)(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  gap: '8px', // Tăng khoảng cách giữa icon và text
-  cursor: 'pointer',
-  fontSize: '16px', // Tăng font size
-  fontWeight: '600',
-  color: theme.palette.mode === 'dark' ? '#90caf9' : '#172b4d',
-  backgroundColor: theme.palette.mode === 'dark' ? '#2f3542' : '#f5f6fa',
-  padding: '12px 16px', // Tăng padding để nút lớn hơn
-  borderRadius: '6px',
-  boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)', // Thêm bóng nhẹ
-  transition: 'all 0.2s ease',
-  '&:hover': {
-    backgroundColor: theme.palette.mode === 'dark' ? '#33485D' : '#e0e4ff',
-    transform: 'translateY(-2px)', // Hiệu ứng nâng lên khi hover
-    boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)', // Tăng bóng khi hover
-  },
-}));
 
 const EditCardPage = ({ token }) => {
   const { cardId } = useParams();
@@ -133,15 +110,15 @@ const EditCardPage = ({ token }) => {
       <Box
         sx={{
           position: 'relative',
-          width: 950, // Tăng width để khung lớn hơn
+          width: 950,
           maxWidth: 950,
           bgcolor: 'background.paper',
-          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)', // Tăng bóng để tạo chiều sâu
-          borderRadius: '12px', // Bo góc lớn hơn
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+          borderRadius: '12px',
           border: 'none',
           outline: 0,
-          padding: '50px 30px 30px', // Tăng padding để thoáng hơn
-          margin: '40px auto', // Giảm margin top/bottom để cân đối
+          padding: '50px 30px 30px',
+          margin: '40px auto',
           backgroundColor: (theme) =>
             theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
         }}
@@ -156,21 +133,20 @@ const EditCardPage = ({ token }) => {
         >
           <CancelIcon
             color="error"
-            sx={{ fontSize: '28px', '&:hover': { color: 'error.light' } }} // Tăng kích thước icon đóng
+            sx={{ fontSize: '28px', '&:hover': { color: 'error.light' } }}
             onClick={handleClose}
           />
         </Box>
 
         <Box sx={{ mb: 2, mt: -3, pr: 3, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <CreditCardIcon sx={{ fontSize: '28px' }} /> {/* Tăng kích thước icon */}
+          <CreditCardIcon sx={{ fontSize: '28px' }} />
           <Typography variant="h6" sx={{ fontWeight: '700', fontSize: '24px' }}>
             Edit Card
           </Typography>
         </Box>
 
         <Grid container spacing={3} sx={{ mb: 4 }}>
-          {/* Left side: Form */}
-          <Grid xs={12} sm={8.5}>
+          <Grid xs={12}>
             <Box sx={{ mb: 4, p: 2, borderRadius: '8px', backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2f3542' : '#f9fafc', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                 <SubjectRoundedIcon sx={{ fontSize: '26px' }} />
@@ -243,19 +219,6 @@ const EditCardPage = ({ token }) => {
                 </Stack>
               </form>
             </Box>
-          </Grid>
-
-          {/* Right side: Actions */}
-          <Grid xs={12} sm={3.5}>
-            <Typography sx={{ fontWeight: '600', fontSize: '18px', color: 'primary.main', mb: 2 }}>
-              Actions
-            </Typography>
-            <Stack direction="column" spacing={1.5}>
-              <SidebarItem onClick={() => navigate(`/boards/${boardId}`)}>
-                <ArrowBackIcon fontSize="medium" />
-                Back to Board
-              </SidebarItem>
-            </Stack>
           </Grid>
         </Grid>
       </Box>
