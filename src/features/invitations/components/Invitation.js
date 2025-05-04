@@ -70,4 +70,26 @@ const Invitation = ({ boardId, columnId, cardId, invitationId, email, action, on
   return null; // Component này không render UI
 };
 
+// Thêm các hàm gọi API mới để lấy danh sách lời mời đang chờ xử lý
+export const getPendingBoardInvitations = async (userId) => {
+  return await handleApiCall(
+    () => invitationInstance.get(`/pending/board/${userId}`).then(res => res.data),
+    'Get pending board invitations'
+  );
+};
+
+export const getPendingColumnInvitations = async (userId) => {
+  return await handleApiCall(
+    () => invitationInstance.get(`/pending/column/${userId}`).then(res => res.data),
+    'Get pending column invitations'
+  );
+};
+
+export const getPendingCardInvitations = async (userId) => {
+  return await handleApiCall(
+    () => invitationInstance.get(`/pending/card/${userId}`).then(res => res.data),
+    'Get pending card invitations'
+  );
+};
+
 export default Invitation;

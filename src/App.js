@@ -22,6 +22,7 @@ import InviteToBoardPage from './features/invitations/components/InviteToBoardPa
 import InviteToColumnPage from './features/invitations/components/InviteToColumnPage';
 import AssignToCardPage from './features/invitations/components/AssignToCardPage';
 import AcceptRejectInvitationPage from './features/invitations/components/AcceptRejectInvitationPage';
+import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage'; // Import component mới
 
 /**
  * Main application component
@@ -159,15 +160,16 @@ function App() {
           }
         />
         <Route
-          path="/invitations/:invitationId/accept"
+          path="/invitations/:invitationId"
           element={
-            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} action="accept" />} />
+            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} />} />
           }
         />
+        {/* Route mới cho PendingInvitationsPage */}
         <Route
-          path="/invitations/:invitationId/reject"
+          path="/pending-invitations/:userId"
           element={
-            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} action="reject" />} />
+            <PrivateRoute token={token} component={<PendingInvitationsPage token={token} />} />
           }
         />
       </Routes>

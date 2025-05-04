@@ -18,46 +18,65 @@ import Invitation from './Invitation';
  * @param {string} props.invitationId - Invitation ID
  * @param {boolean} props.open - Whether the dialog is open
  * @param {Function} props.onClose - Callback to close the dialog
- * @param {string} props.action - Action ('accept' or 'reject')
  * @returns {JSX.Element}
  */
-const AcceptRejectInvitation = ({ invitationId, open, onClose, action }) => {
+const AcceptRejectInvitation = ({ invitationId, open, onClose }) => {
   const navigate = useNavigate();
   const [submitAction, setSubmitAction] = useState('');
 
-  const handleSubmit = () => {
+  const handleSubmit = (action) => (event) => {
+    event.preventDefault();
     setSubmitAction(action);
   };
 
-  const handleSuccess = () => {
-    showToast(`Invitation ${action === 'accept' ? 'accepted' : 'rejected'} successfully!`, 'success');
+  const handleSuccess = (action) => {
+    const message = action === 'accept' ? 'Invitation accepted successfully!' : 'Invitation rejected successfully!';
+    showToast(message, 'success');
     setSubmitAction('');
     onClose();
     setTimeout(() => navigate('/dashboard'), 2000);
   };
 
-  const handleError = (err) => {
-    showToast(err.message, 'error');
+  const handleError = (err, action) => {
+    showToast(err.message || `Failed to ${action} invitation`, 'error');
     setSubmitAction('');
   };
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle>{action === 'accept' ? 'Accept Invitation' : 'Reject Invitation'}</DialogTitle>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+        <DialogTitle>Manage Invitation</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography>
-              Are you sure you want to {action === 'accept' ? 'accept' : 'reject'} this invitation?
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+            <Typography variant="body1">
+              Would you like to accept or reject this invitation?
             </Typography>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={onClose} color="secondary">
+          <Button
+            onClick={onClose}
+            color="secondary"
+            variant="outlined"
+            sx={{ minWidth: 100 }}
+          >
             Cancel
           </Button>
-          <Button onClick={handleSubmit} color={action === 'accept' ? 'primary' : 'error'}>
-            {action === 'accept' ? 'Accept' : 'Reject'}
+          <Button
+            onClick={handleSubmit('reject')}
+            color="error"
+            variant="contained"
+            sx={{ minWidth: 100 }}
+          >
+            Reject
+          </Button>
+          <Button
+            onClick={handleSubmit('accept')}
+            color="primary"
+            variant="contained"
+            sx={{ minWidth: 100 }}
+          >
+            Accept
           </Button>
         </DialogActions>
       </Dialog>
@@ -66,8 +85,8 @@ const AcceptRejectInvitation = ({ invitationId, open, onClose, action }) => {
         <Invitation
           invitationId={invitationId}
           action={submitAction}
-          onSuccess={handleSuccess}
-          onError={handleError}
+          onSuccess={() => handleSuccess(submitAction)}
+          onError={(err) => handleError(err, submitAction)}
         />
       )}
     </>

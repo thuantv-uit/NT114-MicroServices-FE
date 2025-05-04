@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import AssignToCard from './AssignToCard';
 
 /**
@@ -10,12 +10,17 @@ import AssignToCard from './AssignToCard';
  */
 const AssignToCardPage = ({ token }) => {
   const { cardId } = useParams();
+  const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
   const columnId = state?.columnId || '';
 
+  const handleClose = () => {
+    navigate(`/boards/${boardId}`); // Điều hướng về trang board
+  };
+
   return (
-    <AssignToCard boardId={boardId} columnId={columnId} cardId={cardId} open={true} onClose={() => {}} />
+    <AssignToCard boardId={boardId} columnId={columnId} cardId={cardId} open={true} onClose={handleClose} />
   );
 };
 

@@ -1,15 +1,15 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import AcceptRejectInvitation from './AcceptRejectInvitation';
+import PendingInvitations from './PendingInvitations';
 
 /**
- * Page to accept or reject an invitation
+ * Page to display pending invitations for a user
  * @param {Object} props
  * @param {string} props.token - Authentication token
  * @returns {JSX.Element}
  */
-const AcceptRejectInvitationPage = ({ token }) => {
-  const { invitationId } = useParams();
+const PendingInvitationsPage = ({ token }) => {
+  const { userId } = useParams();
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -17,12 +17,8 @@ const AcceptRejectInvitationPage = ({ token }) => {
   };
 
   return (
-    <AcceptRejectInvitation
-      invitationId={invitationId}
-      open={true}
-      onClose={handleClose}
-    />
+    <PendingInvitations userId={userId} onClose={handleClose} />
   );
 };
 
-export default AcceptRejectInvitationPage;
+export default PendingInvitationsPage;
