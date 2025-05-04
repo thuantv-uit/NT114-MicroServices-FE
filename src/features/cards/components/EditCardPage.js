@@ -76,10 +76,6 @@ const EditCardPage = ({ token }) => {
     e.preventDefault();
     const validationErrors = validateCardForm(formValues);
     setErrors(validationErrors);
-    // if (Object.keys(validationErrors).length > 0) {
-    //   showToast('Please fix the errors in the form', 'error');
-    //   return;
-    // }
     if (!token) {
       showToast('Authentication token is missing', 'error');
       return;
@@ -110,8 +106,8 @@ const EditCardPage = ({ token }) => {
       <Box
         sx={{
           position: 'relative',
-          width: 950,
-          maxWidth: 950,
+          width: 1200,
+          maxWidth: 1200,
           bgcolor: 'background.paper',
           boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
           borderRadius: '12px',
@@ -145,9 +141,9 @@ const EditCardPage = ({ token }) => {
           </Typography>
         </Box>
 
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          <Grid xs={12}>
-            <Box sx={{ mb: 4, p: 2, borderRadius: '8px', backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2f3542' : '#f9fafc', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
+        <Grid container spacing={2} sx={{ mb: 4 }}> {/* Giảm spacing từ 3 xuống 0 */}
+          <Grid xs={6}>
+            <Box sx={{ mb: 4, p: '16px 0', borderRadius: '8px', backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2f3542' : '#f9fafc', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
                 <SubjectRoundedIcon sx={{ fontSize: '26px' }} />
                 <Typography variant="span" sx={{ fontWeight: '600', fontSize: '22px' }}>
@@ -167,17 +163,23 @@ const EditCardPage = ({ token }) => {
                   required
                   disabled={loading}
                   InputProps={{
-                    sx: { fontSize: '16px', borderRadius: '8px' },
+                    sx: { fontSize: '20px', borderRadius: '8px' },
                   }}
                   InputLabelProps={{
                     sx: { fontSize: '16px' },
                   }}
                 />
-                <Box sx={{ mt: 3 }}>
+                {/* <Box sx={{ mt: 3 }}>
                   <CardDescriptionMdEditor
                     cardDescriptionProp={formValues.description}
                     handleUpdateCardDescription={handleUpdateCardDescription}
                   />
+                </Box> */}
+                <Box sx={{ mt: 3, width: '100%', display: 'flex', justifyContent: 'center' }}>
+                  <CardDescriptionMdEditor
+                    cardDescriptionProp={formValues.description}
+                    handleUpdateCardDescription={handleUpdateCardDescription}
+                    />
                 </Box>
                 <Stack direction="row" spacing={2} sx={{ mt: 3 }}>
                   <Button
