@@ -6,10 +6,9 @@ import AcceptRejectInvitation from './AcceptRejectInvitation';
  * Page to accept or reject an invitation
  * @param {Object} props
  * @param {string} props.token - Authentication token
- * @param {string} props.action - Action ('accept' or 'reject')
  * @returns {JSX.Element}
  */
-const AcceptRejectInvitationPage = ({ token, action }) => {
+const AcceptRejectInvitationPage = ({ token }) => {
   const { invitationId } = useParams();
   const navigate = useNavigate();
 
@@ -22,7 +21,6 @@ const AcceptRejectInvitationPage = ({ token, action }) => {
       invitationId={invitationId}
       open={true}
       onClose={handleClose}
-      action={action}
     />
   );
 };

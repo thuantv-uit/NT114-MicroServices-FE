@@ -159,15 +159,9 @@ function App() {
           }
         />
         <Route
-          path="/invitations/:invitationId/accept"
+          path="/invitations/:invitationId"
           element={
-            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} action="accept" />} />
-          }
-        />
-        <Route
-          path="/invitations/:invitationId/reject"
-          element={
-            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} action="reject" />} />
+            <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} />} />
           }
         />
       </Routes>
