@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCards } from '../services/cardService';
 import { updateColumn } from '../../columns/services/columnService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, Typography } from '@mui/material';
+import { Box, IconButton, Stack, Typography } from '@mui/material'; // Thay Button bằng IconButton
 import {
   DndContext,
   closestCorners,
@@ -15,18 +15,124 @@ import {
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { arrayMove } from '@dnd-kit/sortable';
 import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
-import Card from './Card';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 
-/**
- * Component to list cards in a column
- * @param {Object} props
- * @param {string} props.columnId - Column ID
- * @param {string} props.token - Authentication token
- * @param {string} props.boardId - Board ID
- * @param {Object} props.column - Column data
- * @param {Function} props.onRefresh - Refresh callback
- * @returns {JSX.Element}
- */
+// Component Card để hiển thị title và các icon hành động
+const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card._id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <Box
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      sx={{
+        mb: 1,
+        p: 1.5,
+        bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333' : '#fff'),
+        borderRadius: '4px',
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        cursor: 'grab',
+        position: 'relative',
+        transition: 'all 0.2s ease',
+        '&:hover': {
+          boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)',
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f9f9f9'),
+        },
+      }}
+    >
+      {/* Tiêu đề của card */}
+      <Typography
+        variant="body1"
+        sx={{
+          fontWeight: '500',
+          fontSize: '14px',
+          mb: 1,
+          color: (theme) => (theme.palette.mode === 'dark' ? '#ddd' : '#172b4d'),
+        }}
+      >
+        {card.title}
+      </Typography>
+
+      {/* Các icon hành động (luôn hiện) */}
+      <Stack
+        direction="row"
+        spacing={0.5}
+        sx={{
+          justifyContent: 'flex-end',
+        }}
+      >
+        <IconButton
+          color="primary"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(card);
+          }}
+          sx={{
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
+            '&:hover': {
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
+            },
+          }}
+        >
+          <EditIcon sx={{ fontSize: '16px' }} />
+        </IconButton>
+        <IconButton
+          color="error"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(card._id);
+          }}
+          sx={{
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
+            '&:hover': {
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
+            },
+          }}
+        >
+          <DeleteIcon sx={{ fontSize: '16px' }} />
+        </IconButton>
+        <IconButton
+          color="info"
+          size="small"
+          onClick={(e) => {
+            e.stopPropagation();
+            onInviteUser(card);
+          }}
+          sx={{
+            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
+            '&:hover': {
+              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
+            },
+          }}
+        >
+          <PersonAddIcon sx={{ fontSize: '16px' }} />
+        </IconButton>
+      </Stack>
+    </Box>
+  );
+};
+
 const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -75,6 +181,10 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
 
   const handleDelete = (cardId) => {
     navigate(`/cards/${cardId}/delete`, { state: { boardId } });
+  };
+
+  const handleInviteUser = (card) => {
+    showToast(`Invite user for card ${card._id} (not implemented)`, 'info');
   };
 
   const handleDragStart = (event) => {
@@ -131,7 +241,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
                 token={token}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onRefresh={onRefresh}
+                onInviteUser={handleInviteUser}
               />
             ))
           ) : (
@@ -141,7 +251,15 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
       </SortableContext>
       <DragOverlay dropAnimation={customDropAnimation}>
         {activeCardId && activeCardData ? (
-          <Card card={activeCardData} boardId={boardId} columnId={columnId} token={token} onEdit={() => {}} onDelete={() => {}} onRefresh={() => {}} />
+          <Card
+            card={activeCardData}
+            boardId={boardId}
+            columnId={columnId}
+            token={token}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onInviteUser={() => {}}
+          />
         ) : null}
       </DragOverlay>
     </DndContext>
