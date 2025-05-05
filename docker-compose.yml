@@ -2,14 +2,15 @@ version: '3.8'
 
 services:
   frontend:
-    image: nt114-frontend:latest
+    build:
+      context: .
+    image: nt114-microservice-fe:latest
     ports:
-      - "3000:3000" # Ánh xạ cổng 3000 của container ra cổng 3000 của host
+      - "3000:3000"
     networks:
       - app-network
 
 # Định nghĩa network
 networks:
   app-network:
-    external:
-      name: thuantv
+    driver: bridge
