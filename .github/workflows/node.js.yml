@@ -15,7 +15,6 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-        # Supported Node.js versions: https://nodejs.org/en/about/releases/
       fail-fast: false # Continue testing other versions even if one fails
 
     steps:
@@ -45,14 +44,9 @@ jobs:
 
       # SonarQube Scan
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2
+        uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        with:
-          args: >
-            -Dsonar.branch.name=${{ github.ref_name }}
-            -Dsonar.scm.provider=git
 
       # Run tests with detailed error logging (optional, uncomment if tests are available)
       # - name: Run Tests
