@@ -15,32 +15,33 @@ jobs:
     strategy:
       matrix:
         node-version: [18.x, 20.x, 22.x]
-      fail-fast: false # Tiếp tục kiểm thử các phiên bản khác ngay cả khi một phiên bản thất bại
+        # Supported Node.js versions: https://nodejs.org/en/about/releases/
+      fail-fast: false # Continue testing other versions even if one fails
 
     steps:
-      # Lấy mã nguồn từ kho lưu trữ
-      - name: Lấy mã nguồn
+      # Fetch source code from the repository
+      - name: Checkout Source Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Cần cho SonarQube phân tích lịch sử
+          fetch-depth: 0  # Required for SonarQube to analyze history
 
-      # Thiết lập môi trường Node.js
-      - name: Thiết lập Node.js ${{ matrix.node-version }}
+      # Set up Node.js environment
+      - name: Set Up Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm' # Lưu cache dependencies npm để tăng tốc
+          cache: 'npm' # Cache npm dependencies to speed up
 
-      # Cài đặt dependencies
-      - name: Cài đặt dependencies
-        run: npm ci # Sử dụng npm ci để cài đặt sạch và đồng nhất
+      # Install dependencies
+      - name: Install Dependencies
+        run: npm ci # Use npm ci for clean and consistent installation
 
-      # Xây dựng dự án với ghi log chi tiết
-      - name: Xây dựng
-        run: npm run build -- --verbose # Bật chế độ ghi log chi tiết cho build
+      # Build the project with detailed logging
+      - name: Build Project
+        run: npm run build -- --verbose # Enable detailed logging for build
         env:
-          NODE_ENV: production # Đảm bảo build ở chế độ production
-        continue-on-error: false # Dừng bước nếu build thất bại
+          NODE_ENV: production # Ensure build in production mode
+        continue-on-error: false # Stop if build fails
 
       # SonarQube Scan
       - name: SonarQube Scan
@@ -48,19 +49,23 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.branch.name=${{ github.ref_name }}
+            -Dsonar.scm.provider=git
 
-      # Chạy kiểm thử với chi tiết lỗi (tùy chọn, bỏ comment nếu có kiểm thử)
-      # - name: Chạy kiểm thử
-      #   run: npm test -- --verbose # Bật chế độ ghi log chi tiết cho kiểm thử
+      # Run tests with detailed error logging (optional, uncomment if tests are available)
+      # - name: Run Tests
+      #   run: npm test -- --verbose # Enable detailed logging for tests
       #   env:
       #     NODE_ENV: test
       #   continue-on-error: false
 
-      # Hiển thị chi tiết lỗi nếu build thất bại
-      - name: Hiển thị chi tiết lỗi build
-        if: failure() # Chỉ chạy nếu các bước trước thất bại
+      # Display build error details if failed
+      - name: Display Build Error Details
+        if: failure() # Run only if previous steps fail
         run: |
-          echo "Kiểm tra các file log lỗi..."
-          find . -type f -name "*.log" -exec cat {} \; || echo "Không tìm thấy file log"
-          echo "Liệt kê các file trong thư mục build (nếu có)..."
-          ls -la dist/ || echo "Không tìm thấy thư mục dist/"
+          echo "Checking error log files..."
+          find . -type f -name "*.log" -exec cat {} \; || echo "No log files found"
+          echo "Listing files in build directory (if exists)..."
+          ls -la dist/ || echo "Build directory dist/ not found"
