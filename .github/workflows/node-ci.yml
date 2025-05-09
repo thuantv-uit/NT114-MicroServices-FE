@@ -1,0 +1,16 @@
+name: Node CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-service:
+    uses: ./.github/workflows/build-service.yml
+
+  sonarqube-service:
+    uses: ./.github/workflows/sonarqube-service.yml
