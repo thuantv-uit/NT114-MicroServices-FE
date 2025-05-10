@@ -14,7 +14,7 @@ jobs:
     steps:
       # Bước 1: Sao chép mã nguồn từ kho lưu trữ
       - name: Sao chép kho lưu trữ
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Bước 2: Thiết lập ngày và giờ để đặt tên tệp
       - name: Thiết lập ngày và giờ
@@ -63,7 +63,7 @@ jobs:
       # Bước 9: Đẩy kết quả quét vào kho lưu trữ
       - name: Đẩy kết quả quét vào kho
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TRIVY_TOKEN }}
         run: |
           OUTPUT_FILE="trivy-results/scan-results-${DATETIME}.json"
           git config --global user.name "GitHub Actions"
