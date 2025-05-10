@@ -1,4 +1,4 @@
-name: Scan Trivy
+name: Pipeline Quét Bảo mật Trivy
 
 # Kích hoạt pipeline khi push vào nhánh main hoặc khi có pull request nhắm đến nhánh main
 on:
@@ -63,7 +63,12 @@ jobs:
             exit 1
           fi
 
-      # Bước 9: Lưu kết quả quét dưới dạng artifact
+      # Bước 9: Lưu giá trị DATETIME dưới dạng output
+      - name: Lưu giá trị DATETIME
+        id: save-datetime
+        run: echo "datetime=${{ env.DATETIME }}" >> $GITHUB_OUTPUT
+
+      # Bước 10: Lưu kết quả quét dưới dạng artifact
       - name: Lưu kết quả quét dưới dạng artifact
         uses: actions/upload-artifact@v4
         with:
@@ -71,7 +76,7 @@ jobs:
           path: trivy-results/scan-results-${{ env.DATETIME }}.json
 
   push-results:
-    name: Đẩy Kết Quả Quét vào Nhánh trivy-results
+    name: Đẩy Kết Quá Quét vào Nhánh trivy-results
     runs-on: ubuntu-latest
     needs: build-and-scan  # Đợi job build-and-scan hoàn thành
     if: github.event_name == 'push'  # Chỉ chạy khi sự kiện là push
@@ -81,10 +86,10 @@ jobs:
       - name: Sao chép kho lưu trữ
         uses: actions/checkout@v4
 
-      # Bước 2: Thiết lập ngày và giờ (phải khớp với job build-and-scan)
-      - name: Thiết lập ngày và giờ
-        id: set-datetime
-        run: echo "DATETIME=$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
+      # Bước 2: Lấy giá trị DATETIME từ job build-and-scan
+      - name: Lấy giá trị DATETIME
+        id: get-datetime
+        run: echo "DATETIME=${{ needs.build-and-scan.outputs.datetime }}" >> $GITHUB_ENV
 
       # Bước 3: Tải artifact kết quả quét
       - name: Tải artifact kết quả quét
@@ -92,8 +97,19 @@ jobs:
         with:
           name: trivy-scan-results-${{ env.DATETIME }}
           path: trivy-results
+        continue-on-error: true  # Tiếp tục ngay cả khi tải artifact thất bại
 
-      # Bước 4: Đẩy kết quả quét vào nhánh trivy-results
+      # Bước 4: Kiểm tra xem artifact có tồn tại không
+      - name: Kiểm tra artifact
+        run: |
+          if [ -f "trivy-results/scan-results-${{ env.DATETIME }}.json" ]; then
+            echo "Artifact tải thành công."
+          else
+            echo "Lỗi: Không tìm thấy artifact trivy-scan-results-${{ env.DATETIME }}."
+            exit 1
+          fi
+
+      # Bước 5: Đẩy kết quả quét vào nhánh trivy-results
       - name: Đẩy kết quả quét vào nhánh trivy-results
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
