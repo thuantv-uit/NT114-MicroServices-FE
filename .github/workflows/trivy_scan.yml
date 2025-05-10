@@ -63,14 +63,9 @@ jobs:
             exit 1
           fi
 
-      # Bước 9: Đẩy kết quả quét vào kho lưu trữ
-      # - name: Đẩy kết quả quét vào kho
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   run: |
-      #     OUTPUT_FILE="trivy-results/scan-results-${DATETIME}.json"
-      #     git config --global user.name "thuantv-uit"
-      #     git config --global user.email "tvt04102004@gmail.com"
-      #     git add "$OUTPUT_FILE"
-      #     git commit -m "Thêm kết quả quét Trivy (${DATETIME})"
-      #     git push origin HEAD:dev
+      # Bước 9: Lưu kết quả quét dưới dạng artifact
+      - name: Lưu kết quả quét dưới dạng artifact cho ${{ matrix.service }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-scan-results-${{ matrix.service }}-${{ env.DATETIME }}
+          path: trivy-results/scan-results-${{ matrix.service }}-${{ env.DATETIME }}.json
