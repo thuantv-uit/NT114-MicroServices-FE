@@ -66,11 +66,11 @@ jobs:
       # Bước 9: Đẩy kết quả quét vào kho lưu trữ
       - name: Đẩy kết quả quét vào kho
         env:
-          GITHUB_TOKEN: ${{ secrets.TRIVY_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           OUTPUT_FILE="trivy-results/scan-results-${DATETIME}.json"
           git config --global user.name "thuantv-uit"
           git config --global user.email "tvt04102004@gmail.com"
           git add "$OUTPUT_FILE"
           git commit -m "Thêm kết quả quét Trivy (${DATETIME})"
-          git push origin HEAD:main
+          git push origin HEAD:dev
