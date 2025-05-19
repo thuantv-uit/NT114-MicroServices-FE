@@ -17,3 +17,5 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+# Test workflow for project
+# This workflow is designed to scan Docker images using Trivy and push the results to a specific branch.
