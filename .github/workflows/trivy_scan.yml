@@ -69,3 +69,4 @@ jobs:
           git add "GitHub Actions/Trivy Automation/scan-results-${{ env.DATE }}.json"
           git commit -m "Thêm kết quả quét Trivy (${{ env.DATE }})" || echo "Không có thay đổi để commit"
           git push origin HEAD:trivy-scan-results
+          # Ghi chú: Đảm bảo rằng nhánh 'trivy-scan-results' đã tồn tại trong repository
