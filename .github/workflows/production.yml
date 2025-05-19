@@ -55,3 +55,6 @@ jobs:
           find . -type f -name "*.log" -exec cat {} \; || echo "Không tìm thấy file log"
           echo "Liệt kê các file trong thư mục build (nếu có)..."
           ls -la dist/ || echo "Không tìm thấy thư mục dist/"
+
+
+# Test workflow for project
