@@ -4,8 +4,7 @@
 This project is a front-end web application bootstrapped with **Create React App**, a popular tool for setting up React projects with a pre-configured build system. It provides a development environment for building single-page applications using **React**, with support for hot reloading, testing, and optimized production builds.
 
 ### Author Information
-- **Author**: Facebook (Create React App Team)  
-- **Adapted by**: Thuan Tran Van (for this README format)  
+- **Author**: Tran Van Thuan
 - **Created Date**: April 22, 2025  
 
 ---
