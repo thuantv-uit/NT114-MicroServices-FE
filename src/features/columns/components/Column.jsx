@@ -33,9 +33,37 @@ function Column({ column, boardId, token, onRefresh }) {
 
   return (
     <div ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
-      <Box sx={COLUMN_STYLE}>
-        <Box sx={COLUMN_HEADER_STYLE}>
-          <Typography variant="h6">{column.title}</Typography>
+      <Box
+        sx={{
+          ...COLUMN_STYLE,
+          bgcolor: '#EBECF0', // Đảm bảo nền xám nhạt
+          borderRadius: '8px', // Bo góc 8px
+          p: 1, // Padding 8px, hỗ trợ khung bao phủ
+          minWidth: '272px', // Chiều rộng giống Trello
+          maxWidth: '272px',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <Box
+          sx={{
+            ...COLUMN_HEADER_STYLE,
+            mb: 0.5, // Giảm khoảng cách xuống 4px
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 600,
+              color: '#172B4D',
+              fontSize: '14px',
+            }}
+          >
+            {column.title}
+          </Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <ColumnMenu
               column={column}
@@ -50,7 +78,13 @@ function Column({ column, boardId, token, onRefresh }) {
             </Tooltip>
           </Box>
         </Box>
-        <CardList columnId={column._id} boardId={boardId} token={token} column={column} onRefresh={onRefresh} />
+        <CardList
+          columnId={column._id}
+          boardId={boardId}
+          token={token}
+          column={column}
+          onRefresh={onRefresh}
+        />
       </Box>
     </div>
   );

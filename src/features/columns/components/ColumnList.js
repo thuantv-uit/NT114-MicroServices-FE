@@ -20,14 +20,7 @@ import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortabl
 import { arrayMove } from '@dnd-kit/sortable';
 import Card from '../../cards/components/Card';
 
-/**
- * Component to list columns in a board
- * @param {Object} props
- * @param {string} props.boardId - Board ID
- * @param {string} props.token - Authentication token
- * @returns {JSX.Element}
- */
-const ColumnList = ({ boardId, token }) => {
+const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
   const navigate = useNavigate();
   const [columns, setColumns] = useState([]);
   const [orderedColumnIds, setOrderedColumnIds] = useState([]);
@@ -94,7 +87,7 @@ const ColumnList = ({ boardId, token }) => {
 
       try {
         await updateBoardColumnOrder(boardId, newOrderedColumnIds);
-        showToast('Column order updated successfully!', 'success');
+        showToast('Cập nhật thứ tự cột thành công!', 'success');
       } catch (err) {
         setOrderedColumnIds(prevOrderedColumnIds);
         showToast(err.message, 'error');
@@ -118,7 +111,7 @@ const ColumnList = ({ boardId, token }) => {
 
         try {
           await updateColumn(sourceCol._id, sourceCol.title, newCardOrderIds);
-          showToast('Card order updated successfully!', 'success');
+          showToast('Cập nhật thứ tự thẻ thành công!', 'success');
         } catch (err) {
           setColumns(columns);
           showToast(err.message, 'error');
@@ -145,7 +138,7 @@ const ColumnList = ({ boardId, token }) => {
             updateColumn(sourceCol._id, sourceCol.title, sourceCardOrderIds),
             updateColumn(destCol._id, destCol.title, destCardOrderIds),
           ]);
-          showToast('Card moved successfully!', 'success');
+          showToast('Di chuyển thẻ thành công!', 'success');
         } catch (err) {
           setColumns(columns);
           showToast(err.message, 'error');
@@ -155,8 +148,27 @@ const ColumnList = ({ boardId, token }) => {
   };
 
   const customDropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }),
+    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
   };
+
+  // Định nghĩa ColumnContainer mặc định với kiểu dáng Trello
+  const DefaultColumnContainer = ({ children, ...props }) => (
+    <Box
+      sx={{
+        bgcolor: '#EBECF0', // Nền xám nhạt giống Trello
+        borderRadius: '8px',
+        p: 1, // Padding 8px cho tất cả cạnh
+        minWidth: '272px', // Chiều rộng tối thiểu giống Trello
+        maxWidth: '272px',
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'all 0.2s ease',
+      }}
+      {...props}
+    >
+      {children}
+    </Box>
+  );
 
   return (
     <DndContext
@@ -165,15 +177,22 @@ const ColumnList = ({ boardId, token }) => {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <Box sx={{ my: 4 }}>
+      <Box sx={{ my: 1, width: '100%' }}>
         {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
             <CircularProgress />
           </Box>
         ) : (
           <SortableContext items={orderedColumnIds} strategy={horizontalListSortingStrategy}>
-            <Box sx={{ overflowX: 'auto', whiteSpace: 'nowrap', pb: 2, width: '100%', mx: 'auto' }}>
-              <Box sx={{ display: 'inline-flex', gap: 2 }}>
+            <Box
+              sx={{
+                overflowX: 'auto',
+                whiteSpace: 'nowrap',
+                pb: 1,
+                width: '100%',
+              }}
+            >
+              <Box sx={{ display: 'inline-flex', gap: 1 }}>
                 {orderedColumnIds.length > 0 ? (
                   orderedColumnIds.map((columnId) => {
                     const column = columns.find((c) => c._id === columnId);
@@ -184,17 +203,30 @@ const ColumnList = ({ boardId, token }) => {
                         boardId={boardId}
                         token={token}
                         onRefresh={loadColumns}
+                        ColumnContainer={ColumnContainer || DefaultColumnContainer} // Sử dụng mặc định nếu không truyền
+                        CardContainer={CardContainer}
                       />
                     ) : null;
                   })
                 ) : (
-                  <Box sx={{ textAlign: 'center', py: 4 }}>
-                    <Typography>No columns found.</Typography>
+                  <Box sx={{ textAlign: 'center', py: 2, px: 2 }}>
+                    <Typography sx={{ color: '#5E6C84', mb: 1 }}>
+                      Không tìm thấy cột nào.
+                    </Typography>
                     <Button
                       variant="contained"
                       onClick={() => navigate(`/boards/${boardId}/columns/create`)}
+                      sx={{
+                        bgcolor: '#0079BF',
+                        color: '#FFFFFF',
+                        borderRadius: '6px',
+                        textTransform: 'none',
+                        fontWeight: 'bold',
+                        px: 2,
+                        '&:hover': { bgcolor: '#026AA7' },
+                      }}
                     >
-                      Create New Column
+                      Thêm cột mới
                     </Button>
                   </Box>
                 )}
@@ -209,6 +241,8 @@ const ColumnList = ({ boardId, token }) => {
               boardId={boardId}
               token={token}
               onRefresh={loadColumns}
+              ColumnContainer={ColumnContainer || DefaultColumnContainer}
+              CardContainer={CardContainer}
             />
           ) : activeDragItemType === 'CARD' && activeDragItemData ? (
             <Card
@@ -216,6 +250,7 @@ const ColumnList = ({ boardId, token }) => {
               boardId={boardId}
               onEdit={() => {}}
               onDelete={() => {}}
+              CardContainer={CardContainer}
             />
           ) : null}
         </DragOverlay>

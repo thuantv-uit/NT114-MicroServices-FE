@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCards } from '../services/cardService';
 import { updateColumn } from '../../columns/services/columnService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, IconButton, Stack, Typography } from '@mui/material'; // Thay Button bằng IconButton
+import { Box, IconButton, Stack, Typography } from '@mui/material';
 import {
   DndContext,
   closestCorners,
@@ -35,7 +35,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1, // Giảm opacity để giống Trello
   };
 
   return (
@@ -45,39 +45,52 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }
       {...attributes}
       {...listeners}
       sx={{
-        mb: 1,
-        p: 1.5,
-        bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333' : '#fff'),
-        borderRadius: '4px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+        mb: 1, // Tăng từ 0.5 (4px) lên 1 (8px) để có khoảng cách lớn hơn
+        p: 0.5,
+        bgcolor: '#FFFFFF',
+        borderRadius: '8px',
+        boxShadow: '0 1px 0 rgba(9, 30, 66, 0.25)',
         cursor: 'grab',
         position: 'relative',
         transition: 'all 0.2s ease',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '40px',
         '&:hover': {
-          boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)',
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f9f9f9'),
+          boxShadow: '0 2px 4px rgba(9, 30, 66, 0.2)',
+          bgcolor: '#F4F5F7',
         },
       }}
     >
-      {/* Tiêu đề của card */}
+      {/* Tiêu đề của card, căn giữa chiều ngang */}
       <Typography
         variant="body1"
         sx={{
-          fontWeight: '500',
+          fontWeight: 600, // Đậm hơn, giống Trello
           fontSize: '14px',
-          mb: 1,
-          color: (theme) => (theme.palette.mode === 'dark' ? '#ddd' : '#172b4d'),
+          color: '#172B4D', // Màu chữ đậm của Trello
+          textAlign: 'center', // Căn giữa chiều ngang
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap', // Giới hạn tiêu đề trong 1 dòng
+          flexGrow: 1, // Chiếm phần lớn không gian
+          padding: '2px 0', // Thêm padding nhỏ để căn giữa dọc
         }}
       >
         {card.title}
       </Typography>
 
-      {/* Các icon hành động (luôn hiện) */}
+      {/* Các icon hành động, chỉ hiển thị khi hover, căn giữa chiều ngang */}
       <Stack
         direction="row"
-        spacing={0.5}
+        spacing={0.2} // Giảm khoảng cách giữa icon còn 1.6px
         sx={{
-          justifyContent: 'flex-end',
+          justifyContent: 'center', // Căn giữa chiều ngang
+          opacity: 0, // Ẩn mặc định
+          '&:hover': {
+            opacity: 1, // Hiển thị khi hover
+          },
+          mt: 0.25, // Khoảng cách từ tiêu đề còn 2px
         }}
       >
         <IconButton
@@ -88,13 +101,12 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }
             onEdit(card);
           }}
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
-            '&:hover': {
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
-            },
+            bgcolor: '#F0F0F0',
+            '&:hover': { bgcolor: '#E0E0E0' },
+            padding: '2px', // Giảm padding của icon
           }}
         >
-          <EditIcon sx={{ fontSize: '16px' }} />
+          <EditIcon sx={{ fontSize: '12px' }} /> {/* Giảm kích thước icon xuống 12px */}
         </IconButton>
         <IconButton
           color="error"
@@ -104,13 +116,12 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }
             onDelete(card._id);
           }}
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
-            '&:hover': {
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
-            },
+            bgcolor: '#F0F0F0',
+            '&:hover': { bgcolor: '#E0E0E0' },
+            padding: '2px',
           }}
         >
-          <DeleteIcon sx={{ fontSize: '16px' }} />
+          <DeleteIcon sx={{ fontSize: '12px' }} />
         </IconButton>
         <IconButton
           color="info"
@@ -120,19 +131,28 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }
             onInviteUser(card);
           }}
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
-            '&:hover': {
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
-            },
+            bgcolor: '#F0F0F0',
+            '&:hover': { bgcolor: '#E0E0E0' },
+            padding: '2px',
           }}
         >
-          <PersonAddIcon sx={{ fontSize: '16px' }} />
+          <PersonAddIcon sx={{ fontSize: '12px' }} />
         </IconButton>
       </Stack>
     </Box>
   );
 };
 
+/**
+ * Thành phần hiển thị danh sách thẻ trong cột
+ * @param {Object} props
+ * @param {string} props.columnId - ID của cột
+ * @param {string} props.token - Mã xác thực
+ * @param {string} props.boardId - ID của bảng
+ * @param {Object} props.column - Dữ liệu cột
+ * @param {Function} props.onRefresh - Hàm làm mới cột
+ * @returns {JSX.Element}
+ */
 const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -147,7 +167,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   useEffect(() => {
     const loadCards = async () => {
       if (!token) {
-        showToast('Authentication token is missing', 'error');
+        showToast('Thiếu mã xác thực', 'error');
         return;
       }
       setLoading(true);
@@ -160,7 +180,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
           : data;
         setCards(sortedCards);
       } catch (err) {
-        showToast(err.message || 'Failed to load cards', 'error');
+        showToast(err.message || 'Không thể tải thẻ', 'error');
       } finally {
         setLoading(false);
       }
@@ -184,7 +204,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   };
 
   const handleInviteUser = (card) => {
-    showToast(`Invite user for card ${card._id} (not implemented)`, 'info');
+    showToast(`Mời người dùng cho thẻ ${card._id} (chưa triển khai)`, 'info');
   };
 
   const handleDragStart = (event) => {
@@ -209,61 +229,73 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
 
     try {
       await updateColumn(columnId, column.title, newCardOrderIds);
-      showToast('Card order updated successfully!', 'success');
+      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
       onRefresh();
     } catch (err) {
       setCards(cards);
-      showToast(err.message || 'Failed to update card order', 'error');
+      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
     }
   };
 
   const customDropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }),
+    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }), // Giảm opacity giống Trello
   };
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
-        <Box sx={{ mb: 2 }}>
-          {loading && <Typography variant="body2" color="textSecondary">Loading cards...</Typography>}
-          {cards.length > 0 ? (
-            cards.map((card) => (
-              <Card
-                key={card._id}
-                card={card}
-                boardId={boardId}
-                columnId={columnId}
-                token={token}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onInviteUser={handleInviteUser}
-              />
-            ))
-          ) : (
-            <Typography variant="body2" color="textSecondary">No cards in this column.</Typography>
-          )}
-        </Box>
-      </SortableContext>
-      <DragOverlay dropAnimation={customDropAnimation}>
-        {activeCardId && activeCardData ? (
-          <Card
-            card={activeCardData}
-            boardId={boardId}
-            columnId={columnId}
-            token={token}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onInviteUser={() => {}}
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  );
+return (
+  <DndContext
+    sensors={sensors}
+    collisionDetection={closestCorners}
+    onDragStart={handleDragStart}
+    onDragEnd={handleDragEnd}
+  >
+    <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
+      <Box
+        sx={{
+          mb: 0,
+          px: 1, // Giữ padding trái/phải 8px để thẻ có lề
+          mt: 0, // Đảm bảo không có khoảng cách trên cùng
+        }}
+      >
+        {loading && (
+          <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
+            Đang tải thẻ...
+          </Typography>
+        )}
+        {cards.length > 0 ? (
+          cards.map((card) => (
+            <Card
+              key={card._id}
+              card={card}
+              boardId={boardId}
+              columnId={columnId}
+              token={token}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onInviteUser={handleInviteUser}
+            />
+          ))
+        ) : (
+          <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
+            Không có thẻ trong cột này.
+          </Typography>
+        )}
+      </Box>
+    </SortableContext>
+    <DragOverlay dropAnimation={customDropAnimation}>
+      {activeCardId && activeCardData ? (
+        <Card
+          card={activeCardData}
+          boardId={boardId}
+          columnId={columnId}
+          token={token}
+          onEdit={() => {}}
+          onDelete={() => {}}
+          onInviteUser={() => {}}
+        />
+      ) : null}
+    </DragOverlay>
+  </DndContext>
+);
 };
 
 export default CardList;
