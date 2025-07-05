@@ -22,8 +22,8 @@ import InviteToBoardPage from './features/invitations/components/InviteToBoardPa
 import InviteToColumnPage from './features/invitations/components/InviteToColumnPage';
 import AssignToCardPage from './features/invitations/components/AssignToCardPage';
 import AcceptRejectInvitationPage from './features/invitations/components/AcceptRejectInvitationPage';
-import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage'; // Import component mới
-
+import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage';
+import Chatbot from './features/ai/chatbot';
 /**
  * Main application component
  * @returns {JSX.Element}
@@ -165,11 +165,16 @@ function App() {
             <PrivateRoute token={token} component={<AcceptRejectInvitationPage token={token} />} />
           }
         />
-        {/* Route mới cho PendingInvitationsPage */}
         <Route
           path="/pending-invitations/:userId"
           element={
             <PrivateRoute token={token} component={<PendingInvitationsPage token={token} />} />
+          }
+        />
+        <Route
+          path="/chatbot"
+          element={
+            <PrivateRoute token={token} component={<Chatbot />} />
           }
         />
       </Routes>
