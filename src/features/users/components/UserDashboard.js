@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
-import { fetchUserData, fetchAllUsers } from '../services/userService';
-import { Box, Typography, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
+import { fetchUserData } from '../services/userService';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Grid,
+  Card,
+  CardContent,
+  IconButton,
+} from '@mui/material';
+import { Chat as ChatIcon } from '@mui/icons-material';
+import Chatbot from '../../ai/chatbot';
 
 /**
  * Component to display user dashboard
@@ -10,8 +20,8 @@ import { Box, Typography, List, ListItem, ListItemText, CircularProgress } from 
 const UserDashboard = () => {
   const { token } = useAuth();
   const [user, setUser] = useState(null);
-  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -20,12 +30,8 @@ const UserDashboard = () => {
       }
       setLoading(true);
       try {
-        const [userData, usersData] = await Promise.all([
-          fetchUserData(),
-          fetchAllUsers(),
-        ]);
+        const [userData] = await Promise.all([fetchUserData()]);
         setUser(userData);
-        setAllUsers(usersData);
       } catch (err) {
         // Errors are handled by axios interceptor
       } finally {
@@ -35,33 +41,100 @@ const UserDashboard = () => {
     loadData();
   }, [token]);
 
+  const toggleChat = () => {
+    setIsChatOpen((prev) => !prev);
+  };
+
   return (
-    <Box sx={{ maxWidth: 1200, mx: 'auto', my: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>User Dashboard</Typography>
+    <Box sx={{ maxWidth: 1400, mx: 'auto', my: 4, p: { xs: 2, md: 4 } }}>
+      {/* Header */}
+      <Typography
+        variant="h3"
+        sx={{ fontWeight: 'bold', mb: 4, color: 'primary.main' }}
+      >
+        User Dashboard
+      </Typography>
+
+      {/* Loading State */}
       {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-          <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
+          <CircularProgress size={60} />
         </Box>
       )}
-      {user ? (
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h5">Welcome, {user.username}!</Typography>
-          <Typography>Email: {user.email}</Typography>
-        </Box>
-      ) : (
-        !loading && <Typography>No user data available</Typography>
+
+      {/* Main Content */}
+      {!loading && (
+        <Grid container spacing={3}>
+          {/* User Info Card */}
+          <Grid item xs={12} md={6}>
+            <Card sx={{ boxShadow: 3, borderRadius: 3, bgcolor: 'background.paper' }}>
+              <CardContent>
+                <Typography variant="h5" sx={{ fontWeight: 'medium', mb: 2 }}>
+                  Profile
+                </Typography>
+                {user ? (
+                  <>
+                    <Typography variant="h6" color="text.secondary">
+                      Welcome, {user.username}!
+                    </Typography>
+                  </>
+                ) : (
+                  <Typography variant="body1" color="error">
+                    No user data available
+                  </Typography>
+                )}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* Placeholder for Other Features */}
+          <Grid item xs={12} md={6}>
+            <Card sx={{ boxShadow: 3, borderRadius: 3, bgcolor: 'background.paper' }}>
+              <CardContent>
+                <Typography variant="h5" sx={{ fontWeight: 'medium', mb: 2 }}>
+                  Recent Activity
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  No recent activity to display.
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
       )}
-      <Typography variant="h5" gutterBottom>All Users</Typography>
-      {allUsers.length > 0 ? (
-        <List>
-          {allUsers.map((u) => (
-            <ListItem key={u._id}>
-              <ListItemText primary={`${u.username} - ${u.email}`} />
-            </ListItem>
-          ))}
-        </List>
-      ) : (
-        <Typography>No users found</Typography>
+
+      {/* Chatbot Toggle Button */}
+      <IconButton
+        onClick={toggleChat}
+        sx={{
+          position: 'fixed',
+          bottom: 24,
+          right: 24,
+          bgcolor: 'primary.main',
+          color: 'white',
+          '&:hover': { bgcolor: 'primary.dark' },
+          width: 60,
+          height: 60,
+          boxShadow: 3,
+        }}
+      >
+        <ChatIcon fontSize="large" />
+      </IconButton>
+
+      {/* Chatbot Floating Window */}
+      {isChatOpen && (
+        <Box
+          sx={{
+            position: 'fixed',
+            bottom: 100,
+            right: 24,
+            width: { xs: '90%', sm: 400 },
+            maxHeight: '70vh',
+            zIndex: 1000,
+          }}
+        >
+          <Chatbot onClose={toggleChat} />
+        </Box>
       )}
     </Box>
   );

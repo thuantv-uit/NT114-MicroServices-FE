@@ -2,21 +2,21 @@
  * Style constants for columns and cards
  */
 export const COLUMN_STYLE = {
-  minWidth: '300px',
-  maxWidth: '300px',
-  bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333643' : '#ebecf0'),
-  ml: 2,
-  borderRadius: '6px',
-  height: 'fit-content',
-  maxHeight: (theme) => `calc(100vh - ${theme.spacing(5)})`,
+  bgcolor: '#EBECF0', // Nền xám nhạt giống Trello
+  borderRadius: '8px',
+  p: 1, // Padding 8px, bao gồm padding-bottom
+  minWidth: '272px',
+  maxWidth: '272px',
+  display: 'flex',
+  flexDirection: 'column',
+  transition: 'all 0.2s ease',
 };
 
 export const COLUMN_HEADER_STYLE = {
-  height: '60px',
-  p: 2,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  mb: 0.5, // Giảm từ 8px xuống 4px
 };
 
 export const CARD_PAPER_STYLE = {

@@ -9,7 +9,7 @@ import {
   Divider,
 } from '@mui/material';
 import { showToast } from '../../../utils/toastUtils';
-import { getPendingBoardInvitations, getPendingColumnInvitations, getPendingCardInvitations } from './Invitation';
+import { getPendingBoardInvitations, getPendingColumnInvitations } from './Invitation';
 
 /**
  * Component to display a list of pending invitations for a user
@@ -20,7 +20,6 @@ import { getPendingBoardInvitations, getPendingColumnInvitations, getPendingCard
 const PendingInvitations = ({ userId }) => {
   const [boardInvitations, setBoardInvitations] = useState([]);
   const [columnInvitations, setColumnInvitations] = useState([]);
-  const [cardInvitations, setCardInvitations] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,16 +27,13 @@ const PendingInvitations = ({ userId }) => {
       try {
         const boardInvites = await getPendingBoardInvitations(userId);
         const columnInvites = await getPendingColumnInvitations(userId);
-        const cardInvites = await getPendingCardInvitations(userId);
 
         // Log dữ liệu để kiểm tra cấu trúc
         console.log('Board Invitations:', boardInvites);
         console.log('Column Invitations:', columnInvites);
-        console.log('Card Invitations:', cardInvites);
 
         setBoardInvitations(boardInvites || []);
         setColumnInvitations(columnInvites || []);
-        setCardInvitations(cardInvites || []);
       } catch (err) {
         showToast(err.message || 'Failed to fetch pending invitations', 'error');
       }
@@ -97,7 +93,6 @@ const PendingInvitations = ({ userId }) => {
 
       {renderInvitationList(boardInvitations, 'Board')}
       {renderInvitationList(columnInvitations, 'Column')}
-      {renderInvitationList(cardInvitations, 'Card')}
     </Box>
   );
 };

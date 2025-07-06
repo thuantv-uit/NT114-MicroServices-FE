@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCards } from '../services/cardService';
+import { fetchCards, updateCard } from '../services/cardService'; // Thêm updateCard
 import { updateColumn } from '../../columns/services/columnService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, IconButton, Stack, Typography } from '@mui/material'; // Thay Button bằng IconButton
+import { Box, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import {
   DndContext,
   closestCorners,
@@ -19,10 +19,35 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import LinearScaleIcon from '@mui/icons-material/LinearScale'; // Icon cho chỉnh sửa process
+
+// Hàm tính màu sắc dựa trên process (0: đỏ, 100: xanh lá)
+const getCardBackgroundColor = (process) => {
+  const colors = {
+    0: { r: 255, g: 0, b: 0 }, // Đỏ
+    25: { r: 255, g: 128, b: 0 }, // Cam
+    50: { r: 255, g: 255, b: 0 }, // Vàng
+    75: { r: 128, g: 255, b: 0 }, // Xanh lá nhạt
+    100: { r: 0, g: 255, b: 0 }, // Xanh lá
+  };
+
+  const processValues = Object.keys(colors).map(Number).sort((a, b) => a - b);
+  let lower = processValues.find((val) => val <= process) || 0;
+  let upper = processValues.find((val) => val > process) || 100;
+
+  if (process <= lower) return `rgb(${colors[lower].r}, ${colors[lower].g}, ${colors[lower].b})`;
+  if (process >= upper) return `rgb(${colors[upper].r}, ${colors[upper].g}, ${colors[upper].b})`;
+
+  const ratio = (process - lower) / (upper - lower);
+  const r = Math.round(colors[lower].r + (colors[upper].r - colors[lower].r) * ratio);
+  const g = Math.round(colors[lower].g + (colors[upper].g - colors[lower].g) * ratio);
+  const b = Math.round(colors[lower].b + (colors[upper].b - colors[lower].b) * ratio);
+
+  return `rgb(${r}, ${g}, ${b})`;
+};
 
 // Component Card để hiển thị title và các icon hành động
-const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }) => {
+const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, onRefresh }) => {
   const {
     attributes,
     listeners,
@@ -32,107 +57,185 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser }
     isDragging,
   } = useSortable({ id: card._id });
 
+  const [openProcessDialog, setOpenProcessDialog] = useState(false);
+  const [processValue, setProcessValue] = useState(card.process);
+  const [processError, setProcessError] = useState('');
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  const handleOpenProcessDialog = (e) => {
+    e.stopPropagation();
+    setProcessValue(card.process);
+    setProcessError('');
+    setOpenProcessDialog(true);
+  };
+
+  const handleCloseProcessDialog = () => {
+    setOpenProcessDialog(false);
+    setProcessError('');
+  };
+
+  const handleUpdateProcess = async () => {
+    const processNum = Number(processValue);
+    if (isNaN(processNum) || processNum < 0 || processNum > 100) {
+      setProcessError('Mức độ hoàn thành phải là số từ 0 đến 100');
+      return;
+    }
+
+    try {
+      await updateCard(card._id, { process: processNum }, token);
+      showToast('Cập nhật mức độ hoàn thành thành công!', 'success');
+      handleCloseProcessDialog();
+      onRefresh(); // Làm mới danh sách thẻ
+    } catch (err) {
+      showToast(err.message || 'Không thể cập nhật mức độ hoàn thành', 'error');
+    }
   };
 
   return (
-    <Box
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      sx={{
-        mb: 1,
-        p: 1.5,
-        bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#333' : '#fff'),
-        borderRadius: '4px',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-        cursor: 'grab',
-        position: 'relative',
-        transition: 'all 0.2s ease',
-        '&:hover': {
-          boxShadow: '0 3px 6px rgba(0, 0, 0, 0.15)',
-          bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f9f9f9'),
-        },
-      }}
-    >
-      {/* Tiêu đề của card */}
-      <Typography
-        variant="body1"
+    <>
+      <Box
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
         sx={{
-          fontWeight: '500',
-          fontSize: '14px',
           mb: 1,
-          color: (theme) => (theme.palette.mode === 'dark' ? '#ddd' : '#172b4d'),
+          p: 0.5,
+          bgcolor: getCardBackgroundColor(card.process),
+          borderRadius: '8px',
+          boxShadow: '0 1px 0 rgba(9, 30, 66, 0.25)',
+          cursor: 'grab',
+          position: 'relative',
+          transition: 'all 0.2s ease',
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: '40px',
+          '&:hover': {
+            boxShadow: '0 2px 4px rgba(9, 30, 66, 0.2)',
+            filter: 'brightness(95%)',
+          },
         }}
       >
-        {card.title}
-      </Typography>
+        {/* Tiêu đề của card, căn giữa chiều ngang */}
+        <Typography
+          variant="body1"
+          sx={{
+            fontWeight: 600,
+            fontSize: '14px',
+            color: '#172B4D',
+            textAlign: 'center',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            flexGrow: 1,
+            padding: '2px 0',
+          }}
+        >
+          {card.title}
+        </Typography>
 
-      {/* Các icon hành động (luôn hiện) */}
-      <Stack
-        direction="row"
-        spacing={0.5}
-        sx={{
-          justifyContent: 'flex-end',
-        }}
-      >
-        <IconButton
-          color="primary"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(card);
-          }}
+        {/* Các icon hành động, chỉ hiển thị khi hover, căn giữa chiều ngang */}
+        <Stack
+          direction="row"
+          spacing={0.2}
           sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
+            justifyContent: 'center',
+            opacity: 0,
             '&:hover': {
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
+              opacity: 1,
             },
+            mt: 0.25,
           }}
         >
-          <EditIcon sx={{ fontSize: '16px' }} />
-        </IconButton>
-        <IconButton
-          color="error"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(card._id);
-          }}
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
-            '&:hover': {
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
-            },
-          }}
-        >
-          <DeleteIcon sx={{ fontSize: '16px' }} />
-        </IconButton>
-        <IconButton
-          color="info"
-          size="small"
-          onClick={(e) => {
-            e.stopPropagation();
-            onInviteUser(card);
-          }}
-          sx={{
-            bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#444' : '#f0f0f0'),
-            '&:hover': {
-              bgcolor: (theme) => (theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'),
-            },
-          }}
-        >
-          <PersonAddIcon sx={{ fontSize: '16px' }} />
-        </IconButton>
-      </Stack>
-    </Box>
+          <IconButton
+            color="primary"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(card);
+            }}
+            sx={{
+              bgcolor: '#F0F0F0',
+              '&:hover': { bgcolor: '#E0E0E0' },
+              padding: '2px',
+            }}
+          >
+            <EditIcon sx={{ fontSize: '12px' }} />
+          </IconButton>
+          <IconButton
+            color="error"
+            size="small"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(card._id);
+            }}
+            sx={{
+              bgcolor: '#F0F0F0',
+              '&:hover': { bgcolor: '#E0E0E0' },
+              padding: '2px',
+            }}
+          >
+            <DeleteIcon sx={{ fontSize: '12px' }} />
+          </IconButton>
+          <IconButton
+            color="info"
+            size="small"
+            onClick={handleOpenProcessDialog}
+            sx={{
+              bgcolor: '#F0F0F0',
+              '&:hover': { bgcolor: '#E0E0E0' },
+              padding: '2px',
+            }}
+          >
+            <LinearScaleIcon sx={{ fontSize: '12px' }} />
+          </IconButton>
+        </Stack>
+      </Box>
+
+      {/* Dialog để chỉnh sửa process */}
+      <Dialog open={openProcessDialog} onClose={handleCloseProcessDialog}>
+        <DialogTitle>Chỉnh sửa mức độ hoàn thành</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Mức độ hoàn thành (%)"
+            type="number"
+            fullWidth
+            value={processValue}
+            onChange={(e) => {
+              setProcessValue(e.target.value);
+              setProcessError('');
+            }}
+            error={!!processError}
+            helperText={processError}
+            inputProps={{ min: 0, max: 100 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseProcessDialog}>Hủy</Button>
+          <Button onClick={handleUpdateProcess} color="primary">Lưu</Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
+/**
+ * Thành phần hiển thị danh sách thẻ trong cột
+ * @param {Object} props
+ * @param {string} props.columnId - ID của cột
+ * @param {string} props.token - Mã xác thực
+ * @param {string} props.boardId - ID của bảng
+ * @param {Object} props.column - Dữ liệu cột
+ * @param {Function} props.onRefresh - Hàm làm mới cột
+ * @returns {JSX.Element}
+ */
 const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -147,7 +250,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   useEffect(() => {
     const loadCards = async () => {
       if (!token) {
-        showToast('Authentication token is missing', 'error');
+        showToast('Thiếu mã xác thực', 'error');
         return;
       }
       setLoading(true);
@@ -160,7 +263,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
           : data;
         setCards(sortedCards);
       } catch (err) {
-        showToast(err.message || 'Failed to load cards', 'error');
+        showToast(err.message || 'Không thể tải thẻ', 'error');
       } finally {
         setLoading(false);
       }
@@ -184,7 +287,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
   };
 
   const handleInviteUser = (card) => {
-    showToast(`Invite user for card ${card._id} (not implemented)`, 'info');
+    showToast(`Mời người dùng cho thẻ ${card._id} (chưa triển khai)`, 'info');
   };
 
   const handleDragStart = (event) => {
@@ -209,16 +312,16 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
 
     try {
       await updateColumn(columnId, column.title, newCardOrderIds);
-      showToast('Card order updated successfully!', 'success');
+      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
       onRefresh();
     } catch (err) {
       setCards(cards);
-      showToast(err.message || 'Failed to update card order', 'error');
+      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
     }
   };
 
   const customDropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } }),
+    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
   };
 
   return (
@@ -229,8 +332,18 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
       onDragEnd={handleDragEnd}
     >
       <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
-        <Box sx={{ mb: 2 }}>
-          {loading && <Typography variant="body2" color="textSecondary">Loading cards...</Typography>}
+        <Box
+          sx={{
+            mb: 0,
+            px: 1,
+            mt: 0,
+          }}
+        >
+          {loading && (
+            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
+              Đang tải thẻ...
+            </Typography>
+          )}
           {cards.length > 0 ? (
             cards.map((card) => (
               <Card
@@ -242,10 +355,13 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onInviteUser={handleInviteUser}
+                onRefresh={onRefresh}
               />
             ))
           ) : (
-            <Typography variant="body2" color="textSecondary">No cards in this column.</Typography>
+            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
+              Không có thẻ trong cột này.
+            </Typography>
           )}
         </Box>
       </SortableContext>
@@ -259,6 +375,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
             onEdit={() => {}}
             onDelete={() => {}}
             onInviteUser={() => {}}
+            onRefresh={() => {}}
           />
         ) : null}
       </DragOverlay>

@@ -85,11 +85,4 @@ export const getPendingColumnInvitations = async (userId) => {
   );
 };
 
-export const getPendingCardInvitations = async (userId) => {
-  return await handleApiCall(
-    () => invitationInstance.get(`/pending/card/${userId}`).then(res => res.data),
-    'Get pending card invitations'
-  );
-};
-
 export default Invitation;
