@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { PrivateRoute, PublicRoute } from './utils/RouteUtils';
 import Navbar from './components/Navbar';
+import Home from './components/Home';
+import NotFound from './components/404';
 import Login from './features/users/components/Login';
 import Register from './features/users/components/Register';
 import UserDashboard from './features/users/components/UserDashboard';
@@ -23,18 +25,26 @@ import InviteToColumnPage from './features/invitations/components/InviteToColumn
 import AcceptRejectInvitationPage from './features/invitations/components/AcceptRejectInvitationPage';
 import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage';
 import Chatbot from './features/ai/chatbot';
+
 /**
  * Main application component
  * @returns {JSX.Element}
  */
 function App() {
   const { token, setToken, logout } = useAuth();
-  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF'); // State lưu màu nền
+  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
+  const location = useLocation(); // Lấy đường dẫn hiện tại
+
+  // Chỉ hiển thị Navbar nếu không phải các trang /, /login, /register
+  const showNavbar = !['/', '/login', '/register', '/*'].includes(location.pathname);
 
   return (
     <>
-      <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />
+      {showNavbar && (
+        <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />
+      )}
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route
           path="/login"
           element={
@@ -163,6 +173,10 @@ function App() {
           element={
             <PrivateRoute token={token} component={<Chatbot />} />
           }
+        />
+        <Route 
+        path='*'
+        element={<NotFound />}
         />
       </Routes>
     </>

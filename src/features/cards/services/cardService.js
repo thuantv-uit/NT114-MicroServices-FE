@@ -38,7 +38,7 @@ export const createCard = async (title, description, columnId) => {
  * @param {string} description - Card description
  * @returns {Promise<Object>} Updated card
  */
-export const updateCard = async (cardId, updates = {}) => {
+export const updateProcess = async (cardId, updates = {}) => {
   return handleApiCall(
     async () => {
       // Chỉ gửi các trường được cung cấp (title, description, process)
@@ -54,7 +54,25 @@ export const updateCard = async (cardId, updates = {}) => {
     (error) => {
       // Xử lý lỗi chi tiết
       if (error.response) {
-        const message = error.response.data.message || 'Không thể cập nhật thẻ';
+        const message = error.ređponse.data.message || 'Không thể cập nhật thẻ';
+        throw new Error(message);
+      }
+      throw error;
+    }
+  );
+};
+
+export const updateCard = async (cardId, title, description) => {
+  return handleApiCall(
+    async () => {
+      const response = await cardInstance.put(`/${cardId}`, { title, description });
+      return response.data;
+    },
+    'Update card',
+    (error) => {
+      // Xử lý lỗi chi tiết
+      if (error.response) {
+        const message = error.response.data.message || 'Failed to update card';
         throw new Error(message);
       }
       throw error;
