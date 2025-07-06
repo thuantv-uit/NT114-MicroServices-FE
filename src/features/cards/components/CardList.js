@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCards, updateCard } from '../services/cardService'; // Thêm updateCard
+import { fetchCards, updateProcess } from '../services/cardService'; // Thêm updateCard
 import { updateColumn } from '../../columns/services/columnService';
 import { showToast } from '../../../utils/toastUtils';
 import { Box, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
@@ -87,7 +87,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     }
 
     try {
-      await updateCard(card._id, { process: processNum }, token);
+      await updateProcess(card._id, { process: processNum }, token);
       showToast('Cập nhật mức độ hoàn thành thành công!', 'success');
       handleCloseProcessDialog();
       onRefresh(); // Làm mới danh sách thẻ

@@ -52,7 +52,7 @@ const ColumnEdit = ({ token }) => {
         initialValues={initialValues}
         validate={validateColumnForm}
         onSubmit={async (values) => {
-          await updateColumn(columnId, values.title, initialValues.cardOrderIds || []);
+          await updateColumn(columnId, values.title, initialValues.cardOrderIds);
           showToast('Column updated successfully!', 'success');
           setTimeout(() => navigate(`/boards/${boardId}`), 2000);
         }}
