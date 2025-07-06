@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { fetchCards, updateProcess } from '../services/cardService'; // Thêm updateCard
 import { updateColumn } from '../../columns/services/columnService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
+import { Box, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import {
   DndContext,
   closestCorners,
   useSensor,
   useSensors,
   DragOverlay,
-  defaultDropAnimationSideEffects,
+  defaultDropAnimationSideEffects
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -20,6 +20,8 @@ import { CSS } from '@dnd-kit/utilities';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LinearScaleIcon from '@mui/icons-material/LinearScale'; // Icon cho chỉnh sửa process
+import Slider from '@mui/material/Slider';
+import FormHelperText from '@mui/material/FormHelperText';
 
 // Hàm tính màu sắc dựa trên process (0: đỏ, 100: xanh lá)
 const getCardBackgroundColor = (process) => {
@@ -96,7 +98,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     }
   };
 
-  return (
+return (
     <>
       <Box
         ref={setNodeRef}
@@ -121,7 +123,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           },
         }}
       >
-        {/* Tiêu đề của card, căn giữa chiều ngang */}
         <Typography
           variant="body1"
           sx={{
@@ -138,8 +139,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
         >
           {card.title}
         </Typography>
-
-        {/* Các icon hành động, chỉ hiển thị khi hover, căn giữa chiều ngang */}
         <Stack
           direction="row"
           spacing={0.2}
@@ -197,25 +196,43 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
         </Stack>
       </Box>
 
-      {/* Dialog để chỉnh sửa process */}
+      {/* Dialog để chỉnh sửa process với Slider */}
       <Dialog open={openProcessDialog} onClose={handleCloseProcessDialog}>
         <DialogTitle>Chỉnh sửa mức độ hoàn thành</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Mức độ hoàn thành (%)"
-            type="number"
-            fullWidth
-            value={processValue}
-            onChange={(e) => {
-              setProcessValue(e.target.value);
-              setProcessError('');
-            }}
-            error={!!processError}
-            helperText={processError}
-            inputProps={{ min: 0, max: 100 }}
-          />
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ px: 2, py: 1 }}>
+            <Typography gutterBottom>Mức độ hoàn thành (%): {processValue}</Typography>
+            <Slider
+              value={Number(processValue)}
+              onChange={(e, newValue) => {
+                setProcessValue(newValue);
+                setProcessError('');
+              }}
+              aria-label="Mức độ hoàn thành"
+              valueLabelDisplay="auto"
+              step={5}
+              marks={[
+                { value: 0, label: '0%' },
+                { value: 25, label: '25%' },
+                { value: 50, label: '50%' },
+                { value: 75, label: '75%' },
+                { value: 100, label: '100%' },
+              ]}
+              min={0}
+              max={100}
+              sx={{
+                color: 'primary.main',
+                '& .MuiSlider-markLabel': {
+                  fontSize: '0.75rem',
+                },
+              }}
+            />
+            {processError && (
+              <FormHelperText error sx={{ mt: 1 }}>
+                {processError}
+              </FormHelperText>
+            )}
+          </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseProcessDialog}>Hủy</Button>
@@ -224,6 +241,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
       </Dialog>
     </>
   );
+  
 };
 
 /**
