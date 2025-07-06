@@ -20,7 +20,6 @@ import EditCardPage from './features/cards/components/EditCardPage';
 import DeleteCardPage from './features/cards/components/DeleteCardPage';
 import InviteToBoardPage from './features/invitations/components/InviteToBoardPage';
 import InviteToColumnPage from './features/invitations/components/InviteToColumnPage';
-import AssignToCardPage from './features/invitations/components/AssignToCardPage';
 import AcceptRejectInvitationPage from './features/invitations/components/AcceptRejectInvitationPage';
 import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage';
 import Chatbot from './features/ai/chatbot';
@@ -100,12 +99,6 @@ function App() {
           }
         />
         <Route
-          path="/boards/:id/assign-to-card"
-          element={
-            <PrivateRoute token={token} component={<AssignToCardPage token={token} />} />
-          }
-        />
-        <Route
           path="/boards/:id/change-color"
           element={
             <PrivateRoute token={token} component={<ChangeColor token={token} />} />
@@ -151,12 +144,6 @@ function App() {
           path="/cards/:cardId/delete"
           element={
             <PrivateRoute token={token} component={<DeleteCardPage token={token} />} />
-          }
-        />
-        <Route
-          path="/cards/:cardId/assign-to-card"
-          element={
-            <PrivateRoute token={token} component={<AssignToCardPage token={token} />} />
           }
         />
         <Route

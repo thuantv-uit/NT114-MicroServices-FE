@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Box, IconButton, Badge } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { showToast } from '../utils/toastUtils';
-import { getPendingBoardInvitations, getPendingColumnInvitations, getPendingCardInvitations } from '../features/invitations/components/Invitation';
+import { getPendingBoardInvitations, getPendingColumnInvitations } from '../features/invitations/components/Invitation';
 
 /**
  * Darken a hex color by a given percentage
@@ -62,16 +62,13 @@ const Navbar = ({ token, logout, backgroundColor = '#FFFFFF' }) => {
       try {
         const boardInvites = await getPendingBoardInvitations(userId);
         const columnInvites = await getPendingColumnInvitations(userId);
-        const cardInvites = await getPendingCardInvitations(userId);
 
         console.log('Navbar Board Invites:', boardInvites);
         console.log('Navbar Column Invites:', columnInvites);
-        console.log('Navbar Card Invites:', cardInvites);
 
         const totalCount =
           (boardInvites?.length || 0) +
-          (columnInvites?.length || 0) +
-          (cardInvites?.length || 0);
+          (columnInvites?.length || 0)
 
         setNotificationCount(totalCount);
       } catch (err) {

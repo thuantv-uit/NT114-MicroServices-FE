@@ -38,17 +38,23 @@ export const createCard = async (title, description, columnId) => {
  * @param {string} description - Card description
  * @returns {Promise<Object>} Updated card
  */
-export const updateCard = async (cardId, title, description) => {
+export const updateCard = async (cardId, updates = {}) => {
   return handleApiCall(
     async () => {
-      const response = await cardInstance.put(`/${cardId}`, { title, description });
+      // Chỉ gửi các trường được cung cấp (title, description, process)
+      const body = {};
+      if (updates.title !== undefined) body.title = updates.title;
+      if (updates.description !== undefined) body.description = updates.description;
+      if (updates.process !== undefined) body.process = updates.process;
+
+      const response = await cardInstance.put(`/${cardId}`, body);
       return response.data;
     },
-    'Update card',
+    'Cập nhật thẻ',
     (error) => {
       // Xử lý lỗi chi tiết
       if (error.response) {
-        const message = error.response.data.message || 'Failed to update card';
+        const message = error.response.data.message || 'Không thể cập nhật thẻ';
         throw new Error(message);
       }
       throw error;
