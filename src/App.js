@@ -4,6 +4,7 @@ import { useAuth } from './hooks/useAuth';
 import { PrivateRoute, PublicRoute } from './utils/RouteUtils';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
+import NotFound from './components/404';
 import Login from './features/users/components/Login';
 import Register from './features/users/components/Register';
 import UserDashboard from './features/users/components/UserDashboard';
@@ -35,7 +36,7 @@ function App() {
   const location = useLocation(); // Lấy đường dẫn hiện tại
 
   // Chỉ hiển thị Navbar nếu không phải các trang /, /login, /register
-  const showNavbar = !['/', '/login', '/register'].includes(location.pathname);
+  const showNavbar = !['/', '/login', '/register', '/*'].includes(location.pathname);
 
   return (
     <>
@@ -172,6 +173,10 @@ function App() {
           element={
             <PrivateRoute token={token} component={<Chatbot />} />
           }
+        />
+        <Route 
+        path='*'
+        element={<NotFound />}
         />
       </Routes>
     </>

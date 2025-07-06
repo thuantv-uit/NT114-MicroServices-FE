@@ -114,12 +114,15 @@ const Register = () => {
             NT114, Web Application for Creating Timelines
           </Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2 }}>
+            <Link href="/" variant="body2" sx={{ color: 'primary.main' }}>
+              Home
+            </Link>
             <Link href="/about" variant="body2" sx={{ color: 'primary.main' }}>
               About Us
             </Link>
-            <Link href="/contact" variant="body2" sx={{ color: 'primary.main' }}>
+            {/* <Link href="/contact" variant="body2" sx={{ color: 'primary.main' }}>
               Contact
-            </Link>
+            </Link> */}
             <Link href="/privacy" variant="body2" sx={{ color: 'primary.main' }}>
               Privacy Policy
             </Link>
