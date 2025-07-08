@@ -5,7 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useNavigate } from 'react-router-dom';
 import ColumnMenu from './ColumnMenu';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
-import CardList from '../../cards/components/CardList';
+import CardList from '../../cards/components/Card';
 import { COLUMN_STYLE, COLUMN_HEADER_STYLE } from '../../../constants/styles';
 
 /**

@@ -1,36 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchCards, updateProcess } from '../services/cardService'; // Thêm updateCard
-import { updateColumn } from '../../columns/services/columnService';
-import { showToast } from '../../../utils/toastUtils';
-import { Box, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import {
-  DndContext,
-  closestCorners,
-  useSensor,
-  useSensors,
-  DragOverlay,
-  defaultDropAnimationSideEffects
-} from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { arrayMove } from '@dnd-kit/sortable';
-import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
+import { showToast } from '../../../utils/toastUtils';
+import { updateColumn } from '../../columns/services/columnService';
+import {
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Avatar,
+  Input,
+  Slider,
+  FormHelperText,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LinearScaleIcon from '@mui/icons-material/LinearScale'; // Icon cho chỉnh sửa process
-import Slider from '@mui/material/Slider';
-import FormHelperText from '@mui/material/FormHelperText';
+import LinearScaleIcon from '@mui/icons-material/LinearScale';
+import ImageIcon from '@mui/icons-material/Image';
+import CommentIcon from '@mui/icons-material/Comment';
+import AttachFileIcon from '@mui/icons-material/AttachFile';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { updateProcess, updateCardImage } from '../services/cardService';
+import { getUserById } from '../../users/services/userService';
 
-// Hàm tính màu sắc dựa trên process (0: đỏ, 100: xanh lá)
+// Hàm tính màu sắc dựa trên process
 const getCardBackgroundColor = (process) => {
   const colors = {
-    0: { r: 255, g: 0, b: 0 }, // Đỏ
-    25: { r: 255, g: 128, b: 0 }, // Cam
-    50: { r: 255, g: 255, b: 0 }, // Vàng
-    75: { r: 128, g: 255, b: 0 }, // Xanh lá nhạt
-    100: { r: 0, g: 255, b: 0 }, // Xanh lá
+    0: { r: 255, g: 0, b: 0 },
+    25: { r: 255, g: 128, b: 0 },
+    50: { r: 255, g: 255, b: 0 },
+    75: { r: 128, g: 255, b: 0 },
+    100: { r: 0, g: 255, b: 0 },
   };
 
   const processValues = Object.keys(colors).map(Number).sort((a, b) => a - b);
@@ -48,7 +59,63 @@ const getCardBackgroundColor = (process) => {
   return `rgb(${r}, ${g}, ${b})`;
 };
 
-// Component Card để hiển thị title và các icon hành động
+// Hàm xử lý Drag and Drop
+const useDragAndDrop = (cards, setCards, columnId, columnTitle, onRefresh) => {
+  const [activeCardId, setActiveCardId] = useState(null);
+  const [activeCardData, setActiveCardData] = useState(null);
+
+  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } });
+  const sensors = useSensors(mouseSensor, touchSensor);
+
+  const handleDragStart = (event) => {
+    setActiveCardId(event?.active?.id);
+    setActiveCardData(event?.active?.data?.current);
+  };
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    setActiveCardId(null);
+    setActiveCardData(null);
+
+    if (!active || !over || active.id === over.id) return;
+
+    const oldIndex = cards.findIndex((card) => card._id === active.id);
+    const newIndex = cards.findIndex((card) => card._id === over.id);
+
+    const newCards = arrayMove(cards, oldIndex, newIndex);
+    const newCardOrderIds = newCards.map((card) => card._id);
+
+    setCards(newCards);
+
+    try {
+      await updateColumn(columnId, columnTitle, newCardOrderIds);
+      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
+      onRefresh();
+    } catch (err) {
+      setCards(cards);
+      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
+    }
+  };
+
+  return {
+    sensors,
+    activeCardId,
+    activeCardData,
+    handleDragStart,
+    handleDragEnd,
+  };
+};
+
+// Hàm format ngày tháng
+const formatDate = (date) => {
+  const d = new Date(date);
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${month} ${day}`;
+};
+
+// Component Card
 const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, onRefresh }) => {
   const {
     attributes,
@@ -62,6 +129,25 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
   const [openProcessDialog, setOpenProcessDialog] = useState(false);
   const [processValue, setProcessValue] = useState(card.process);
   const [processError, setProcessError] = useState('');
+  const [openImageDialog, setOpenImageDialog] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [user, setUser] = useState(null);
+
+  // Lấy thông tin user tạo card
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (card.userId) {
+        try {
+          const userData = await getUserById(card.userId);
+          setUser(userData);
+        } catch (err) {
+          showToast(err.message || 'Không thể tải thông tin user', 'error');
+        }
+      }
+    };
+    fetchUser();
+  }, [card.userId]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -74,6 +160,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     setProcessValue(card.process);
     setProcessError('');
     setOpenProcessDialog(true);
+    setAnchorEl(null);
   };
 
   const handleCloseProcessDialog = () => {
@@ -92,13 +179,78 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
       await updateProcess(card._id, { process: processNum }, token);
       showToast('Cập nhật mức độ hoàn thành thành công!', 'success');
       handleCloseProcessDialog();
-      onRefresh(); // Làm mới danh sách thẻ
+      onRefresh();
     } catch (err) {
       showToast(err.message || 'Không thể cập nhật mức độ hoàn thành', 'error');
     }
   };
 
-return (
+  const handleOpenImageDialog = (e) => {
+    e.stopPropagation();
+    setImageFile(null);
+    setOpenImageDialog(true);
+    setAnchorEl(null);
+  };
+
+  const handleCloseImageDialog = () => {
+    setOpenImageDialog(false);
+  };
+
+  const handleImageChange = (event) => {
+    setImageFile(event.target.files[0]);
+  };
+
+  const handleUpdateImage = async () => {
+    if (!imageFile) {
+      showToast('Vui lòng chọn một file ảnh', 'error');
+      return;
+    }
+
+    try {
+      // eslint-disable-next-line no-unused-vars
+      const response = await updateCardImage(card._id, imageFile);
+      showToast('Cập nhật ảnh thẻ thành công!', 'success');
+      handleCloseImageDialog();
+      onRefresh();
+    } catch (err) {
+      showToast(err.message || 'Không thể cập nhật ảnh thẻ', 'error');
+    }
+  };
+
+  const handleMenuClick = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEditClick = (e) => {
+    e.stopPropagation();
+    onEdit(card);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    onDelete(card._id);
+    setAnchorEl(null);
+  };
+
+  const handleCommentClick = (e) => {
+    e.stopPropagation();
+    showToast('Chức năng bình luận chưa triển khai', 'info');
+    setAnchorEl(null);
+  };
+
+  const handleAttachClick = (e) => {
+    e.stopPropagation();
+    showToast('Chức năng đính kèm chưa triển khai', 'info');
+    setAnchorEl(null);
+  };
+
+  return (
     <>
       <Box
         ref={setNodeRef}
@@ -106,8 +258,8 @@ return (
         {...attributes}
         {...listeners}
         sx={{
-          mb: 1,
-          p: 0.5,
+          mb: 1.5,
+          p: 1.5,
           bgcolor: getCardBackgroundColor(card.process),
           borderRadius: '8px',
           boxShadow: '0 1px 0 rgba(9, 30, 66, 0.25)',
@@ -123,80 +275,129 @@ return (
           },
         }}
       >
+        {/* Image */}
+        {card.image && (
+          <Avatar
+            src={card.image}
+            alt={card.title}
+            variant="square"
+            sx={{
+              width: '100%',
+              height: '100%',
+              mb: 1.5,
+              borderRadius: '8px',
+              mx: 'auto',
+              my: 1.5,
+            }}
+          />
+        )}
+        {/* Updated Date và User Avatar */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: '#5E6C84',
+              textAlign: 'left',
+            }}
+          >
+            {formatDate(card.updatedAt)}
+          </Typography>
+          {user && (
+            <Avatar
+              src={user.avatar || 'https://via.placeholder.com/24'}
+              alt={user.username}
+              sx={{ width: 24, height: 24 }}
+            />
+          )}
+        </Box>
+        {/* Title */}
         <Typography
           variant="body1"
           sx={{
-            fontWeight: 600,
             fontSize: '14px',
             color: '#172B4D',
-            textAlign: 'center',
+            textAlign: 'left',
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flexGrow: 1,
-            padding: '2px 0',
+            whiteSpace: 'normal',
+            mb: 1,
           }}
         >
           {card.title}
         </Typography>
-        <Stack
-          direction="row"
-          spacing={0.2}
-          sx={{
-            justifyContent: 'center',
-            opacity: 0,
-            '&:hover': {
-              opacity: 1,
-            },
-            mt: 0.25,
-          }}
+        {/* Menu và Icons */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <IconButton
+            size="small"
+            onClick={handleMenuClick}
+            sx={{
+              bgcolor: '#F0F0F0',
+              '&:hover': { bgcolor: '#E0E0E0' },
+              padding: '4px',
+            }}
+          >
+            <MoreVertIcon sx={{ fontSize: '16px' }} />
+          </IconButton>
+          <Stack direction="row" spacing={0.5}>
+            <IconButton
+              size="small"
+              onClick={handleCommentClick}
+              sx={{
+                bgcolor: '#F0F0F0',
+                '&:hover': { bgcolor: '#E0E0E0' },
+                padding: '4px',
+              }}
+            >
+              <CommentIcon sx={{ fontSize: '12px' }} />
+            </IconButton>
+            <IconButton
+              size="small"
+              onClick={handleAttachClick}
+              sx={{
+                bgcolor: '#F0F0F0',
+                '&:hover': { bgcolor: '#E0E0E0' },
+                padding: '4px',
+              }}
+            >
+              <AttachFileIcon sx={{ fontSize: '12px' }} />
+            </IconButton>
+          </Stack>
+        </Box>
+        {/* Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
         >
-          <IconButton
-            color="primary"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(card);
-            }}
-            sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '2px',
-            }}
-          >
-            <EditIcon sx={{ fontSize: '12px' }} />
-          </IconButton>
-          <IconButton
-            color="error"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(card._id);
-            }}
-            sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '2px',
-            }}
-          >
-            <DeleteIcon sx={{ fontSize: '12px' }} />
-          </IconButton>
-          <IconButton
-            color="info"
-            size="small"
-            onClick={handleOpenProcessDialog}
-            sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '2px',
-            }}
-          >
-            <LinearScaleIcon sx={{ fontSize: '12px' }} />
-          </IconButton>
-        </Stack>
+          <MenuItem onClick={handleEditClick}>
+            <ListItemIcon>
+              <EditIcon fontSize="small" />
+            </ListItemIcon>
+            Chỉnh sửa
+          </MenuItem>
+          <MenuItem onClick={handleDeleteClick}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            Xóa
+          </MenuItem>
+          <MenuItem onClick={handleOpenProcessDialog}>
+            <ListItemIcon>
+              <LinearScaleIcon fontSize="small" />
+            </ListItemIcon>
+            Cập nhật tiến độ
+          </MenuItem>
+          <MenuItem onClick={handleOpenImageDialog}>
+            <ListItemIcon>
+              <ImageIcon fontSize="small" />
+            </ListItemIcon>
+            Cập nhật ảnh
+          </MenuItem>
+        </Menu>
       </Box>
 
-      {/* Dialog để chỉnh sửa process với Slider */}
+      {/* Dialog để chỉnh sửa process */}
       <Dialog open={openProcessDialog} onClose={handleCloseProcessDialog}>
         <DialogTitle>Chỉnh sửa mức độ hoàn thành</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
@@ -239,161 +440,29 @@ return (
           <Button onClick={handleUpdateProcess} color="primary">Lưu</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Dialog để cập nhật ảnh */}
+      <Dialog open={openImageDialog} onClose={handleCloseImageDialog}>
+        <DialogTitle>Cập nhật ảnh thẻ</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ px: 2, py: 1 }}>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              sx={{ mb: 1 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseImageDialog}>Hủy</Button>
+          <Button onClick={handleUpdateImage} color="primary" disabled={!imageFile}>
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
-  
 };
 
-/**
- * Thành phần hiển thị danh sách thẻ trong cột
- * @param {Object} props
- * @param {string} props.columnId - ID của cột
- * @param {string} props.token - Mã xác thực
- * @param {string} props.boardId - ID của bảng
- * @param {Object} props.column - Dữ liệu cột
- * @param {Function} props.onRefresh - Hàm làm mới cột
- * @returns {JSX.Element}
- */
-const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [activeCardId, setActiveCardId] = useState(null);
-  const [activeCardData, setActiveCardData] = useState(null);
-  const navigate = useNavigate();
-
-  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } });
-  const sensors = useSensors(mouseSensor, touchSensor);
-
-  useEffect(() => {
-    const loadCards = async () => {
-      if (!token) {
-        showToast('Thiếu mã xác thực', 'error');
-        return;
-      }
-      setLoading(true);
-      try {
-        const data = await fetchCards(columnId);
-        const sortedCards = column.cardOrderIds
-          ? column.cardOrderIds
-              .map((cardId) => data.find((card) => card._id === cardId))
-              .filter((card) => card)
-          : data;
-        setCards(sortedCards);
-      } catch (err) {
-        showToast(err.message || 'Không thể tải thẻ', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCards();
-  }, [columnId, column.cardOrderIds, token]);
-
-  const handleEdit = (card) => {
-    navigate(`/cards/${card._id}/edit`, {
-      state: {
-        title: card.title,
-        description: card.description,
-        boardId,
-        columnId,
-      },
-    });
-  };
-
-  const handleDelete = (cardId) => {
-    navigate(`/cards/${cardId}/delete`, { state: { boardId } });
-  };
-
-  const handleDragStart = (event) => {
-    setActiveCardId(event?.active?.id);
-    setActiveCardData(event?.active?.data?.current);
-  };
-
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-    setActiveCardId(null);
-    setActiveCardData(null);
-
-    if (!active || !over || active.id === over.id) return;
-
-    const oldIndex = cards.findIndex((card) => card._id === active.id);
-    const newIndex = cards.findIndex((card) => card._id === over.id);
-
-    const newCards = arrayMove(cards, oldIndex, newIndex);
-    const newCardOrderIds = newCards.map((card) => card._id);
-
-    setCards(newCards);
-
-    try {
-      await updateColumn(columnId, column.title, newCardOrderIds);
-      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
-      onRefresh();
-    } catch (err) {
-      setCards(cards);
-      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
-    }
-  };
-
-  const customDropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
-  };
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
-        <Box
-          sx={{
-            mb: 0,
-            px: 1,
-            mt: 0,
-          }}
-        >
-          {loading && (
-            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
-              Đang tải thẻ...
-            </Typography>
-          )}
-          {cards.length > 0 ? (
-            cards.map((card) => (
-              <Card
-                key={card._id}
-                card={card}
-                boardId={boardId}
-                columnId={columnId}
-                token={token}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onRefresh={onRefresh}
-              />
-            ))
-          ) : (
-            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
-              Không có thẻ trong cột này.
-            </Typography>
-          )}
-        </Box>
-      </SortableContext>
-      <DragOverlay dropAnimation={customDropAnimation}>
-        {activeCardId && activeCardData ? (
-          <Card
-            card={activeCardData}
-            boardId={boardId}
-            columnId={columnId}
-            token={token}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onInviteUser={() => {}}
-            onRefresh={() => {}}
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  );
-};
-
-export default CardList;
+export { Card, useDragAndDrop, getCardBackgroundColor };

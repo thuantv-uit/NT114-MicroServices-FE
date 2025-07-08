@@ -102,3 +102,24 @@ export const deleteCard = async (cardId) => {
     }
   );
 };
+
+/**
+ * Update card image
+ * @param {string} cardId - Card ID
+ * @param {File} imageFile - Image file for card
+ * @returns {Promise<Object>} Updated card data
+ */
+export const updateCardImage = async (cardId, imageFile) => {
+  const formData = new FormData();
+  formData.append('image', imageFile);
+
+  return handleApiCall(
+    () =>
+      cardInstance
+        .post(`/${cardId}/image`, formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then(res => res.data),
+    'Update card image'
+  );
+};

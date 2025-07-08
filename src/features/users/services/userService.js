@@ -73,3 +73,10 @@ export const changeAvatar = async (avatarFile) => {
     'Change avatar'
   );
 };
+
+export const getUserById = async (userId) => {
+  return handleApiCall(
+    () => userInstance.get(`/${userId}`).then(res => res.data),
+    'Fetch user by ID'
+  );
+};
