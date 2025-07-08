@@ -1,11 +1,11 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Box, Typography, Paper, IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
+// import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import { CARD_PAPER_STYLE } from '../../../constants/styles';
 
 /**
@@ -21,7 +21,7 @@ import { CARD_PAPER_STYLE } from '../../../constants/styles';
  * @returns {JSX.Element}
  */
 const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onRefresh }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id,
     data: { ...card, type: 'CARD' },
@@ -60,14 +60,14 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onRefresh }) =
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
-            <IconButton
+            {/* <IconButton
               aria-label="assign-to-card"
               onClick={() => navigate(`/cards/${card._id}/assign-to-card`, { state: { boardId, columnId } })}
               color="primary"
               data-no-dnd="true"
             >
               <AssignmentIndIcon fontSize="small" />
-            </IconButton>
+            </IconButton> */}
           </Box>
         </Box>
       </Paper>

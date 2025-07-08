@@ -53,3 +53,23 @@ export const fetchAllUsers = async () => {
     'Fetch all users'
   );
 };
+
+/**
+ * Change user avatar
+ * @param {File} avatarFile - Image file for avatar
+ * @returns {Promise<Object>} Updated user data
+ */
+export const changeAvatar = async (avatarFile) => {
+  const formData = new FormData();
+  formData.append('avatar', avatarFile);
+
+  return handleApiCall(
+    () =>
+      userInstance
+        .post('/change-avatar', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+        .then(res => res.data),
+    'Change avatar'
+  );
+};

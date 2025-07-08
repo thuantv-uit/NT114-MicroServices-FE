@@ -3,7 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { PrivateRoute, PublicRoute } from './utils/RouteUtils';
 import Navbar from './components/Navbar';
-import Home from './components/Home';
+import Home1 from './components/Home1';
 import NotFound from './components/404';
 import Login from './features/users/components/Login';
 import Register from './features/users/components/Register';
@@ -44,7 +44,7 @@ function App() {
         <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />
       )}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home1 />} />
         <Route
           path="/login"
           element={

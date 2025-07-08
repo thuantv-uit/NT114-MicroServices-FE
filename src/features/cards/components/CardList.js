@@ -304,10 +304,6 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
     navigate(`/cards/${cardId}/delete`, { state: { boardId } });
   };
 
-  const handleInviteUser = (card) => {
-    showToast(`Mời người dùng cho thẻ ${card._id} (chưa triển khai)`, 'info');
-  };
-
   const handleDragStart = (event) => {
     setActiveCardId(event?.active?.id);
     setActiveCardData(event?.active?.data?.current);
@@ -372,7 +368,6 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
                 token={token}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                onInviteUser={handleInviteUser}
                 onRefresh={onRefresh}
               />
             ))

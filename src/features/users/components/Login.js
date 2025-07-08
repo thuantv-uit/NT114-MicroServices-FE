@@ -37,6 +37,7 @@ const Login = ({ setToken }) => {
         alignItems: 'center',
         minHeight: '100vh',
         bgcolor: '#f5f5f5',
+        background: 'linear-gradient(180deg, #e3f2fd 0%, #ffffff 100%)', // Gradient background
       }}
     >
       <Paper

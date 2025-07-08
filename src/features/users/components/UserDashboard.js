@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
-import { fetchUserData } from '../services/userService';
+import { fetchUserData, changeAvatar } from '../services/userService'; // Import changeAvatar
 import {
   Box,
   Typography,
@@ -9,6 +9,9 @@ import {
   Card,
   CardContent,
   IconButton,
+  Avatar,
+  Button,
+  Input,
 } from '@mui/material';
 import { Chat as ChatIcon } from '@mui/icons-material';
 import Chatbot from '../../ai/chatbot';
@@ -22,6 +25,7 @@ const UserDashboard = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [avatarFile, setAvatarFile] = useState(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -43,6 +47,33 @@ const UserDashboard = () => {
 
   const toggleChat = () => {
     setIsChatOpen((prev) => !prev);
+  };
+
+  const handleAvatarChange = (event) => {
+    setAvatarFile(event.target.files[0]);
+  };
+
+  const handleAvatarUpload = async () => {
+    if (!avatarFile) {
+      alert('Please select an image file');
+      return;
+    }
+    if (!token) {
+      alert('You must be logged in to update avatar');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      const response = await changeAvatar(avatarFile); // Use changeAvatar from userService
+      setUser(response.user); // Update user with new avatar
+      setAvatarFile(null); // Reset file input
+      alert('Avatar updated successfully');
+    } catch (error) {
+      alert('Failed to update avatar: ' + (error.message || 'Unknown error'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -74,9 +105,34 @@ const UserDashboard = () => {
                 </Typography>
                 {user ? (
                   <>
-                    <Typography variant="h6" color="text.secondary">
-                      Welcome, {user.username}!
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Avatar
+                        src={user.avatar || 'https://via.placeholder.com/150'}
+                        alt={user.username}
+                        sx={{ width: 100, height: 100, mr: 2 }}
+                      />
+                      <Typography variant="h6" color="text.secondary">
+                        Welcome, {user.username}!
+                      </Typography>
+                    </Box>
+                    {/* <Typography variant="body1" color="text.secondary">
+                      Email: {user.email}
+                    </Typography> */}
+                    <Box sx={{ mt: 2 }}>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        sx={{ mb: 1 }}
+                      />
+                      <Button
+                        variant="contained"
+                        onClick={handleAvatarUpload}
+                        disabled={!avatarFile || loading}
+                      >
+                        Update Avatar
+                      </Button>
+                    </Box>
                   </>
                 ) : (
                   <Typography variant="body1" color="error">
