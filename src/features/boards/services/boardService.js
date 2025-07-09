@@ -48,11 +48,29 @@ export const fetchBoard = async (boardId) => {
  * @param {string} title - Board title
  * @param {string} description - Board description
  * @param {string} backgroundColor - Board background color (hex code)
+ * @param {FormData|string} backgroundImage - Board background image file or URL
  * @returns {Promise<Object>} Updated board
  */
-export const updateBoard = async (boardId, title, description, backgroundColor) => {
+export const updateBoard = async (boardId, title, description, backgroundColor, backgroundImage) => {
+  const formData = new FormData();
+  if (title !== undefined) formData.append('title', title);
+  if (description !== undefined) formData.append('description', description);
+  if (backgroundColor !== undefined) formData.append('backgroundColor', backgroundColor);
+  if (backgroundImage instanceof FormData) {
+    // FormData from ChangeBackground.js (file upload)
+    formData.append('backgroundImage', backgroundImage.get('backgroundImage'));
+  } else if (typeof backgroundImage === 'string') {
+    // String URL (e.g., from other components)
+    formData.append('backgroundImage', backgroundImage);
+  }
+
   return handleApiCall(
-    () => boardInstance.put(`/${boardId}`, { title, description, backgroundColor }).then(res => res.data),
+    () =>
+      boardInstance.put(`/${boardId}`, formData, {
+        headers: {
+          'Content-Type': backgroundImage instanceof FormData ? 'multipart/form-data' : 'application/json',
+        },
+      }).then((res) => res.data),
     'Update board'
   );
 };

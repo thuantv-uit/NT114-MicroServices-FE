@@ -11,7 +11,7 @@ import { Box, Button, Typography, Input } from '@mui/material';
  * @param {string} props.token - Authentication token
  * @returns {JSX.Element}
  */
-const ChangeColor = ({ token }) => {
+const ChangeBackground = ({ token }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
@@ -57,7 +57,7 @@ const ChangeColor = ({ token }) => {
 
       // Send file to backend
       await updateBoard(id, undefined, undefined, undefined, formData);
-      showToast('Background updated successfully!', 'success');
+      showToast('Background image updated successfully!', 'success');
       setTimeout(() => navigate(`/boards/${id}`, { state: { refresh: true } }), 2000);
     } catch (err) {
       showToast(err.message, 'error');
@@ -67,7 +67,7 @@ const ChangeColor = ({ token }) => {
   };
 
   return (
-    <FormContainer title="Change Board Background" loading={loading}>
+    <FormContainer title="Change Board Background Image" loading={loading}>
       <Box sx={{ maxWidth: 600, mx: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
         {/* File Input */}
         <Typography variant="h6" gutterBottom>
@@ -123,4 +123,4 @@ const ChangeColor = ({ token }) => {
   );
 };
 
-export default ChangeColor;
+export default ChangeBackground;
