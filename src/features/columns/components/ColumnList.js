@@ -192,7 +192,7 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
                 width: '100%',
               }}
             >
-              <Box sx={{ display: 'inline-flex', gap: 1 }}>
+              <Box sx={{ display: 'inline-flex', gap: 1.5 }}>
                 {orderedColumnIds.length > 0 ? (
                   orderedColumnIds.map((columnId) => {
                     const column = columns.find((c) => c._id === columnId);

@@ -9,11 +9,11 @@ import {
   Grid,
   Card,
   CardContent,
-  CircularProgress
+  CircularProgress,
 } from '@mui/material';
 
 /**
- * Component to list all boards
+ * Component to list all boards with image or color backgrounds
  * @param {Object} props
  * @param {string} props.token - Authentication token
  * @returns {JSX.Element}
@@ -27,6 +27,7 @@ const BoardList = ({ token }) => {
       setLoading(true);
       try {
         const data = await fetchBoards();
+        console.log('Fetched boards:', data); // Debug
         setBoards(data);
       } catch (err) {
         showToast(err.message, 'error');
@@ -71,54 +72,75 @@ const BoardList = ({ token }) => {
       ) : (
         <Grid container spacing={3}>
           {boards.length > 0 ? (
-            boards.map((board) => (
-              <Grid item xs={12} sm={6} md={3} key={board._id}>
-                <Card
-                  sx={{
-                    borderRadius: 3,
-                    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-                    bgcolor: board.backgroundColor || '#f0f4f8', // Màu nền từ board
-                    transition: 'transform 0.2s, box-shadow 0.2s',
-                    '&:hover': {
-                      transform: 'translateY(-4px)',
-                      boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
-                    },
-                    // Kích thước hình chữ nhật cố định
-                    width: 280,
-                    height: 200,
-                    display: 'flex',
-                    alignItems: 'flex-end', // Đẩy nội dung xuống cuối
-                    justifyContent: 'center',
-                    overflow: 'hidden',
-                  }}
-                >
-                  <CardContent
+            boards.map((board) => {
+              // Determine if backgroundImage is more recent
+              const isImageLatest =
+                board.backgroundImageUpdatedAt &&
+                board.backgroundColorUpdatedAt &&
+                new Date(board.backgroundImageUpdatedAt) > new Date(board.backgroundColorUpdatedAt);
+
+              return (
+                <Grid item xs={12} sm={6} md={3} key={board._id}>
+                  <Card
                     sx={{
-                      p: 2,
-                      width: '100%',
-                      bgcolor: '#ffffff', // Nền trắng cho tiêu đề
+                      borderRadius: 3,
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
+                      transition: 'transform 0.2s, box-shadow 0.2s',
+                      '&:hover': {
+                        transform: 'translateY(-4px)',
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.15)',
+                      },
+                      width: 210,
+                      height: 120,
+                      display: 'flex',
+                      flexDirection: 'column', // Chia thành 2 phần theo chiều dọc
+                      overflow: 'hidden',
                     }}
                   >
-                    <Typography
-                      variant="h6"
+                    {/* Phần Background */}
+                    <Box
                       sx={{
-                        fontWeight: 'medium',
-                        color: 'text.primary', // Chữ đen để tương phản với nền trắng
-                        textAlign: 'center',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
+                        flex: '0 0 80%', // Chiếm 70% chiều cao
+                        backgroundImage: isImageLatest && board.backgroundImage ? `url(${board.backgroundImage})` : 'none',
+                        backgroundColor: isImageLatest ? 'transparent' : board.backgroundColor || '#f0f4f8',
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center',
                       }}
-                      component={Link}
-                      to={`/boards/${board._id}`}
-                      style={{ textDecoration: 'none' }}
+                    />
+
+                    {/* Phần Title */}
+                    <CardContent
+                      sx={{
+                        flex: '0 0 20%', // Chiếm 30% chiều cao
+                        p: 0.3, // Giảm padding để gọn hơn
+                        bgcolor: 'rgba(255, 255, 255, 0.9)', // Nền semi-transparent
+                        display: 'flex',
+                        alignItems: 'top',
+                        justifyContent: 'center',
+                      }}
                     >
-                      {board.title}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          fontWeight: 'medium',
+                          color: 'text.primary',
+                          textAlign: 'center',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                          fontSize: '0.875rem',
+                        }}
+                        component={Link}
+                        to={`/boards/${board._id}`}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        {board.title}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              );
+            })
           ) : (
             <Box sx={{ textAlign: 'center', width: '100%', mt: 4 }}>
               <Typography

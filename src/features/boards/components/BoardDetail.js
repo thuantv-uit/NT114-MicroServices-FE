@@ -228,15 +228,11 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
 
       {/* Columns section */}
       {board ? (
-        <ColumnsWrapper
-          sx={{
-            mt: 1,
-          }}
-        >
+        <ColumnsWrapper sx={{ mt: 1 }} >
           <Box
             sx={{
               display: 'flex',
-              gap: 1,
+              gap: 2,
               p: 0.5,
               mr: 1,
             }}
