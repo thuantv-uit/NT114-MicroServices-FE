@@ -17,10 +17,14 @@ const ColumnEdit = ({ token }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
   const boardId = state?.boardId || '';
-  const [initialValues, setInitialValues] = useState({ title: state?.title || '' });
+  const [initialValues, setInitialValues] = useState({ 
+    title: state?.title || '',
+    backgroundColor: state?.backgroundColor || '#ffffff' 
+  });
   const [loading, setLoading] = useState(false);
   const fields = [
     { name: 'title', label: 'Column Title', required: true },
+    { name: 'backgroundColor', label: 'Background Color', type: 'color', required: false },
   ];
 
   useEffect(() => {
@@ -30,7 +34,10 @@ const ColumnEdit = ({ token }) => {
         const columns = await fetchColumns(boardId);
         const column = columns.find(c => c._id === columnId);
         if (column) {
-          setInitialValues({ title: column.title });
+          setInitialValues({ 
+            title: column.title,
+            backgroundColor: column.backgroundColor || '#ffffff'
+          });
         } else {
           showToast('Column not found', 'error');
         }
@@ -52,7 +59,7 @@ const ColumnEdit = ({ token }) => {
         initialValues={initialValues}
         validate={validateColumnForm}
         onSubmit={async (values) => {
-          await updateColumn(columnId, values.title, initialValues.cardOrderIds);
+          await updateColumn(columnId, values.title, initialValues.cardOrderIds, values.backgroundColor);
           showToast('Column updated successfully!', 'success');
           setTimeout(() => navigate(`/boards/${boardId}`), 2000);
         }}

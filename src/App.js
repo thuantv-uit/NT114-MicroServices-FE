@@ -14,7 +14,6 @@ import BoardCreate from './features/boards/components/BoardCreate';
 import UpdateBoard from './features/boards/components/UpdateBoard';
 import DeleteBoard from './features/boards/components/DeleteBoard';
 import ChangeColor from './features/boards/components/ChangeColor';
-import ChangeColumnColor from './features/columns/components/ChangeColumnColor';
 import CreateColumn from './features/columns/components/CreateColumn';
 import ColumnEdit from './features/columns/components/ColumnEdit';
 import DeleteColumn from './features/columns/components/DeleteColumn';
@@ -125,13 +124,6 @@ function App() {
           path="/columns/:columnId/edit"
           element={
             <PrivateRoute token={token} component={<ColumnEdit token={token} />} />
-          }
-        />
-        {/* Change color for column */}
-        <Route
-          path="/columns/:columnId/change-color-column"
-          element={
-            <PrivateRoute token={token} component={<ChangeColumnColor token={token} />} />
           }
         />
         <Route
