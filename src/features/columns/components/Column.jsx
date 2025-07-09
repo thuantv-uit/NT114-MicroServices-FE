@@ -36,7 +36,7 @@ function Column({ column, boardId, token, onRefresh }) {
       <Box
         sx={{
           ...COLUMN_STYLE,
-          bgcolor: '#EBECF0', // Đảm bảo nền xám nhạt
+          bgcolor: column.backgroundColor, // Đảm bảo nền xám nhạt
           borderRadius: '8px', // Bo góc 8px
           p: 1, // Padding 8px, hỗ trợ khung bao phủ
           minWidth: '272px', // Chiều rộng giống Trello

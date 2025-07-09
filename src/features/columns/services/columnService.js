@@ -34,12 +34,13 @@ export const createColumn = async (title, boardId) => {
  * Update a column
  * @param {string} columnId - Column ID
  * @param {string} title - Column title
+ * @param {string} backgroundColor - Board background color (hex code)
  * @param {Array} cardOrderIds - Order of card IDs
  * @returns {Promise<Object>} Updated column
  */
-export const updateColumn = async (columnId, title, cardOrderIds) => {
+export const updateColumn = async (columnId, title, cardOrderIds, backgroundColor) => {
   return handleApiCall(
-    () => columnInstance.put(`/${columnId}`, { title, cardOrderIds }).then(res => res.data),
+    () => columnInstance.put(`/${columnId}`, { title, cardOrderIds, backgroundColor }).then(res => res.data),
     'Update column'
   );
 };
