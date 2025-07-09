@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { fetchBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import ColumnList from '../../columns/components/ColumnList';
@@ -19,56 +19,55 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import AddIcon from '@mui/icons-material/Add';
 
-// Thành phần định kiểu cho Khung Cột
+// Styled components (unchanged)
 const ColumnContainer = styled(Box)(({ theme }) => ({
   minWidth: 270,
   maxWidth: 270,
-  backgroundColor: '#EBECF0', // Màu xám nhạt tiêu chuẩn của Trello
-  borderRadius: '12px', // Bo góc giống Trello
+  backgroundColor: '#EBECF0',
+  borderRadius: '12px',
   padding: theme.spacing(1),
   transition: 'box-shadow 0.2s ease-in-out',
   '&:hover': {
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)', // Đổ bóng nhẹ hơn
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
   },
 }));
 
-// Thành phần định kiểu cho Thẻ
 const CardContainer = styled(Box)(({ theme }) => ({
-  backgroundColor: '#FFFFFF', // Màu trắng giống thẻ Trello
-  borderRadius: '8px', // Bo góc nhẹ hơn, giống Trello
+  backgroundColor: '#FFFFFF',
+  borderRadius: '8px',
   padding: theme.spacing(1),
-  marginBottom: theme.spacing(0.5), // Giảm khoảng cách giữa thẻ
-  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)', // Đổ bóng nhẹ
+  marginBottom: theme.spacing(0.5),
+  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
   transition: 'box-shadow 0.2s ease-in-out',
   '&:hover': {
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)', // Đổ bóng nhẹ khi hover
+    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
   },
 }));
 
-// Thành phần định kiểu cho Khung chứa Cột
 const ColumnsWrapper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(1),
-  backgroundColor: 'transparent', // Nền trong suốt để hòa hợp với nền bảng
+  backgroundColor: 'transparent',
   borderRadius: '12px',
-  boxShadow: 'none', // Không đổ bóng
+  boxShadow: 'none',
   width: '100%',
-  maxWidth: 'calc(100vw - 32px)', // Giảm lề để giống Trello
-  minHeight: 'calc(100vh - 120px)', // Tối ưu chiều cao
+  maxWidth: 'calc(100vw - 32px)',
+  minHeight: 'calc(100vh - 120px)',
   overflowX: 'auto',
   display: 'flex',
   alignItems: 'flex-start',
 }));
 
 /**
- * Thành phần hiển thị chi tiết bảng
+ * Component to display board details with Cloudinary image or color background
  * @param {Object} props
- * @param {string} props.token - Mã xác thực
- * @param {Function} props.setBackgroundColor - Hàm đặt màu nền trong App.js
+ * @param {string} props.token - Authentication token
+ * @param {Function} props.setBackgroundColor - Function to set background color in App.js
  * @returns {JSX.Element}
  */
 const BoardDetail = ({ token, setBackgroundColor }) => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { state } = useLocation();
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openInviteBoard, setOpenInviteBoard] = useState(false);
@@ -78,6 +77,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       setLoading(true);
       try {
         const data = await fetchBoard(id);
+        console.log('Fetched board:', data); // Debug
         setBoard(data);
         setBackgroundColor(data.backgroundColor || '#FFFFFF');
       } catch (err) {
@@ -87,33 +87,42 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       }
     };
     loadBoard();
-  }, [id, setBackgroundColor]);
+  }, [id, setBackgroundColor, state?.refresh]);
 
   const handleNavigation = (path) => {
     navigate(path);
   };
 
+  // Determine which background to use based on latest update
+  const isImageLatest =
+    board?.backgroundImageUpdatedAt &&
+    board?.backgroundColorUpdatedAt &&
+    new Date(board.backgroundImageUpdatedAt) > new Date(board.backgroundColorUpdatedAt);
+
   return (
     <Box
       sx={{
-        backgroundColor: board?.backgroundColor || '#FFFFFF',
+        backgroundImage: isImageLatest && board?.backgroundImage ? `url(${board.backgroundImage})` : 'none',
+        backgroundColor: !isImageLatest ? board?.backgroundColor || '#FFFFFF' : 'transparent',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
         minHeight: '100vh',
         width: '100%',
-        pt: 0, // Không padding-top để sát thanh điều hướng
-        px: 1, // Giảm lề ngang còn 8px, giống Trello
+        pt: 0,
+        px: 1,
         boxSizing: 'border-box',
         overflow: 'auto',
       }}
     >
-      {/* Phần tiêu đề: Tên bảng, mô tả và các nút hành động */}
+      {/* Header: Board title, description, and action buttons */}
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
-          mb: 1, // Tăng margin-bottom để cách khung cột 8px
+          mb: 1,
           minHeight: 'auto',
-          mt: 1, // 8px, sát thanh điều hướng
+          mt: 1,
         }}
       >
         <Box>
@@ -123,15 +132,15 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                 variant="h5"
                 sx={{
                   fontWeight: 'bold',
-                  color: '#172B4D', // Màu chữ đậm giống Trello
-                  lineHeight: 1.4, // Tăng khoảng cách chữ
+                  color: '#172B4D',
+                  lineHeight: 1.4,
                 }}
               >
                 {board.title}
               </Typography>
               <Typography
                 variant="body2"
-                sx={{ color: '#5E6C84', lineHeight: 1.4 }} // Màu nhạt hơn, giống Trello
+                sx={{ color: '#5E6C84', lineHeight: 1.4 }}
               >
                 {board.description || 'Không có mô tả.'}
               </Typography>
@@ -140,16 +149,16 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
             <Typography variant="h5">Đang tải...</Typography>
           )}
         </Box>
-        {/* Nút hành động */}
-        <Box sx={{ display: 'flex', gap: 0.5 }}> {/* Giảm gap để nút sát nhau hơn */}
-          <Tooltip title="Đổi màu nền">
+        {/* Action buttons */}
+        <Box sx={{ display: 'flex', gap: 0.5 }}>
+          <Tooltip title="Đổi nền">
             <IconButton
               color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/change-color`)}
+              onClick={() => handleNavigation(`/boards/${id}/change-background`)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
-                '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' }, // Hover giống Trello
-                p: 0.5, // Nút nhỏ gọn
+                '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
+                p: 0.5,
               }}
             >
               <PaletteIcon fontSize="small" />
@@ -210,26 +219,26 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         </Box>
       </Box>
 
-      {/* Chỉ báo tải */}
+      {/* Loading indicator */}
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Phần cột */}
+      {/* Columns section */}
       {board ? (
         <ColumnsWrapper
           sx={{
-            mt: 1, // 8px, cách tiêu đề giống Trello
+            mt: 1,
           }}
         >
           <Box
             sx={{
               display: 'flex',
-              gap: 1, // 8px giữa các cột
-              p: 0.5, // 4px lề
-              mr: 1, // Thêm lề phải để tránh cột cuối sát mép
+              gap: 1,
+              p: 0.5,
+              mr: 1,
             }}
           >
             <ColumnList
@@ -244,7 +253,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         <Typography color="error">Không tìm thấy bảng</Typography>
       )}
 
-      {/* Hộp thoại mời người dùng vào bảng */}
+      {/* Invite to board dialog */}
       <InviteToBoard
         boardId={id}
         open={openInviteBoard}

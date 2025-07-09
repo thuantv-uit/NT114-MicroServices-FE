@@ -109,7 +109,7 @@ function App() {
           }
         />
         <Route
-          path="/boards/:id/change-color"
+          path="/boards/:id/change-background"
           element={
             <PrivateRoute token={token} component={<ChangeColor token={token} />} />
           }
