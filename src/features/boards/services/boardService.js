@@ -99,3 +99,10 @@ export const inviteUser = async (boardId, email) => {
     'Invite user'
   );
 };
+
+export const getBoardById = async (boardId) => {
+  return handleApiCall(
+    () => boardInstance.get(`all/${boardId}`),
+    'All User get Board by ID'
+  )
+}

@@ -32,12 +32,6 @@ const Invitation = ({ boardId, columnId, cardId, invitationId, email, action, on
             'Invite user to column'
           );
           break;
-        case 'assignToCard':
-          response = await handleApiCall(
-            () => invitationInstance.post('/card', { boardId, columnId, cardId, email }).then(res => res.data),
-            'Assign user to card'
-          );
-          break;
         case 'accept':
           response = await handleApiCall(
             () => invitationInstance.put(`/accept/${invitationId}`).then(res => res.data),
@@ -61,7 +55,7 @@ const Invitation = ({ boardId, columnId, cardId, invitationId, email, action, on
   };
 
   // Gọi performAction ngay khi component được mount
-  if (boardId && email && (action === 'inviteToBoard' || (action === 'inviteToColumn' && columnId) || (action === 'assignToCard' && columnId && cardId))) {
+  if (boardId && email && (action === 'inviteToBoard' || (action === 'inviteToColumn' && columnId))) {
     performAction();
   } else if (invitationId && (action === 'accept' || action === 'reject')) {
     performAction();

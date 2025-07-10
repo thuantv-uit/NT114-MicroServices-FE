@@ -69,3 +69,10 @@ export const updateBoardColumnOrder = async (boardId, columnOrderIds) => {
     'Update column order'
   );
 };
+
+export const getColumndById = async (columnId) => {
+  return handleApiCall(
+    () => columnInstance.get(`all/${columnId}`),
+    'All User get Column by ID'
+  )
+}
