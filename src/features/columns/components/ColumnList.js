@@ -1,12 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { fetchColumns, updateBoardColumnOrder, updateColumn } from '../services/columnService';
 import { fetchBoard } from '../../boards/services/boardService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, Typography, CircularProgress, Button } from '@mui/material';
+import { Box, Typography, CircularProgress } from '@mui/material';
 import Column from './Column';
+import CreateCard from '../../cards/components/CreateCard';
+import ColumnEdit from './ColumnEdit';
+import DeleteColumn from './DeleteColumn';
 import {
   DndContext,
   useSensor,
@@ -18,10 +20,10 @@ import {
 import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { arrayMove } from '@dnd-kit/sortable';
+import { Dialog } from '@mui/material';
 import Card from '../../cards/components/Card';
 
 const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
-  const navigate = useNavigate();
   const [columns, setColumns] = useState([]);
   const [orderedColumnIds, setOrderedColumnIds] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -29,6 +31,10 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
   const [activeDragItemType, setActiveDragItemType] = useState(null);
   const [activeDragItemData, setActiveDragItemData] = useState(null);
   const [sourceColumn, setSourceColumn] = useState(null);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openCreateCardDialog, setOpenCreateCardDialog] = useState(false);
+  const [selectedColumn, setSelectedColumn] = useState(null);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } });
@@ -147,18 +153,26 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
     }
   };
 
+  const handleDialogClose = () => {
+    setOpenEditDialog(false);
+    setOpenDeleteDialog(false);
+    setOpenCreateCardDialog(false);
+    setSelectedColumn(null);
+    loadColumns();
+  };
+
   const customDropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
   };
 
-  // Định nghĩa ColumnContainer mặc định với kiểu dáng Trello
+  // Default ColumnContainer with Trello style
   const DefaultColumnContainer = ({ children, ...props }) => (
     <Box
       sx={{
-        bgcolor: '#EBECF0', // Nền xám nhạt giống Trello
+        bgcolor: '#EBECF0',
         borderRadius: '8px',
-        p: 1, // Padding 8px cho tất cả cạnh
-        minWidth: '272px', // Chiều rộng tối thiểu giống Trello
+        p: 1,
+        minWidth: '272px',
         maxWidth: '272px',
         display: 'flex',
         flexDirection: 'column',
@@ -203,7 +217,23 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
                         boardId={boardId}
                         token={token}
                         onRefresh={loadColumns}
-                        ColumnContainer={ColumnContainer || DefaultColumnContainer} // Sử dụng mặc định nếu không truyền
+                        onEdit={() => {
+                          setSelectedColumn(column);
+                          setOpenEditDialog(true);
+                        }}
+                        onDelete={() => {
+                          setSelectedColumn(column);
+                          setOpenDeleteDialog(true);
+                        }}
+                        onAddCard={() => {
+                          if (column?._id) {
+                            setSelectedColumn(column);
+                            setOpenCreateCardDialog(true);
+                          } else {
+                            showToast('Không thể tạo thẻ: Thiếu ID cột', 'error');
+                          }
+                        }}
+                        ColumnContainer={ColumnContainer || DefaultColumnContainer}
                         CardContainer={CardContainer}
                       />
                     ) : null;
@@ -213,21 +243,6 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
                     <Typography sx={{ color: '#5E6C84', mb: 1 }}>
                       Không tìm thấy cột nào.
                     </Typography>
-                    <Button
-                      variant="contained"
-                      onClick={() => navigate(`/boards/${boardId}/columns/create`)}
-                      sx={{
-                        bgcolor: '#0079BF',
-                        color: '#FFFFFF',
-                        borderRadius: '6px',
-                        textTransform: 'none',
-                        fontWeight: 'bold',
-                        px: 2,
-                        '&:hover': { bgcolor: '#026AA7' },
-                      }}
-                    >
-                      Thêm cột mới
-                    </Button>
                   </Box>
                 )}
               </Box>
@@ -241,6 +256,9 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
               boardId={boardId}
               token={token}
               onRefresh={loadColumns}
+              onEdit={() => {}}
+              onDelete={() => {}}
+              onAddCard={() => {}}
               ColumnContainer={ColumnContainer || DefaultColumnContainer}
               CardContainer={CardContainer}
             />
@@ -248,13 +266,57 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
             <Card
               card={activeDragItemData}
               boardId={boardId}
+              columnId={sourceColumn?._id}
+              token={token}
               onEdit={() => {}}
               onDelete={() => {}}
+              onInviteUser={() => {}}
+              onRefresh={() => {}}
               CardContainer={CardContainer}
             />
           ) : null}
         </DragOverlay>
       </Box>
+
+      {/* Edit Column Dialog */}
+      {selectedColumn && (
+        <Dialog open={openEditDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
+          <ColumnEdit
+            token={token}
+            columnId={selectedColumn._id}
+            boardId={boardId}
+            initialValues={{
+              title: selectedColumn.title,
+              backgroundColor: selectedColumn.backgroundColor || '#ffffff',
+            }}
+            onClose={handleDialogClose}
+          />
+        </Dialog>
+      )}
+
+      {/* Delete Column Dialog */}
+      {selectedColumn && (
+        <Dialog open={openDeleteDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
+          <DeleteColumn
+            token={token}
+            columnId={selectedColumn._id}
+            boardId={boardId}
+            onClose={handleDialogClose}
+          />
+        </Dialog>
+      )}
+
+      {/* Create Card Dialog */}
+      {selectedColumn && (
+        <Dialog open={openCreateCardDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
+          <CreateCard
+            token={token}
+            columnId={selectedColumn._id}
+            boardId={boardId}
+            onClose={handleDialogClose}
+          />
+        </Dialog>
+      )}
     </DndContext>
   );
 };

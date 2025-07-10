@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { updateColumn, fetchColumns } from '../services/columnService';
 import { showToast } from '../../../utils/toastUtils';
 import FormContainer from '../../../components/FormContainer';
@@ -10,21 +9,18 @@ import { validateColumnForm } from '../../../utils/validateUtils';
  * Component to edit a column
  * @param {Object} props
  * @param {string} props.token - Authentication token
+ * @param {string} props.columnId - Column ID
+ * @param {string} props.boardId - Board ID
+ * @param {Object} props.initialValues - Initial form values
+ * @param {Function} props.onClose - Function to close the dialog
  * @returns {JSX.Element}
  */
-const ColumnEdit = ({ token }) => {
-  const { columnId } = useParams();
-  const navigate = useNavigate();
-  const { state } = useLocation();
-  const boardId = state?.boardId || '';
-  const [initialValues, setInitialValues] = useState({ 
-    title: state?.title || '',
-    backgroundColor: state?.backgroundColor || '#ffffff' 
-  });
+const ColumnEdit = ({ token, columnId, boardId, initialValues, onClose }) => {
+  const [formValues, setFormValues] = useState(initialValues);
   const [loading, setLoading] = useState(false);
   const fields = [
-    { name: 'title', label: 'Column Title', required: true },
-    { name: 'backgroundColor', label: 'Background Color', type: 'color', required: false },
+    { name: 'title', label: 'Column Title', required: true, InputProps: { sx: { fontSize: '16px' } } },
+    { name: 'backgroundColor', label: 'Background Color', type: 'color', required: false, InputProps: { sx: { fontSize: '16px' } } },
   ];
 
   useEffect(() => {
@@ -34,7 +30,7 @@ const ColumnEdit = ({ token }) => {
         const columns = await fetchColumns(boardId);
         const column = columns.find(c => c._id === columnId);
         if (column) {
-          setInitialValues({ 
+          setFormValues({ 
             title: column.title,
             backgroundColor: column.backgroundColor || '#ffffff'
           });
@@ -47,7 +43,7 @@ const ColumnEdit = ({ token }) => {
         setLoading(false);
       }
     };
-    if (!state?.title) {
+    if (!initialValues.title) {
       loadColumn();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -56,15 +52,20 @@ const ColumnEdit = ({ token }) => {
   return (
     <FormContainer title="Edit Column" loading={loading}>
       <GenericForm
-        initialValues={initialValues}
+        initialValues={formValues}
         validate={validateColumnForm}
         onSubmit={async (values) => {
-          await updateColumn(columnId, values.title, initialValues.cardOrderIds, values.backgroundColor);
-          showToast('Column updated successfully!', 'success');
-          setTimeout(() => navigate(`/boards/${boardId}`), 2000);
+          try {
+            await updateColumn(columnId, values.title, formValues.cardOrderIds, values.backgroundColor);
+            showToast('Column updated successfully!', 'success');
+            onClose();
+          } catch (err) {
+            showToast(err.message, 'error');
+          }
         }}
         submitLabel="Update Column"
-        cancelPath={`/boards/${boardId}`}
+        cancelPath={null}
+        onCancel={onClose}
         fields={fields}
       />
     </FormContainer>

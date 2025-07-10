@@ -2,7 +2,6 @@ import React from 'react';
 import { Box, Typography, Tooltip } from '@mui/material';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useNavigate } from 'react-router-dom';
 import ColumnMenu from './ColumnMenu';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import CardList from '../../cards/components/Card';
@@ -15,10 +14,12 @@ import { COLUMN_STYLE, COLUMN_HEADER_STYLE } from '../../../constants/styles';
  * @param {string} props.boardId - Board ID
  * @param {string} props.token - Authentication token
  * @param {Function} props.onRefresh - Refresh callback
+ * @param {Function} props.onEdit - Edit column callback
+ * @param {Function} props.onDelete - Delete column callback
+ * @param {Function} props.onAddCard - Add card callback
  * @returns {JSX.Element}
  */
-function Column({ column, boardId, token, onRefresh }) {
-  const navigate = useNavigate();
+function Column({ column, boardId, token, onRefresh, onEdit, onDelete, onAddCard }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column, type: 'COLUMN' },
@@ -36,10 +37,10 @@ function Column({ column, boardId, token, onRefresh }) {
       <Box
         sx={{
           ...COLUMN_STYLE,
-          bgcolor: column.backgroundColor, // Đảm bảo nền xám nhạt
-          borderRadius: '8px', // Bo góc 8px
-          p: 1, // Padding 8px, hỗ trợ khung bao phủ
-          minWidth: '272px', // Chiều rộng giống Trello
+          bgcolor: column.backgroundColor,
+          borderRadius: '8px',
+          p: 1,
+          minWidth: '272px',
           maxWidth: '272px',
           display: 'flex',
           flexDirection: 'column',
@@ -48,7 +49,7 @@ function Column({ column, boardId, token, onRefresh }) {
         <Box
           sx={{
             ...COLUMN_HEADER_STYLE,
-            mb: 0.5, // Giảm khoảng cách xuống 4px
+            mb: 0.5,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -69,9 +70,9 @@ function Column({ column, boardId, token, onRefresh }) {
               column={column}
               boardId={boardId}
               token={token}
-              onEdit={() => navigate(`/columns/${column._id}/edit`, { state: { title: column.title, boardId } })}
-              onDelete={() => navigate(`/columns/${column._id}/delete`, { state: { boardId } })}
-              onAddCard={() => navigate(`/columns/${column._id}/cards/create`, { state: { boardId } })}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onAddCard={onAddCard}
             />
             <Tooltip title="Drag to move">
               <DragHandleIcon sx={{ cursor: 'pointer' }} {...listeners} />

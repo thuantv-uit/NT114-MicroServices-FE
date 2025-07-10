@@ -7,6 +7,7 @@ import InviteToBoard from '../../invitations/components/InviteToBoard';
 import UpdateBoard from './UpdateBoard';
 import ChangeBackground from './ChangeColor';
 import DeleteBoard from './DeleteBoard';
+import CreateColumn from '../../columns/components/CreateColumn';
 import {
   Box,
   Typography,
@@ -70,6 +71,7 @@ const ColumnsWrapper = styled(Paper)(({ theme }) => ({
  */
 const BoardDetail = ({ token, setBackgroundColor }) => {
   const { id } = useParams();
+  // eslint-disable-next-line no-unused-vars
   const navigate = useNavigate();
   const { state } = useLocation();
   const [board, setBoard] = useState(null);
@@ -78,6 +80,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [openBackgroundDialog, setOpenBackgroundDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openCreateColumnDialog, setOpenCreateColumnDialog] = useState(false);
 
   useEffect(() => {
     const loadBoard = async () => {
@@ -101,7 +104,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     setOpenUpdateDialog(false);
     setOpenBackgroundDialog(false);
     setOpenDeleteDialog(false);
-    // Refresh board data
+    setOpenCreateColumnDialog(false);
     try {
       const data = await fetchBoard(id);
       setBoard(data);
@@ -224,7 +227,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
           <Tooltip title="Tạo cột mới">
             <IconButton
               color="primary"
-              onClick={() => navigate(`/boards/${id}/columns/create`)}
+              onClick={() => setOpenCreateColumnDialog(true)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
                 '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
@@ -280,6 +283,11 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       {/* Delete Confirmation Dialog */}
       <Dialog open={openDeleteDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <DeleteBoard token={token} onClose={handleDialogClose} />
+      </Dialog>
+
+      {/* Create Column Dialog */}
+      <Dialog open={openCreateColumnDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+        <CreateColumn token={token} onClose={handleDialogClose} />
       </Dialog>
 
       {/* Invite to board dialog */}
