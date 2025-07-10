@@ -20,10 +20,11 @@ import { showToast } from '../utils/toastUtils';
  * @param {Function} props.onSubmit - Submit handler
  * @param {string} props.submitLabel - Submit button label
  * @param {string} props.cancelPath - Cancel button navigation path
+ * @param {Function} props.onCancel - Cancel handler for dialog
  * @param {Array} props.fields - Array of field configs
  * @returns {JSX.Element}
  */
-const GenericForm = ({ initialValues, validate, onSubmit, submitLabel, cancelPath, fields }) => {
+const GenericForm = ({ initialValues, validate, onSubmit, submitLabel, cancelPath, onCancel, fields }) => {
   const navigate = useNavigate();
   const { values, errors, loading, handleChange, handleSubmit } = useForm({
     initialValues,
@@ -84,8 +85,13 @@ const GenericForm = ({ initialValues, validate, onSubmit, submitLabel, cancelPat
         <Button type="submit" variant="contained" color="primary" disabled={loading} fullWidth>
           {loading ? 'Processing...' : submitLabel}
         </Button>
-        {cancelPath && (
-          <Button variant="outlined" onClick={() => navigate(cancelPath)} fullWidth disabled={loading}>
+        {(cancelPath || onCancel) && (
+          <Button
+            variant="outlined"
+            onClick={() => (onCancel ? onCancel() : navigate(cancelPath))}
+            fullWidth
+            disabled={loading}
+          >
             Cancel
           </Button>
         )}

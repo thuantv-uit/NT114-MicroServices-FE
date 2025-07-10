@@ -10,7 +10,9 @@ import {
   Card,
   CardContent,
   CircularProgress,
+  Dialog,
 } from '@mui/material';
+import BoardCreate from './BoardCreate';
 
 /**
  * Component to list all boards with image or color backgrounds
@@ -21,6 +23,7 @@ import {
 const BoardList = ({ token }) => {
   const [boards, setBoards] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [openCreateDialog, setOpenCreateDialog] = useState(false);
 
   useEffect(() => {
     const loadBoards = async () => {
@@ -38,6 +41,17 @@ const BoardList = ({ token }) => {
     loadBoards();
   }, []);
 
+  // Handle dialog close and refresh boards
+  const handleDialogClose = async () => {
+    setOpenCreateDialog(false);
+    try {
+      const data = await fetchBoards();
+      setBoards(data);
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
+  };
+
   return (
     <Box sx={{ maxWidth: 1400, mx: 'auto', my: 4, px: { xs: 2, md: 4 } }}>
       {/* Header */}
@@ -50,8 +64,7 @@ const BoardList = ({ token }) => {
       <Button
         variant="contained"
         color="primary"
-        component={Link}
-        to="/boards/create"
+        onClick={() => setOpenCreateDialog(true)}
         sx={{
           mb: 4,
           bgcolor: 'primary.main',
@@ -93,14 +106,14 @@ const BoardList = ({ token }) => {
                       width: 210,
                       height: 120,
                       display: 'flex',
-                      flexDirection: 'column', // Chia thành 2 phần theo chiều dọc
+                      flexDirection: 'column',
                       overflow: 'hidden',
                     }}
                   >
                     {/* Phần Background */}
                     <Box
                       sx={{
-                        flex: '0 0 80%', // Chiếm 70% chiều cao
+                        flex: '0 0 80%',
                         backgroundImage: isImageLatest && board.backgroundImage ? `url(${board.backgroundImage})` : 'none',
                         backgroundColor: isImageLatest ? 'transparent' : board.backgroundColor || '#f0f4f8',
                         backgroundSize: 'cover',
@@ -111,9 +124,9 @@ const BoardList = ({ token }) => {
                     {/* Phần Title */}
                     <CardContent
                       sx={{
-                        flex: '0 0 20%', // Chiếm 30% chiều cao
-                        p: 0.3, // Giảm padding để gọn hơn
-                        bgcolor: 'rgba(255, 255, 255, 0.9)', // Nền semi-transparent
+                        flex: '0 0 20%',
+                        p: 0.3,
+                        bgcolor: 'rgba(255, 255, 255, 0.9)',
                         display: 'flex',
                         alignItems: 'top',
                         justifyContent: 'center',
@@ -154,6 +167,11 @@ const BoardList = ({ token }) => {
           )}
         </Grid>
       )}
+
+      {/* Create Board Dialog */}
+      <Dialog open={openCreateDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+        <BoardCreate token={token} onClose={handleDialogClose} />
+      </Dialog>
     </Box>
   );
 };
