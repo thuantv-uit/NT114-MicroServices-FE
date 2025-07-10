@@ -20,7 +20,6 @@ import DeleteColumn from './features/columns/components/DeleteColumn';
 import CreateCard from './features/cards/components/CreateCard';
 import EditCardPage from './features/cards/components/EditCardPage';
 import DeleteCardPage from './features/cards/components/DeleteCardPage';
-import InviteToBoardPage from './features/invitations/components/InviteToBoardPage';
 import InviteToColumnPage from './features/invitations/components/InviteToColumnPage';
 import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage';
 import Chatbot from './features/ai/chatbot';
@@ -93,12 +92,6 @@ function App() {
           path="/boards/:id/delete"
           element={
             <PrivateRoute token={token} component={<DeleteBoard token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id/invite-to-board"
-          element={
-            <PrivateRoute token={token} component={<InviteToBoardPage token={token} />} />
           }
         />
         <Route

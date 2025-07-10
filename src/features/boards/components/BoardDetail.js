@@ -193,7 +193,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
           <Tooltip title="Mời người dùng">
             <IconButton
               color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/invite-to-board`)}
+              onClick={() => setOpenInviteBoard(true)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
                 '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
@@ -228,7 +228,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
 
       {/* Columns section */}
       {board ? (
-        <ColumnsWrapper sx={{ mt: 1 }} >
+        <ColumnsWrapper sx={{ mt: 1 }}>
           <Box
             sx={{
               display: 'flex',
@@ -252,6 +252,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       {/* Invite to board dialog */}
       <InviteToBoard
         boardId={id}
+        board={board} // Pass board data for owner and members
         open={openInviteBoard}
         onClose={() => setOpenInviteBoard(false)}
       />
