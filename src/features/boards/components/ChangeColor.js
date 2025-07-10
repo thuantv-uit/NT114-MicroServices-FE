@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { fetchBoard, updateBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import FormContainer from '../../../components/FormContainer';
@@ -9,11 +9,11 @@ import { Box, Button, Typography, Input } from '@mui/material';
  * Component to upload a background image for a board
  * @param {Object} props
  * @param {string} props.token - Authentication token
+ * @param {Function} props.onClose - Function to close the dialog
  * @returns {JSX.Element}
  */
-const ChangeBackground = ({ token }) => {
+const ChangeBackground = ({ token, onClose }) => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewImage, setPreviewImage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -54,11 +54,9 @@ const ChangeBackground = ({ token }) => {
     try {
       const formData = new FormData();
       formData.append('backgroundImage', selectedFile);
-
-      // Send file to backend
       await updateBoard(id, undefined, undefined, undefined, formData);
       showToast('Background image updated successfully!', 'success');
-      setTimeout(() => navigate(`/boards/${id}`, { state: { refresh: true } }), 2000);
+      onClose();
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
@@ -112,7 +110,7 @@ const ChangeBackground = ({ token }) => {
           <Button
             variant="outlined"
             color="secondary"
-            onClick={() => navigate(`/boards/${id}`)}
+            onClick={onClose}
             disabled={loading}
           >
             Cancel

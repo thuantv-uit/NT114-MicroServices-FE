@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { fetchBoard, updateBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import FormContainer from '../../../components/FormContainer';
@@ -10,11 +10,11 @@ import { validateBoardForm } from '../../../utils/validateUtils';
  * Component to update a board
  * @param {Object} props
  * @param {string} props.token - Authentication token
+ * @param {Function} props.onClose - Function to close the dialog
  * @returns {JSX.Element}
  */
-const UpdateBoard = ({ token }) => {
+const UpdateBoard = ({ token, onClose }) => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [initialValues, setInitialValues] = useState({ title: '', description: '', backgroundColor: '#FFFFFF' });
   const [loading, setLoading] = useState(false);
   const fields = [
@@ -48,13 +48,21 @@ const UpdateBoard = ({ token }) => {
         initialValues={initialValues}
         validate={validateBoardForm}
         onSubmit={async (values) => {
-          await updateBoard(id, values.title, values.description, values.backgroundColor);
-          showToast('Board updated successfully!', 'success');
-          setTimeout(() => navigate(`/boards/${id}`), 2000);
+          setLoading(true);
+          try {
+            await updateBoard(id, values.title, values.description, values.backgroundColor);
+            showToast('Board updated successfully!', 'success');
+            onClose();
+          } catch (err) {
+            showToast(err.message, 'error');
+          } finally {
+            setLoading(false);
+          }
         }}
         submitLabel="Update Board"
-        cancelPath={`/boards/${id}`}
+        cancelPath={null} // No navigation, use onClose
         fields={fields}
+        onCancel={onClose} // Pass onClose as cancel handler
       />
     </FormContainer>
   );

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { fetchBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import ColumnList from '../../columns/components/ColumnList';
 import InviteToBoard from '../../invitations/components/InviteToBoard';
+import UpdateBoard from './UpdateBoard';
+import ChangeBackground from './ChangeColor';
+import DeleteBoard from './DeleteBoard';
 import {
   Box,
   Typography,
@@ -12,6 +15,7 @@ import {
   IconButton,
   styled,
   Tooltip,
+  Dialog,
 } from '@mui/material';
 import PaletteIcon from '@mui/icons-material/Palette';
 import EditIcon from '@mui/icons-material/Edit';
@@ -71,6 +75,9 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   const [board, setBoard] = useState(null);
   const [loading, setLoading] = useState(false);
   const [openInviteBoard, setOpenInviteBoard] = useState(false);
+  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
+  const [openBackgroundDialog, setOpenBackgroundDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
 
   useEffect(() => {
     const loadBoard = async () => {
@@ -89,8 +96,19 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     loadBoard();
   }, [id, setBackgroundColor, state?.refresh]);
 
-  const handleNavigation = (path) => {
-    navigate(path);
+  // Handle dialog close and refresh board
+  const handleDialogClose = async () => {
+    setOpenUpdateDialog(false);
+    setOpenBackgroundDialog(false);
+    setOpenDeleteDialog(false);
+    // Refresh board data
+    try {
+      const data = await fetchBoard(id);
+      setBoard(data);
+      setBackgroundColor(data.backgroundColor || '#FFFFFF');
+    } catch (err) {
+      showToast(err.message, 'error');
+    }
   };
 
   // Determine which background to use based on latest update
@@ -154,7 +172,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
           <Tooltip title="Đổi nền">
             <IconButton
               color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/change-background`)}
+              onClick={() => setOpenBackgroundDialog(true)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
                 '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
@@ -167,7 +185,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
           <Tooltip title="Cập nhật bảng">
             <IconButton
               color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/update`)}
+              onClick={() => setOpenUpdateDialog(true)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
                 '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
@@ -180,7 +198,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
           <Tooltip title="Xóa bảng">
             <IconButton
               color="error"
-              onClick={() => handleNavigation(`/boards/${id}/delete`)}
+              onClick={() => setOpenDeleteDialog(true)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
                 '&:hover': { bgcolor: 'rgba(235, 90, 90, 0.2)' },
@@ -206,7 +224,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
           <Tooltip title="Tạo cột mới">
             <IconButton
               color="primary"
-              onClick={() => handleNavigation(`/boards/${id}/columns/create`)}
+              onClick={() => navigate(`/boards/${id}/columns/create`)}
               sx={{
                 bgcolor: 'rgba(0, 0, 0, 0.05)',
                 '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
@@ -249,10 +267,25 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         <Typography color="error">Không tìm thấy bảng</Typography>
       )}
 
+      {/* Update Board Dialog */}
+      <Dialog open={openUpdateDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+        <UpdateBoard token={token} onClose={handleDialogClose} />
+      </Dialog>
+
+      {/* Change Background Dialog */}
+      <Dialog open={openBackgroundDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+        <ChangeBackground token={token} onClose={handleDialogClose} />
+      </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={openDeleteDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+        <DeleteBoard token={token} onClose={handleDialogClose} />
+      </Dialog>
+
       {/* Invite to board dialog */}
       <InviteToBoard
         boardId={id}
-        board={board} // Pass board data for owner and members
+        board={board}
         open={openInviteBoard}
         onClose={() => setOpenInviteBoard(false)}
       />
