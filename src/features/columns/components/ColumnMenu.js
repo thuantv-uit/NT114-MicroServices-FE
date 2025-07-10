@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { IconButton, Menu, MenuItem } from '@mui/material';
+import { IconButton, Menu, MenuItem, ListItemIcon } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import InviteToColumn from '../../invitations/components/InviteToColumn';
 
 /**
  * Menu component for column actions
@@ -15,8 +19,8 @@ import MoreVertIcon from '@mui/icons-material/MoreVert';
  * @returns {JSX.Element}
  */
 const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => {
-  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openInviteColumn, setOpenInviteColumn] = useState(false);
   const open = Boolean(anchorEl);
 
   const handleMenuClick = (event) => {
@@ -33,13 +37,37 @@ const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => 
         <MoreVertIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleMenuClose}>
-        <MenuItem onClick={() => { onEdit(); handleMenuClose(); }}>Edit Column</MenuItem>
-        <MenuItem onClick={() => { onDelete(); handleMenuClose(); }}>Delete Column</MenuItem>
-        <MenuItem onClick={() => { onAddCard(); handleMenuClose(); }}>Add Card</MenuItem>
-        <MenuItem onClick={() => { navigate(`/columns/${column._id}/invite-to-column`, { state: { boardId } }); handleMenuClose(); }}>
+        <MenuItem onClick={() => { onEdit(); handleMenuClose(); }}>
+          <ListItemIcon>
+            <EditIcon fontSize="small" />
+          </ListItemIcon>
+          Edit Column
+        </MenuItem>
+        <MenuItem onClick={() => { onDelete(); handleMenuClose(); }}>
+          <ListItemIcon>
+            <DeleteIcon fontSize="small" />
+          </ListItemIcon>
+          Delete Column
+        </MenuItem>
+        <MenuItem onClick={() => { onAddCard(); handleMenuClose(); }}>
+          <ListItemIcon>
+            <AddIcon fontSize="small" />
+          </ListItemIcon>
+          Add Card
+        </MenuItem>
+        <MenuItem onClick={() => { setOpenInviteColumn(true); handleMenuClose(); }}>
+          <ListItemIcon>
+            <PersonAddIcon fontSize="small" />
+          </ListItemIcon>
           Invite User to Column
         </MenuItem>
       </Menu>
+      <InviteToColumn
+        boardId={boardId}
+        column={column}
+        open={openInviteColumn}
+        onClose={() => setOpenInviteColumn(false)}
+      />
     </>
   );
 };
