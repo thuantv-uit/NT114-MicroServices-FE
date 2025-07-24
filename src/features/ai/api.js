@@ -1,4 +1,28 @@
 /**
+ * Sends a request to extract column title from raw text
+ * @param {string} text - The input text to extract column title from
+ * @returns {Promise<string>} - Extracted column title
+ */
+export const extractColumnTitle = async (text) => {
+  try {
+    const response = await fetch('http://localhost:5002/extract1', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    return data;
+  } catch (error) {
+    throw new Error(`Extraction error: ${error.message}`);
+  }
+};
+
+
+/**
  * Sends a request to extract board information (title and description) from text
  * @param {string} text - The input text to extract information from
  * @returns {Promise<Object>} - Object containing title and description

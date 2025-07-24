@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography, Dialog, DialogContent } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { extractBoardInfo, sendChatMessage } from './api';
+import { extractBoardInfo, sendChatMessage, extractColumnTitle } from './api';
 import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
+import CreateColumn from '../columns/components/CreateColumn';
+import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation'; // File mới
 import './chatbot.css';
 
 /**
@@ -17,11 +19,33 @@ const Chatbot = ({ onClose }) => {
   const [input, setInput] = useState('');
   const [context, setContext] = useState([]);
   const [boardInfo, setBoardInfo] = useState({ title: '', description: '' });
+  const [latestBoardId, setLatestBoardId] = useState(null); // Lưu boardId
+  const [columnTitle, setColumnTitle] = useState(''); // Lưu columnTitle
+  const [isConfirmColumnOpen, setIsConfirmColumnOpen] = useState(false); // State cho xác nhận column
   const chatBodyRef = useRef(null);
 
   const handleConfirmClose = () => {
     // Reset boardInfo khi đóng xác nhận
     setBoardInfo({ title: '', description: '' });
+  };
+
+  const handleBoardCreated = (boardId) => {
+    // Xử lý khi board được tạo thành công, cập nhật boardId
+    setLatestBoardId(boardId);
+    setMessages((prev) => [
+      ...prev,
+      { sender: 'bot', text: `New board created with ID: ${boardId}` },
+    ]);
+  };
+
+  const handleColumnConfirmed = () => {
+    setIsConfirmColumnOpen(false);
+    setIsCreateColumnOpen(true); // Mở CreateColumn sau khi xác nhận
+  };
+
+  const handleCancelColumnConfirm = () => {
+    setIsConfirmColumnOpen(false);
+    setColumnTitle(''); // Reset columnTitle khi hủy
   };
 
   const sendMessage = async (prompt) => {
@@ -34,9 +58,11 @@ const Chatbot = ({ onClose }) => {
     try {
       // Kiểm tra xem prompt có yêu cầu tạo board không
       const isBoardCreation = prompt.toLowerCase().includes('create board') || prompt.toLowerCase().includes('tạo board');
+      // Kiểm tra xem prompt có yêu cầu tạo column không
+      const isColumnCreation = prompt.toLowerCase().includes('create column') || prompt.toLowerCase().includes('tạo cột');
 
       if (isBoardCreation) {
-        // Gửi yêu cầu trích xuất title và description
+        // Gửi yêu cầu trích xuất title và description cho board
         const extractedData = await extractBoardInfo(prompt);
         const { title, description } = extractedData;
 
@@ -50,6 +76,19 @@ const Chatbot = ({ onClose }) => {
             text: `**Extracted Board Info**:\n- **Title**: ${title}\n- **Description**: ${description}`,
           },
         ]);
+      } else if (isColumnCreation) {
+        // Gửi yêu cầu trích xuất title cho column
+        const columnData = await extractColumnTitle(prompt); // Lấy toàn bộ data
+        const extractedTitle = columnData.title; // Truy cập trực tiếp title
+        setColumnTitle(extractedTitle); // Lưu title vào state
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: `**Extracted Column Title**: ${extractedTitle}`,
+          },
+        ]);
+        setIsConfirmColumnOpen(true); // Mở form xác nhận column
       } else {
         // Gửi yêu cầu chat thông thường
         const chatData = await sendChatMessage(prompt, context);
@@ -74,11 +113,18 @@ const Chatbot = ({ onClose }) => {
     sendMessage(input);
   };
 
+  const handleCreateColumnClose = () => {
+    setIsCreateColumnOpen(false);
+    setColumnTitle(''); // Reset columnTitle khi đóng
+  };
+
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const [isCreateColumnOpen, setIsCreateColumnOpen] = useState(false); // State cho CreateColumn
 
   return (
     <Box className="chat-container">
@@ -92,7 +138,7 @@ const Chatbot = ({ onClose }) => {
         {messages.length === 0 ? (
           <Box className="message bot welcome">
             <ReactMarkdown>
-              Welcome to TimelineBot! Ask about boards, columns, cards, or say "create board" to extract board info.
+              Welcome to TimelineBot! Ask about boards, columns, cards, or say "create board" to extract board info, or "create column" to extract column title.
             </ReactMarkdown>
           </Box>
         ) : (
@@ -110,7 +156,7 @@ const Chatbot = ({ onClose }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask about boards, columns, cards, or say 'create board'..."
+          placeholder="Ask about boards, columns, cards, or say 'create board' or 'create column'..."
         />
         <button
           className="send-button"
@@ -127,8 +173,30 @@ const Chatbot = ({ onClose }) => {
           title={boardInfo.title}
           description={boardInfo.description}
           onClose={handleConfirmClose}
+          onBoardCreated={handleBoardCreated}
         />
       )}
+      {/* Dialog cho xác nhận tạo column từ chatbot */}
+      <Dialog open={isConfirmColumnOpen} onClose={handleCancelColumnConfirm}>
+        <DialogContent>
+          <ConfirmColumnCreation
+            title={columnTitle}
+            boardId={latestBoardId}
+            onConfirm={handleColumnConfirmed}
+            onCancel={handleCancelColumnConfirm}
+          />
+        </DialogContent>
+      </Dialog>
+      {/* Dialog cho CreateColumn */}
+      <Dialog open={isCreateColumnOpen} onClose={handleCreateColumnClose}>
+        <DialogContent>
+          <CreateColumn
+            onClose={handleCreateColumnClose}
+            chatbotBoardId={latestBoardId}
+            chatbotTitle={columnTitle}
+          />
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

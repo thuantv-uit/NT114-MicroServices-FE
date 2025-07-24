@@ -9,9 +9,10 @@ import { showToast } from '../../../utils/toastUtils';
  * @param {string} props.title - Board title from chatbot
  * @param {string} props.description - Board description from chatbot
  * @param {Function} props.onClose - Function to close the confirmation dialog
+ * @param {Function} props.onBoardCreated - Callback function to send boardId to parent
  * @returns {JSX.Element}
  */
-const ConfirmBoardCreation = ({ title, description, onClose }) => {
+const ConfirmBoardCreation = ({ title, description, onClose, onBoardCreated }) => {
   const handleConfirm = async () => {
     try {
       // Tạo board mới
@@ -21,10 +22,13 @@ const ConfirmBoardCreation = ({ title, description, onClose }) => {
       // Lấy board_id của board mới nhất
       const response = await fetchLatestBoardId();
       console.log('fetchLatestBoardId response:', response); // Debug toàn bộ phản hồi
-      const boardId = response?.id || response?.board_id || response?.data?.id || response?.data?.board_id;
-      
+      const boardId = response?.boardId;
       if (boardId) {
         console.log('Board ID:', boardId); // In board_id ra console
+        // Gửi boardId về cho Chatbot qua callback
+        if (onBoardCreated) {
+          onBoardCreated(boardId);
+        }
       } else {
         console.log('Board ID not found in response. Full response:', response);
       }
