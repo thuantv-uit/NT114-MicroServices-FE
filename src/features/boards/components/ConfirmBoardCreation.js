@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Button, Typography } from '@mui/material';
-import { createBoard } from '../services/boardService';
+import { createBoard, fetchLatestBoardId } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 
 /**
@@ -14,12 +14,25 @@ import { showToast } from '../../../utils/toastUtils';
 const ConfirmBoardCreation = ({ title, description, onClose }) => {
   const handleConfirm = async () => {
     try {
-      // Giả định token được xử lý trong createBoard
+      // Tạo board mới
       await createBoard(title, description, '#FFFFFF'); // Mặc định backgroundColor
       showToast('Board created successfully!', 'success');
+
+      // Lấy board_id của board mới nhất
+      const response = await fetchLatestBoardId();
+      console.log('fetchLatestBoardId response:', response); // Debug toàn bộ phản hồi
+      const boardId = response?.id || response?.board_id || response?.data?.id || response?.data?.board_id;
+      
+      if (boardId) {
+        console.log('Board ID:', boardId); // In board_id ra console
+      } else {
+        console.log('Board ID not found in response. Full response:', response);
+      }
+
       onClose();
     } catch (err) {
       showToast(err.message, 'error');
+      console.error('Error creating board or fetching board ID:', err);
     }
   };
 

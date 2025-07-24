@@ -3,7 +3,6 @@ import ReactMarkdown from 'react-markdown';
 import { Box, IconButton, Typography } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
 import { extractBoardInfo, sendChatMessage } from './api';
-// import BoardInfoDisplay from './BoardInfoDisplay';
 import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
 import './chatbot.css';
 
@@ -40,10 +39,6 @@ const Chatbot = ({ onClose }) => {
         // Gửi yêu cầu trích xuất title và description
         const extractedData = await extractBoardInfo(prompt);
         const { title, description } = extractedData;
-        
-        // In title và description ra console
-        console.log('Title:', title);
-        console.log('Description:', description);
 
         // Lưu title và description vào state để truyền làm props
         setBoardInfo({ title, description });
@@ -126,7 +121,6 @@ const Chatbot = ({ onClose }) => {
         </button>
       </Box>
       {/* Hiển thị thông tin board */}
-      {/* <BoardInfoDisplay title={boardInfo.title} description={boardInfo.description} /> */}
       {/* Hiển thị xác nhận Yes/No để tạo board */}
       {(boardInfo.title || boardInfo.description) && (
         <ConfirmBoardCreation

@@ -100,9 +100,25 @@ export const inviteUser = async (boardId, email) => {
   );
 };
 
+/**
+ * Fetch all users by board ID
+ * @param {string} boardId - Board ID
+ * @returns {Promise<Object>} Board data
+ */
 export const getBoardById = async (boardId) => {
   return handleApiCall(
     () => boardInstance.get(`all/${boardId}`),
     'All User get Board by ID'
-  )
-}
+  );
+};
+
+/**
+ * Fetch the ID of the latest board
+ * @returns {Promise<Object>} Object containing the latest board ID
+ */
+export const fetchLatestBoardId = async () => {
+  return handleApiCall(
+    () => boardInstance.get('/latest').then(res => res.data),
+    'Fetch latest board ID'
+  );
+};
