@@ -5,7 +5,7 @@ import { showToast } from '../../../utils/toastUtils';
 import FormContainer from '../../../components/FormContainer';
 import GenericForm from '../../../components/GenericForm';
 import { validateColumnForm } from '../../../utils/validateUtils';
-import { Button, Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 
 /**
  * Component to create a new column
@@ -17,13 +17,12 @@ import { Button, Box, Typography } from '@mui/material';
  */
 const CreateColumn = ({ onClose, chatbotBoardId, chatbotTitle }) => {
   const { id } = useParams();
-  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [confirmValues, setConfirmValues] = useState({ title: '', boardId: '' });
+  const [isConfirmOpen, setIsConfirmOpen] = useState(!!chatbotBoardId && !!chatbotTitle);
 
   // Xử lý logic tạo column từ input người dùng
   const handleManualSubmit = async (values) => {
     try {
-      await createColumn(values.title, id);
+      await createColumn(values.title, id || chatbotBoardId);
       showToast('Column created successfully!', 'success');
       onClose();
     } catch (err) {
@@ -46,13 +45,7 @@ const CreateColumn = ({ onClose, chatbotBoardId, chatbotTitle }) => {
     }
   };
 
-  // Mở form xác nhận khi tạo từ chatbot
-  const handleConfirmOpen = (title, boardId) => {
-    setConfirmValues({ title, boardId });
-    setIsConfirmOpen(true);
-  };
-
-  // Xử lý xác nhận tạo column
+  // Xử lý xác nhận tạo column từ chatbot
   const handleConfirm = () => {
     handleChatbotSubmit();
     setIsConfirmOpen(false);
@@ -61,50 +54,32 @@ const CreateColumn = ({ onClose, chatbotBoardId, chatbotTitle }) => {
   // Đóng form xác nhận
   const handleCancelConfirm = () => {
     setIsConfirmOpen(false);
+    onClose();
   };
 
-  // Logic cho form mặc định (từ input người dùng)
-  const initialValues = { title: '' };
+  // Form cho input người dùng hoặc hiển thị xác nhận từ chatbot
+  const initialValues = { title: chatbotTitle || '' };
   const fields = [
     { name: 'title', label: 'Column Title', required: true, InputProps: { sx: { fontSize: '16px' } } },
   ];
 
   return (
     <FormContainer title="Create New Column">
-      {/* Form mặc định cho input người dùng */}
-      <GenericForm
-        initialValues={initialValues}
-        validate={validateColumnForm}
-        onSubmit={handleManualSubmit}
-        submitLabel="Create Column"
-        cancelPath={null}
-        onCancel={onClose}
-        fields={fields}
-      />
-
-      {/* Xử lý khi có dữ liệu từ chatbot */}
-      {chatbotBoardId && chatbotTitle && !isConfirmOpen && (
-        <Box sx={{ marginTop: 2 }}>
-          <Typography variant="body1">
-            Create column from chatbot: <strong>{chatbotTitle}</strong> on board ID: <strong>{chatbotBoardId}</strong>
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => handleConfirmOpen(chatbotTitle, chatbotBoardId)}
-            sx={{ marginTop: 1 }}
-          >
-            Confirm Creation
-          </Button>
-        </Box>
-      )}
-
-      {/* Form xác nhận khi tạo từ chatbot */}
-      {isConfirmOpen && (
+      {!isConfirmOpen ? (
+        <GenericForm
+          initialValues={initialValues}
+          validate={validateColumnForm}
+          onSubmit={handleManualSubmit}
+          submitLabel="Create Column"
+          cancelPath={null}
+          onCancel={onClose}
+          fields={fields}
+        />
+      ) : (
         <Box sx={{ padding: 2, marginTop: 2, border: '1px solid #ddd', borderRadius: 2 }}>
           <Typography variant="h6">Confirm Column Creation</Typography>
-          <Typography variant="body1"><strong>Title:</strong> {confirmValues.title}</Typography>
-          <Typography variant="body1"><strong>Board ID:</strong> {confirmValues.boardId}</Typography>
+          <Typography variant="body1"><strong>Title:</strong> {chatbotTitle || 'Not provided'}</Typography>
+          <Typography variant="body1"><strong>Board ID:</strong> {chatbotBoardId || 'Not provided'}</Typography>
           <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
             <Button variant="contained" color="primary" onClick={handleConfirm}>
               Yes
