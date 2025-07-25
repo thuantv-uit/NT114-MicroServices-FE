@@ -21,16 +21,16 @@ const ConfirmBoardCreation = ({ title, description, onClose, onBoardCreated }) =
 
       // Lấy board_id của board mới nhất
       const response = await fetchLatestBoardId();
-      console.log('fetchLatestBoardId response:', response); // Debug toàn bộ phản hồi
+      // console.log('fetchLatestBoardId response:', response); // Debug toàn bộ phản hồi
       const boardId = response?.boardId;
       if (boardId) {
-        console.log('Board ID:', boardId); // In board_id ra console
+        // console.log('Board ID:', boardId); // In board_id ra console
         // Gửi boardId về cho Chatbot qua callback
         if (onBoardCreated) {
           onBoardCreated(boardId);
         }
       } else {
-        console.log('Board ID not found in response. Full response:', response);
+        // console.log('Board ID not found in response. Full response:', response);
       }
 
       onClose();

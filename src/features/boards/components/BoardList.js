@@ -30,7 +30,7 @@ const BoardList = ({ token }) => {
       setLoading(true);
       try {
         const data = await fetchBoards();
-        console.log('Fetched boards:', data); // Debug
+        // console.log('Fetched boards:', data); // Debug
         setBoards(data);
       } catch (err) {
         showToast(err.message, 'error');

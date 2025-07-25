@@ -87,7 +87,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       setLoading(true);
       try {
         const data = await fetchBoard(id);
-        console.log('Fetched board:', data); // Debug
+        // console.log('Fetched board:', data); // Debug
         setBoard(data);
         setBackgroundColor(data.backgroundColor || '#FFFFFF');
       } catch (err) {

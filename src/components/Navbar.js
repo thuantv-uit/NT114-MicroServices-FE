@@ -45,11 +45,11 @@ const Navbar = ({ token, logout, backgroundColor = '#FFFFFF' }) => {
   let userId = null;
   if (token) {
     try {
-      console.log('Token:', token); // Debug giá trị token
+      // console.log('Token:', token); // Debug giá trị token
       const payload = JSON.parse(atob(token.split('.')[1]));
-      console.log('Token Payload:', payload); // Debug payload
+      // console.log('Token Payload:', payload); // Debug payload
       userId = payload.userId || payload.id || payload._id || null; // Thử các trường khác nhau
-      console.log('Extracted userId:', userId); // Debug userId
+      // console.log('Extracted userId:', userId); // Debug userId
     } catch (err) {
       console.error('Failed to parse token:', err);
     }
@@ -63,8 +63,8 @@ const Navbar = ({ token, logout, backgroundColor = '#FFFFFF' }) => {
         const boardInvites = await getPendingBoardInvitations(userId);
         const columnInvites = await getPendingColumnInvitations(userId);
 
-        console.log('Navbar Board Invites:', boardInvites);
-        console.log('Navbar Column Invites:', columnInvites);
+        // console.log('Navbar Board Invites:', boardInvites);
+        // console.log('Navbar Column Invites:', columnInvites);
 
         const totalCount =
           (boardInvites?.length || 0) +
@@ -91,7 +91,7 @@ const Navbar = ({ token, logout, backgroundColor = '#FFFFFF' }) => {
 
   const handleNotificationClick = () => {
     if (userId) {
-      console.log('Navigating to /pending-invitations/', userId);
+      // console.log('Navigating to /pending-invitations/', userId);
       navigate(`/pending-invitations/${userId}`);
     } else {
       console.error('No userId found, cannot navigate to pending invitations');
