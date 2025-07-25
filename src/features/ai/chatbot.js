@@ -5,7 +5,6 @@ import { Box, IconButton, Typography, Dialog, DialogContent } from '@mui/materia
 import { Close as CloseIcon } from '@mui/icons-material';
 import { extractBoardInfo, sendChatMessage, extractColumnTitle, extractEmail } from './api';
 import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
-import CreateColumn from '../columns/components/CreateColumn';
 import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation';
 import ConfirmInvitation from '../invitations/components/ConfirmInvitation'; // Import ConfirmInvitation cho form xác nhận
 import Invitation from '../invitations/components/Invitation'; // Import Invitation để xử lý lời mời sau xác nhận
@@ -46,9 +45,11 @@ const Chatbot = ({ onClose }) => {
     ]);
   };
 
-  const handleColumnConfirmed = () => {
-    setIsConfirmColumnOpen(false);
-    setIsCreateColumnOpen(true); // Mở CreateColumn sau khi xác nhận
+  const handleColumnCreated = () => {
+    setMessages((prev) => [
+      ...prev,
+      { sender: 'bot', text: 'Column created successfully!' },
+    ]);
   };
 
   const handleCancelColumnConfirm = () => {
@@ -93,13 +94,6 @@ const Chatbot = ({ onClose }) => {
         const columnData = await extractColumnTitle(prompt); // Lấy toàn bộ data
         const extractedTitle = columnData.title; // Truy cập trực tiếp title
         setColumnTitle(extractedTitle); // Lưu title vào state
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: 'bot',
-            text: `**Extracted Column Title**: ${extractedTitle}`,
-          },
-        ]);
         setIsConfirmColumnOpen(true); // Mở form xác nhận column
       } else if (isEmailExtraction) {
         // Gửi yêu cầu trích xuất email
@@ -130,18 +124,11 @@ const Chatbot = ({ onClose }) => {
     sendMessage(input);
   };
 
-  const handleCreateColumnClose = () => {
-    setIsCreateColumnOpen(false);
-    setColumnTitle(''); // Reset columnTitle khi đóng
-  };
-
   useEffect(() => {
     if (chatBodyRef.current) {
       chatBodyRef.current.scrollTop = chatBodyRef.current.scrollHeight;
     }
   }, [messages]);
-
-  const [isCreateColumnOpen, setIsCreateColumnOpen] = useState(false); // State cho CreateColumn
 
   return (
     <Box className="chat-container">
@@ -200,18 +187,8 @@ const Chatbot = ({ onClose }) => {
           <ConfirmColumnCreation
             title={columnTitle}
             boardId={latestBoardId}
-            onConfirm={handleColumnConfirmed}
+            onColumnCreated={handleColumnCreated}
             onCancel={handleCancelColumnConfirm}
-          />
-        </DialogContent>
-      </Dialog>
-      {/* Dialog cho CreateColumn */}
-      <Dialog open={isCreateColumnOpen} onClose={handleCreateColumnClose}>
-        <DialogContent>
-          <CreateColumn
-            onClose={handleCreateColumnClose}
-            chatbotBoardId={latestBoardId}
-            chatbotTitle={columnTitle}
           />
         </DialogContent>
       </Dialog>
