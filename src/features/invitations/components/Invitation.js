@@ -1,3 +1,4 @@
+// Invitation.js (cập nhật để hỗ trợ xử lý lời mời từ chatbot mà không thay đổi lớn, vì logic đã sẵn sàng)
 import { invitationInstance } from '../../../services/axiosConfig';
 import { handleApiCall } from '../../../utils/apiHelper';
 import { showToast } from '../../../utils/toastUtils';
@@ -21,6 +22,11 @@ const Invitation = ({ boardId, columnId, cardId, invitationId, email, action, on
       let response;
       switch (action) {
         case 'inviteToBoard':
+          // Logic xử lý lời mời vào board từ chatbot (sử dụng email và boardId được truyền xuống)
+          // Kiểm tra email hợp lệ nếu cần (ví dụ tùy chọn)
+          if (!email.includes('@')) {
+            throw new Error('Invalid email format');
+          }
           response = await handleApiCall(
             () => invitationInstance.post('/board', { boardId, email }).then(res => res.data),
             'Invite user to board'

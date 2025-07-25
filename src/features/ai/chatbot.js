@@ -1,3 +1,4 @@
+// chatbot.js (cập nhật để truyền dữ liệu boardId và email xuống ConfirmInvitation, sau đó kích hoạt Invitation sau khi xác nhận)
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Box, IconButton, Typography, Dialog, DialogContent } from '@mui/material';
@@ -6,6 +7,8 @@ import { extractBoardInfo, sendChatMessage, extractColumnTitle, extractEmail } f
 import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
 import CreateColumn from '../columns/components/CreateColumn';
 import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation';
+import ConfirmInvitation from '../invitations/components/ConfirmInvitation'; // Import ConfirmInvitation cho form xác nhận
+import Invitation from '../invitations/components/Invitation'; // Import Invitation để xử lý lời mời sau xác nhận
 import './chatbot.css';
 
 /**
@@ -22,6 +25,9 @@ const Chatbot = ({ onClose }) => {
   const [latestBoardId, setLatestBoardId] = useState(null); // Lưu boardId
   const [columnTitle, setColumnTitle] = useState(''); // Lưu columnTitle
   const [isConfirmColumnOpen, setIsConfirmColumnOpen] = useState(false); // State cho xác nhận column
+  const [isConfirmInvitationOpen, setIsConfirmInvitationOpen] = useState(false); // State cho xác nhận lời mời
+  const [pendingEmail, setPendingEmail] = useState(''); // Lưu email tạm thời để xác nhận
+  const [inviteData, setInviteData] = useState(null); // State để kích hoạt Invitation component sau xác nhận
   const chatBodyRef = useRef(null);
 
   const handleConfirmClose = () => {
@@ -46,6 +52,17 @@ const Chatbot = ({ onClose }) => {
   const handleCancelColumnConfirm = () => {
     setIsConfirmColumnOpen(false);
     setColumnTitle(''); // Reset columnTitle khi hủy
+  };
+
+  const handleInvitationConfirmed = () => {
+    setIsConfirmInvitationOpen(false);
+    // Kích hoạt gửi lời mời bằng cách set inviteData với email và boardId
+    setInviteData({ email: pendingEmail, boardId: latestBoardId });
+  };
+
+  const handleCancelInvitation = () => {
+    setIsConfirmInvitationOpen(false);
+    setPendingEmail(''); // Reset pendingEmail khi hủy
   };
 
   const sendMessage = async (prompt) => {
@@ -92,17 +109,8 @@ const Chatbot = ({ onClose }) => {
       } else if (isEmailExtraction) {
         // Gửi yêu cầu trích xuất email
         const extractedEmail = await extractEmail(prompt);
-        const boardIdText = latestBoardId ? ` for board ID: ${latestBoardId}` : ' (no board created yet)';
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: 'bot',
-            text: `**Extracted Email**: ${extractedEmail}${boardIdText}`,
-          },
-        ]);
-
-        // TODO: Thêm logic xử lý email ở đây (ví dụ: gửi lời mời, lưu vào database)
-        // console.log(`Extracted email: ${extractedEmail}, Board ID: ${latestBoardId}`);
+        setPendingEmail(extractedEmail);
+        setIsConfirmInvitationOpen(true); // Mở form xác nhận lời mời với email và boardId
       } else {
         // Gửi yêu cầu chat thông thường
         const chatData = await sendChatMessage(prompt, context);
@@ -210,6 +218,39 @@ const Chatbot = ({ onClose }) => {
           />
         </DialogContent>
       </Dialog>
+      {/* Dialog cho xác nhận lời mời từ chatbot (truyền email và boardId) */}
+      <Dialog open={isConfirmInvitationOpen} onClose={handleCancelInvitation}>
+        <DialogContent>
+          <ConfirmInvitation
+            email={pendingEmail}
+            boardId={latestBoardId}
+            onConfirm={handleInvitationConfirmed}
+            onCancel={handleCancelInvitation}
+          />
+        </DialogContent>
+      </Dialog>
+      {/* Kích hoạt Invitation component để gửi lời mời khi có inviteData (sau xác nhận) */}
+      {inviteData && (
+        <Invitation
+          boardId={inviteData.boardId}
+          email={inviteData.email}
+          action="inviteToBoard"
+          onSuccess={(response) => {
+            setMessages((prev) => [
+              ...prev,
+              { sender: 'bot', text: `Invitation sent to ${inviteData.email} for board ID: ${inviteData.boardId}` },
+            ]);
+            setInviteData(null); // Reset sau khi hoàn thành
+          }}
+          onError={(err) => {
+            setMessages((prev) => [
+              ...prev,
+              { sender: 'bot', text: `Failed to send invitation: ${err.message}` },
+            ]);
+            setInviteData(null); // Reset sau khi lỗi
+          }}
+        />
+      )}
     </Box>
   );
 };
