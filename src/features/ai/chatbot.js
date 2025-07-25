@@ -1,4 +1,3 @@
-// chatbot.js (cập nhật để truyền dữ liệu boardId và email xuống ConfirmInvitation, sau đó kích hoạt Invitation sau khi xác nhận)
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Box, IconButton, Typography, Dialog, DialogContent } from '@mui/material';
@@ -6,8 +5,8 @@ import { Close as CloseIcon } from '@mui/icons-material';
 import { extractBoardInfo, sendChatMessage, extractColumnTitle, extractEmail } from './api';
 import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
 import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation';
-import ConfirmInvitation from '../invitations/components/ConfirmInvitation'; // Import ConfirmInvitation cho form xác nhận
-import Invitation from '../invitations/components/Invitation'; // Import Invitation để xử lý lời mời sau xác nhận
+import ConfirmInvitation from '../invitations/components/ConfirmInvitation';
+import Invitation from '../invitations/components/Invitation';
 import './chatbot.css';
 
 /**
@@ -21,23 +20,21 @@ const Chatbot = ({ onClose }) => {
   const [input, setInput] = useState('');
   const [context, setContext] = useState([]);
   const [boardInfo, setBoardInfo] = useState({ title: '', description: '' });
-  const [latestBoardId, setLatestBoardId] = useState(null); // Lưu boardId
-  const [columnTitle, setColumnTitle] = useState(''); // Lưu columnTitle
-  const [isConfirmBoardOpen, setIsConfirmBoardOpen] = useState(false); // State cho xác nhận board
-  const [isConfirmColumnOpen, setIsConfirmColumnOpen] = useState(false); // State cho xác nhận column
-  const [isConfirmInvitationOpen, setIsConfirmInvitationOpen] = useState(false); // State cho xác nhận lời mời
-  const [pendingEmail, setPendingEmail] = useState(''); // Lưu email tạm thời để xác nhận
-  const [inviteData, setInviteData] = useState(null); // State để kích hoạt Invitation component sau xác nhận
+  const [latestBoardId, setLatestBoardId] = useState(null);
+  const [columnTitle, setColumnTitle] = useState('');
+  const [isConfirmBoardOpen, setIsConfirmBoardOpen] = useState(false);
+  const [isConfirmColumnOpen, setIsConfirmColumnOpen] = useState(false);
+  const [isConfirmInvitationOpen, setIsConfirmInvitationOpen] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [inviteData, setInviteData] = useState(null);
   const chatBodyRef = useRef(null);
 
   const handleBoardConfirmClose = () => {
     setIsConfirmBoardOpen(false);
-    // Reset boardInfo khi đóng xác nhận
     setBoardInfo({ title: '', description: '' });
   };
 
   const handleBoardCreated = (boardId) => {
-    // Xử lý khi board được tạo thành công, cập nhật boardId
     setLatestBoardId(boardId);
     setMessages((prev) => [
       ...prev,
@@ -54,54 +51,45 @@ const Chatbot = ({ onClose }) => {
 
   const handleCancelColumnConfirm = () => {
     setIsConfirmColumnOpen(false);
-    setColumnTitle(''); // Reset columnTitle khi hủy
+    setColumnTitle('');
   };
 
   const handleInvitationConfirmed = () => {
     setIsConfirmInvitationOpen(false);
-    // Kích hoạt gửi lời mời bằng cách set inviteData với email và boardId
     setInviteData({ email: pendingEmail, boardId: latestBoardId });
   };
 
   const handleCancelInvitation = () => {
     setIsConfirmInvitationOpen(false);
-    setPendingEmail(''); // Reset pendingEmail khi hủy
+    setPendingEmail('');
   };
 
   const sendMessage = async (prompt) => {
     if (!prompt.trim()) return;
 
-    // Thêm tin nhắn người dùng vào giao diện
     setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
     setInput('');
 
     try {
-      // Kiểm tra các loại yêu cầu
       const isBoardCreation = prompt.toLowerCase().includes('create board') || prompt.toLowerCase().includes('tạo board');
       const isColumnCreation = prompt.toLowerCase().includes('create column') || prompt.toLowerCase().includes('tạo cột');
       const isEmailExtraction = prompt.toLowerCase().includes('invite user with email');
 
       if (isBoardCreation) {
-        // Gửi yêu cầu trích xuất title và description cho board
         const extractedData = await extractBoardInfo(prompt);
         const { title, description } = extractedData;
-
-        // Lưu title và description vào state để truyền làm props và mở dialog xác nhận
         setBoardInfo({ title, description });
         setIsConfirmBoardOpen(true);
       } else if (isColumnCreation) {
-        // Gửi yêu cầu trích xuất title cho column
-        const columnData = await extractColumnTitle(prompt); // Lấy toàn bộ data
-        const extractedTitle = columnData.title; // Truy cập trực tiếp title
-        setColumnTitle(extractedTitle); // Lưu title vào state
-        setIsConfirmColumnOpen(true); // Mở form xác nhận column
+        const columnData = await extractColumnTitle(prompt);
+        const extractedTitle = columnData.title;
+        setColumnTitle(extractedTitle);
+        setIsConfirmColumnOpen(true);
       } else if (isEmailExtraction) {
-        // Gửi yêu cầu trích xuất email
         const extractedEmail = await extractEmail(prompt);
         setPendingEmail(extractedEmail);
-        setIsConfirmInvitationOpen(true); // Mở form xác nhận lời mời với email và boardId
+        setIsConfirmInvitationOpen(true);
       } else {
-        // Gửi yêu cầu chat thông thường
         const chatData = await sendChatMessage(prompt, context);
         setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
         setContext(chatData.context);
@@ -170,7 +158,6 @@ const Chatbot = ({ onClose }) => {
           Send
         </button>
       </Box>
-      {/* Dialog cho xác nhận tạo board từ chatbot */}
       <Dialog open={isConfirmBoardOpen} onClose={handleBoardConfirmClose}>
         <DialogContent>
           <ConfirmBoardCreation
@@ -181,7 +168,6 @@ const Chatbot = ({ onClose }) => {
           />
         </DialogContent>
       </Dialog>
-      {/* Dialog cho xác nhận tạo column từ chatbot */}
       <Dialog open={isConfirmColumnOpen} onClose={handleCancelColumnConfirm}>
         <DialogContent>
           <ConfirmColumnCreation
@@ -192,7 +178,6 @@ const Chatbot = ({ onClose }) => {
           />
         </DialogContent>
       </Dialog>
-      {/* Dialog cho xác nhận lời mời từ chatbot (truyền email và boardId) */}
       <Dialog open={isConfirmInvitationOpen} onClose={handleCancelInvitation}>
         <DialogContent>
           <ConfirmInvitation
@@ -203,7 +188,6 @@ const Chatbot = ({ onClose }) => {
           />
         </DialogContent>
       </Dialog>
-      {/* Kích hoạt Invitation component để gửi lời mời khi có inviteData (sau xác nhận) */}
       {inviteData && (
         <Invitation
           boardId={inviteData.boardId}
@@ -214,14 +198,14 @@ const Chatbot = ({ onClose }) => {
               ...prev,
               { sender: 'bot', text: `Invitation sent to ${inviteData.email} for board ID: ${inviteData.boardId}` },
             ]);
-            setInviteData(null); // Reset sau khi hoàn thành
+            setInviteData(null);
           }}
           onError={(err) => {
             setMessages((prev) => [
               ...prev,
               { sender: 'bot', text: `Failed to send invitation: ${err.message}` },
             ]);
-            setInviteData(null); // Reset sau khi lỗi
+            setInviteData(null);
           }}
         />
       )}
