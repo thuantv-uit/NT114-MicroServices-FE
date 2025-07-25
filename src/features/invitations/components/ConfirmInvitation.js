@@ -1,4 +1,4 @@
-// ConfirmInvitation.js (cập nhật để trở thành component form xác nhận yes/no cho lời mời vào board)
+// ConfirmInvitation.js
 import React from 'react';
 import { Button, Typography, Box } from '@mui/material';
 
@@ -13,15 +13,11 @@ import { Button, Typography, Box } from '@mui/material';
  */
 const ConfirmInvitation = ({ email, boardId, onConfirm, onCancel }) => {
   return (
-    <Box sx={{ textAlign: 'center', p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Xác nhận lời mời
-      </Typography>
-      <Typography variant="body1" gutterBottom>
-        Bạn có muốn mời user với email <strong>{email}</strong> vào board ID <strong>{boardId}</strong> không?
-      </Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-        <Button variant="contained" color="primary" onClick={onConfirm} sx={{ mr: 2 }}>
+    <Box sx={{ padding: 2, marginTop: 2, border: '1px solid #ddd', borderRadius: 2 }}>
+      <Typography variant="h6">Confirm Invitation</Typography>
+      <Typography variant="body1"><strong>Email:</strong> {email || 'Not provided'}</Typography>
+      <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
+        <Button variant="contained" color="primary" onClick={onConfirm}>
           Yes
         </Button>
         <Button variant="outlined" color="secondary" onClick={onCancel}>

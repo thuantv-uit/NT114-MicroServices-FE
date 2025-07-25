@@ -196,7 +196,7 @@ const Chatbot = ({ onClose }) => {
           onSuccess={(response) => {
             setMessages((prev) => [
               ...prev,
-              { sender: 'bot', text: `Invitation sent to ${inviteData.email} for board ID: ${inviteData.boardId}` },
+              { sender: 'bot', text: 'Invitation sent successfully!' },
             ]);
             setInviteData(null);
           }}
