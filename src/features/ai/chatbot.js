@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Box, IconButton, Typography, Dialog, DialogContent } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import { extractBoardInfo, sendChatMessage, extractColumnTitle } from './api';
+import { extractBoardInfo, sendChatMessage, extractColumnTitle, extractEmail } from './api';
 import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
 import CreateColumn from '../columns/components/CreateColumn';
-import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation'; // File mới
+import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation';
 import './chatbot.css';
 
 /**
@@ -56,10 +56,10 @@ const Chatbot = ({ onClose }) => {
     setInput('');
 
     try {
-      // Kiểm tra xem prompt có yêu cầu tạo board không
+      // Kiểm tra các loại yêu cầu
       const isBoardCreation = prompt.toLowerCase().includes('create board') || prompt.toLowerCase().includes('tạo board');
-      // Kiểm tra xem prompt có yêu cầu tạo column không
       const isColumnCreation = prompt.toLowerCase().includes('create column') || prompt.toLowerCase().includes('tạo cột');
+      const isEmailExtraction = prompt.toLowerCase().includes('invite user with email');
 
       if (isBoardCreation) {
         // Gửi yêu cầu trích xuất title và description cho board
@@ -89,6 +89,20 @@ const Chatbot = ({ onClose }) => {
           },
         ]);
         setIsConfirmColumnOpen(true); // Mở form xác nhận column
+      } else if (isEmailExtraction) {
+        // Gửi yêu cầu trích xuất email
+        const extractedEmail = await extractEmail(prompt);
+        const boardIdText = latestBoardId ? ` for board ID: ${latestBoardId}` : ' (no board created yet)';
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: 'bot',
+            text: `**Extracted Email**: ${extractedEmail}${boardIdText}`,
+          },
+        ]);
+
+        // TODO: Thêm logic xử lý email ở đây (ví dụ: gửi lời mời, lưu vào database)
+        // console.log(`Extracted email: ${extractedEmail}, Board ID: ${latestBoardId}`);
       } else {
         // Gửi yêu cầu chat thông thường
         const chatData = await sendChatMessage(prompt, context);
@@ -138,7 +152,7 @@ const Chatbot = ({ onClose }) => {
         {messages.length === 0 ? (
           <Box className="message bot welcome">
             <ReactMarkdown>
-              Welcome to TimelineBot! Ask about boards, columns, cards, or say "create board" to extract board info, or "create column" to extract column title.
+              Welcome to TimelineBot! Ask about boards, columns, cards, or say "create board" to extract board info, "create column" to extract column title, or "invite user with email" to extract an email.
             </ReactMarkdown>
           </Box>
         ) : (
@@ -156,7 +170,7 @@ const Chatbot = ({ onClose }) => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask about boards, columns, cards, or say 'create board' or 'create column'..."
+          placeholder="Ask about boards, columns, cards, or say 'create board', 'create column', or 'invite user with email'..."
         />
         <button
           className="send-button"
@@ -167,7 +181,6 @@ const Chatbot = ({ onClose }) => {
         </button>
       </Box>
       {/* Hiển thị thông tin board */}
-      {/* Hiển thị xác nhận Yes/No để tạo board */}
       {(boardInfo.title || boardInfo.description) && (
         <ConfirmBoardCreation
           title={boardInfo.title}

@@ -1,4 +1,27 @@
 /**
+ * Sends a request to extract email from raw text
+ * @param {string} text - The input text to extract email from
+ * @returns {Promise<string>} - Extracted email address
+ */
+export const extractEmail = async (text) => {
+  try {
+    const response = await fetch('http://localhost:5003/extract-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: text }),
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    return data.email; // Trả về email trực tiếp từ { email: "..." }
+  } catch (error) {
+    throw new Error(`Email extraction error: ${error.message}`);
+  }
+};
+
+/**
  * Sends a request to extract column title from raw text
  * @param {string} text - The input text to extract column title from
  * @returns {Promise<string>} - Extracted column title
