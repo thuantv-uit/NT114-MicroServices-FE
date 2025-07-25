@@ -12,12 +12,15 @@ import { Box, Button, Typography } from '@mui/material';
  */
 const ConfirmColumnCreation = ({ title, boardId, onConfirm, onCancel }) => {
   return (
-    <Box sx={{ padding: 2, marginTop: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-      <Typography variant="h6">Confirm Column Creation</Typography>
-      <Typography variant="body1"><strong>Title:</strong> {title || 'Not provided'}</Typography>
-      <Typography variant="body1"><strong>Board ID:</strong> {boardId || 'Not provided'}</Typography>
-      <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={onConfirm}>
+    <Box sx={{ textAlign: 'center', p: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        Xác nhận tạo column
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        Bạn có muốn tạo column với title <strong>{title}</strong> cho board ID <strong>{boardId}</strong> không?
+      </Typography>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Button variant="contained" color="primary" onClick={onConfirm} sx={{ mr: 2 }}>
           Yes
         </Button>
         <Button variant="outlined" color="secondary" onClick={onCancel}>

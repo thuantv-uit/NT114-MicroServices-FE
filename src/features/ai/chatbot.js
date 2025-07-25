@@ -24,13 +24,15 @@ const Chatbot = ({ onClose }) => {
   const [boardInfo, setBoardInfo] = useState({ title: '', description: '' });
   const [latestBoardId, setLatestBoardId] = useState(null); // Lưu boardId
   const [columnTitle, setColumnTitle] = useState(''); // Lưu columnTitle
+  const [isConfirmBoardOpen, setIsConfirmBoardOpen] = useState(false); // State cho xác nhận board
   const [isConfirmColumnOpen, setIsConfirmColumnOpen] = useState(false); // State cho xác nhận column
   const [isConfirmInvitationOpen, setIsConfirmInvitationOpen] = useState(false); // State cho xác nhận lời mời
   const [pendingEmail, setPendingEmail] = useState(''); // Lưu email tạm thời để xác nhận
   const [inviteData, setInviteData] = useState(null); // State để kích hoạt Invitation component sau xác nhận
   const chatBodyRef = useRef(null);
 
-  const handleConfirmClose = () => {
+  const handleBoardConfirmClose = () => {
+    setIsConfirmBoardOpen(false);
     // Reset boardInfo khi đóng xác nhận
     setBoardInfo({ title: '', description: '' });
   };
@@ -40,7 +42,7 @@ const Chatbot = ({ onClose }) => {
     setLatestBoardId(boardId);
     setMessages((prev) => [
       ...prev,
-      { sender: 'bot', text: `New board created with ID: ${boardId}` },
+      { sender: 'bot', text: 'Board created successfully!' },
     ]);
   };
 
@@ -83,16 +85,9 @@ const Chatbot = ({ onClose }) => {
         const extractedData = await extractBoardInfo(prompt);
         const { title, description } = extractedData;
 
-        // Lưu title và description vào state để truyền làm props
+        // Lưu title và description vào state để truyền làm props và mở dialog xác nhận
         setBoardInfo({ title, description });
-
-        setMessages((prev) => [
-          ...prev,
-          {
-            sender: 'bot',
-            text: `**Extracted Board Info**:\n- **Title**: ${title}\n- **Description**: ${description}`,
-          },
-        ]);
+        setIsConfirmBoardOpen(true);
       } else if (isColumnCreation) {
         // Gửi yêu cầu trích xuất title cho column
         const columnData = await extractColumnTitle(prompt); // Lấy toàn bộ data
@@ -188,15 +183,17 @@ const Chatbot = ({ onClose }) => {
           Send
         </button>
       </Box>
-      {/* Hiển thị thông tin board */}
-      {(boardInfo.title || boardInfo.description) && (
-        <ConfirmBoardCreation
-          title={boardInfo.title}
-          description={boardInfo.description}
-          onClose={handleConfirmClose}
-          onBoardCreated={handleBoardCreated}
-        />
-      )}
+      {/* Dialog cho xác nhận tạo board từ chatbot */}
+      <Dialog open={isConfirmBoardOpen} onClose={handleBoardConfirmClose}>
+        <DialogContent>
+          <ConfirmBoardCreation
+            title={boardInfo.title}
+            description={boardInfo.description}
+            onClose={handleBoardConfirmClose}
+            onBoardCreated={handleBoardCreated}
+          />
+        </DialogContent>
+      </Dialog>
       {/* Dialog cho xác nhận tạo column từ chatbot */}
       <Dialog open={isConfirmColumnOpen} onClose={handleCancelColumnConfirm}>
         <DialogContent>
