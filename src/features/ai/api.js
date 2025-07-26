@@ -1,4 +1,30 @@
 /**
+ * Sends a request to analyze actions from text
+ * @param {string} prompt - The input text to analyze actions from
+ * @returns {Promise<Array>} - Array of actions
+ */
+export const analyzeActions = async (prompt) => {
+  try {
+    const response = await fetch('http://localhost:5004/analyze-actions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    });
+    const data = await response.json();
+
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    console.log('1:', data);
+    console.log('2:', data.actions);
+
+    return data.actions;
+  } catch (error) {
+    throw new Error(`Action analysis error: ${error.message}`);
+  }
+};
+
+/**
  * Sends a request to extract email from raw text
  * @param {string} text - The input text to extract email from
  * @returns {Promise<string>} - Extracted email address
