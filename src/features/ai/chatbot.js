@@ -63,102 +63,118 @@ const Chatbot = ({ onClose }) => {
     setIsConfirmInvitationOpen(false);
     setPendingEmail('');
   };
+  
+//   const sendMessage = async (prompt) => {
+//   if (!prompt.trim()) return;
 
-  // const sendMessage = async (prompt) => {
-  //   if (!prompt.trim()) return;
+//   setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
+//   setInput('');
 
-  //   setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
-  //   setInput('');
+//   try {
+//     const actions = await analyzeActions(prompt); // Gọi hàm analyzeActions từ api.js
 
-  //   try {
-  //     const isBoardCreation = prompt.toLowerCase().includes('create board') || prompt.toLowerCase().includes('tạo board');
-  //     const isColumnCreation = prompt.toLowerCase().includes('create column') || prompt.toLowerCase().includes('tạo cột');
-  //     const isEmailExtraction = prompt.toLowerCase().includes('invite user with email');
+//     if (actions.length === 0) {
+//       const chatData = await sendChatMessage(prompt, context);
+//       setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
+//       setContext(chatData.context);
+//       return;
+//     }
 
-  //     if (isBoardCreation) {
-  //       const extractedData = await extractBoardInfo(prompt);
-  //       const { title, description } = extractedData;
-  //       setBoardInfo({ title, description });
-  //       setIsConfirmBoardOpen(true);
-  //     } else if (isColumnCreation) {
-  //       const columnData = await extractColumnTitle(prompt);
-  //       const extractedTitle = columnData.title;
-  //       setColumnTitle(extractedTitle);
-  //       setIsConfirmColumnOpen(true);
-  //     } else if (isEmailExtraction) {
-  //       const extractedEmail = await extractEmail(prompt);
-  //       setPendingEmail(extractedEmail);
-  //       setIsConfirmInvitationOpen(true);
-  //     } else {
-  //       const chatData = await sendChatMessage(prompt, context);
-  //       setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
-  //       setContext(chatData.context);
-  //     }
-  //   } catch (error) {
-  //     setMessages((prev) => [
-  //       ...prev,
-  //       { sender: 'bot', text: `Error: ${error.message}` },
-  //     ]);
-  //   }
-  // };
+//     // In type và data của từng mảng
+//     actions.forEach((action, index) => {
+//       setMessages((prev) => [
+//         ...prev,
+//         { sender: 'bot', text: `Action ${index + 1}: Type: ${action.type}, Data: ${action.data}` },
+//       ]);
+//     });
 
-  const sendMessage = async (prompt) => {
-  if (!prompt.trim()) return;
+//     // Xử lý ưu tiên: create board, invite user, create column
+//     for (const action of actions) {
+//       if (action.type === 'create_board') {
+//         const extractedData = await extractBoardInfo(action.data);
+//         const { title, description } = extractedData;
+//         setBoardInfo({ title, description });
+//         setIsConfirmBoardOpen(true);
+//       } else if (action.type === 'invite_user') {
+//         const extractedEmail = await extractEmail(action.data);
+//         setPendingEmail(extractedEmail);
+//         setIsConfirmInvitationOpen(true);
+//       } else if (action.type === 'create_column') {
+//         const columnData = await extractColumnTitle(action.data);
+//         const extractedTitle = columnData.title;
+//         setColumnTitle(extractedTitle);
+//         setIsConfirmColumnOpen(true);
+//       }
+//     }
 
-  setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
-  setInput('');
+//     // Nếu không có hành động nào khớp, gửi tin nhắn thông thường
+//     if (actions.every(action => !['create_board', 'invite_user', 'create_column'].includes(action.type))) {
+//       const chatData = await sendChatMessage(prompt, context);
+//       setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
+//       setContext(chatData.context);
+//     }
+//   } catch (error) {
+//     setMessages((prev) => [
+//       ...prev,
+//       { sender: 'bot', text: `Error: ${error.message}` },
+//     ]);
+//   }
+// };
 
-  try {
-    const actions = await analyzeActions(prompt); // Gọi hàm analyzeActions từ api.js
+const sendMessage = async (prompt) => {
+    if (!prompt.trim()) return;
 
-    if (actions.length === 0) {
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: 'No actionable commands detected.' },
-      ]);
-      return;
-    }
+    setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
+    setInput('');
 
-    // In type và data của từng mảng
-    actions.forEach((action, index) => {
-      setMessages((prev) => [
-        ...prev,
-        { sender: 'bot', text: `Action ${index + 1}: Type: ${action.type}, Data: ${action.data}` },
-      ]);
-    });
+    try {
+      const actions = await analyzeActions(prompt);
 
-    // Xử lý ưu tiên: create board, invite user, create column
-    for (const action of actions) {
-      if (action.type === 'create_board') {
-        const extractedData = await extractBoardInfo(action.data);
-        const { title, description } = extractedData;
-        setBoardInfo({ title, description });
-        setIsConfirmBoardOpen(true);
-      } else if (action.type === 'invite_user') {
-        const extractedEmail = await extractEmail(action.data);
-        setPendingEmail(extractedEmail);
-        setIsConfirmInvitationOpen(true);
-      } else if (action.type === 'create_column') {
-        const columnData = await extractColumnTitle(action.data);
-        const extractedTitle = columnData.title;
-        setColumnTitle(extractedTitle);
-        setIsConfirmColumnOpen(true);
+      if (actions.length === 0) {
+        const chatData = await sendChatMessage(prompt, context);
+        setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
+        setContext(chatData.context);
+        return;
       }
-    }
 
-    // Nếu không có hành động nào khớp, gửi tin nhắn thông thường
-    if (actions.every(action => !['create_board', 'invite_user', 'create_column'].includes(action.type))) {
-      const chatData = await sendChatMessage(prompt, context);
-      setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
-      setContext(chatData.context);
+      actions.forEach((action, index) => {
+        setMessages((prev) => [
+          ...prev,
+          { sender: 'bot', text: `Action ${index + 1}: Type: ${action.type}, Data: ${action.data}` },
+        ]);
+      });
+
+      // Xử lý ưu tiên: create_board, invite_user, create_column
+      for (const action of actions) {
+        if (action.type === 'create_board') {
+          const extractedData = await extractBoardInfo(action.data);
+          const { title, description } = extractedData;
+          setBoardInfo({ title, description });
+          setIsConfirmBoardOpen(true);
+        } else if (action.type === 'invite_user') {
+          const extractedEmail = await extractEmail(action.data);
+          setPendingEmail(extractedEmail);
+          setIsConfirmInvitationOpen(true);
+        } else if (action.type === 'create_column') {
+          const columnData = await extractColumnTitle(action.data);
+          const extractedTitle = columnData.title;
+          setColumnTitle(extractedTitle);
+          setIsConfirmColumnOpen(true);
+        }
+      }
+
+      if (actions.every(action => !['create_board', 'invite_user', 'create_column'].includes(action.type))) {
+        const chatData = await sendChatMessage(prompt, context);
+        setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
+        setContext(chatData.context);
+      }
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { sender: 'bot', text: `Error: ${error.message}` },
+      ]);
     }
-  } catch (error) {
-    setMessages((prev) => [
-      ...prev,
-      { sender: 'bot', text: `Error: ${error.message}` },
-    ]);
-  }
-};
+  };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && input.trim()) {
