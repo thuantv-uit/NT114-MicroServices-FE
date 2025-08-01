@@ -63,63 +63,6 @@ const Chatbot = ({ onClose }) => {
     setIsConfirmInvitationOpen(false);
     setPendingEmail('');
   };
-  
-//   const sendMessage = async (prompt) => {
-//   if (!prompt.trim()) return;
-
-//   setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
-//   setInput('');
-
-//   try {
-//     const actions = await analyzeActions(prompt); // Gọi hàm analyzeActions từ api.js
-
-//     if (actions.length === 0) {
-//       const chatData = await sendChatMessage(prompt, context);
-//       setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
-//       setContext(chatData.context);
-//       return;
-//     }
-
-//     // In type và data của từng mảng
-//     actions.forEach((action, index) => {
-//       setMessages((prev) => [
-//         ...prev,
-//         { sender: 'bot', text: `Action ${index + 1}: Type: ${action.type}, Data: ${action.data}` },
-//       ]);
-//     });
-
-//     // Xử lý ưu tiên: create board, invite user, create column
-//     for (const action of actions) {
-//       if (action.type === 'create_board') {
-//         const extractedData = await extractBoardInfo(action.data);
-//         const { title, description } = extractedData;
-//         setBoardInfo({ title, description });
-//         setIsConfirmBoardOpen(true);
-//       } else if (action.type === 'invite_user') {
-//         const extractedEmail = await extractEmail(action.data);
-//         setPendingEmail(extractedEmail);
-//         setIsConfirmInvitationOpen(true);
-//       } else if (action.type === 'create_column') {
-//         const columnData = await extractColumnTitle(action.data);
-//         const extractedTitle = columnData.title;
-//         setColumnTitle(extractedTitle);
-//         setIsConfirmColumnOpen(true);
-//       }
-//     }
-
-//     // Nếu không có hành động nào khớp, gửi tin nhắn thông thường
-//     if (actions.every(action => !['create_board', 'invite_user', 'create_column'].includes(action.type))) {
-//       const chatData = await sendChatMessage(prompt, context);
-//       setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
-//       setContext(chatData.context);
-//     }
-//   } catch (error) {
-//     setMessages((prev) => [
-//       ...prev,
-//       { sender: 'bot', text: `Error: ${error.message}` },
-//     ]);
-//   }
-// };
 
 const sendMessage = async (prompt) => {
     if (!prompt.trim()) return;
@@ -192,6 +135,16 @@ const sendMessage = async (prompt) => {
     }
   }, [messages]);
 
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset chiều cao
+      textarea.style.height = `${textarea.scrollHeight}px`; // Điều chỉnh theo nội dung
+    }
+  }, [input]);
+
   return (
     <Box className="chat-container">
       <Box className="chat-header">
@@ -216,13 +169,13 @@ const sendMessage = async (prompt) => {
         )}
       </Box>
       <Box className="chat-input-container">
-        <input
+        <textarea
           className="chat-input"
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask about boards, columns, cards, or say 'create board', 'create column', or 'invite user with email'..."
+          placeholder="Ask about boards, columns, cards,..."
         />
         <button
           className="send-button"

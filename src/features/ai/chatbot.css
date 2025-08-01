@@ -49,7 +49,7 @@
   border-top: 1px solid #e0e0e0;
 }
 
-.chat-input {
+/* .chat-input {
   flex: 1;
   padding: 12px;
   border: none;
@@ -59,6 +59,38 @@
 
 .chat-input:focus {
   outline: none;
+} */
+
+.chat-input {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  font-size: 14px;
+  background: transparent;
+  resize: none; /* Ngăn người dùng thay đổi kích thước thủ công */
+  min-height: 40px; /* Chiều cao tối thiểu */
+  max-height: 120px; /* Chiều cao tối đa */
+  overflow-y: auto; /* Cho phép cuộn nếu vượt quá max-height */
+  line-height: 1.4;
+}
+
+.chat-input:focus {
+  outline: none;
+}
+
+/* Tùy chỉnh thanh cuộn cho textarea */
+.chat-input::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-input::-webkit-scrollbar-track {
+  background: #e0e0e0;
+  border-radius: 10px;
+}
+
+.chat-input::-webkit-scrollbar-thumb {
+  background: #007bff;
+  border-radius: 10px;
 }
 
 .send-button {
