@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Box, IconButton, Badge, Avatar, Popover, Button, Input, Typography, TextField, InputAdornment } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
@@ -23,7 +23,6 @@ import { fetchUserData, changeAvatar } from '../features/users/services/userServ
  */
 const Navbar = ({ token, logout, backgroundColor, isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [notificationCount, setNotificationCount] = useState(0);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(false);

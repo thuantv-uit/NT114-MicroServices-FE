@@ -26,6 +26,8 @@ import PendingInvitationsPage from './features/invitations/components/PendingInv
 import Chatbot from './features/ai/chatbot';
 import StartPage from './features/boards/components/BoardStar';
 import CurrentPage from './features/boards/components/BoardCurrent';
+import Calendar from './features/cards/components/Calendar';
+import Summary from './features/cards/components/Summary';
 
 /**
  * Main application component
@@ -201,6 +203,18 @@ function App() {
               path="/chatbot"
               element={
                 <PrivateRoute token={token} component={<Chatbot />} />
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <PrivateRoute token={token} component={<Calendar />} />
+              }
+              />
+            <Route
+              path="/summary"
+              element={
+                <PrivateRoute token={token} component={<Summary />} />
               }
             />
             <Route path="*" element={<NotFound />} />

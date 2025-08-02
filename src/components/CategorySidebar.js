@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Accordion, AccordionSummary, AccordionDetails, Typography, IconButton } from '@mui/material';
+import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import PersonIcon from '@mui/icons-material/Person';
 import HistoryIcon from '@mui/icons-material/History';
@@ -11,9 +11,8 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import FolderIcon from '@mui/icons-material/Folder';
 import GroupIcon from '@mui/icons-material/Group';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import MailIcon from '@mui/icons-material/Mail';
 import LogoutIcon from '@mui/icons-material/Logout';
-import CloseIcon from '@mui/icons-material/Close'; // Added for close button
+// import CloseIcon from '@mui/icons-material/Close';
 import { showToast } from '../utils/toastUtils';
 
 /**
@@ -27,19 +26,7 @@ import { showToast } from '../utils/toastUtils';
  */
 const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState(null);
   const [expanded, setExpanded] = useState(false);
-
-  useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        setUserId(payload.userId || payload.id || payload._id || null);
-      } catch (err) {
-        console.error('Failed to parse token:', err);
-      }
-    }
-  }, [token]);
 
   const handleLogout = () => {
     if (typeof logout === 'function') {
@@ -79,11 +66,6 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
       }}
     >
       {/* Close button at the top */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-        <IconButton onClick={toggleSidebar}>
-          <CloseIcon />
-        </IconButton>
-      </Box>
       <List sx={{ flexGrow: 1 }}>
         {/* For You */}
         <ListItem disablePadding>
@@ -167,15 +149,6 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
             <ListItemText primary="More" sx={{ color: '#000000' }} />
           </ListItemButton>
         </ListItem>
-        {/* Pending Invitations */}
-        {userId && (
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to={`/pending-invitations/${userId}`}>
-              <ListItemIcon><MailIcon sx={{ color: '#000000' }} /></ListItemIcon>
-              <ListItemText primary="Pending Invitations" sx={{ color: '#000000' }} />
-            </ListItemButton>
-          </ListItem>
-        )}
       </List>
       {/* Logout at the bottom */}
       <List>
