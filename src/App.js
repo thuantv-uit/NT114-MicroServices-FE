@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { PrivateRoute, PublicRoute } from './utils/RouteUtils';
 import Navbar from './components/Navbar';
+import CategorySidebar from './components/CategorySidebar';
 import Home1 from './components/Home1';
 import NotFound from './components/404';
 import Login from './features/users/components/Login';
@@ -31,141 +32,148 @@ import Chatbot from './features/ai/chatbot';
 function App() {
   const { token, setToken, logout } = useAuth();
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
-  const location = useLocation(); // Lấy đường dẫn hiện tại
+  const location = useLocation();
 
-  // Chỉ hiển thị Navbar nếu không phải các trang /, /login, /register
+  // Only show Navbar and Sidebar if not on /, /login, /register, or 404 pages
   const showNavbar = !['/', '/login', '/register', '/*'].includes(location.pathname);
 
   return (
-    <>
-      {showNavbar && (
-        <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />
-      )}
-      <Routes>
-        <Route path="/" element={<Home1 />} />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute token={token} component={<UserDashboard token={token} />} />
-          }
-        />
-        <Route
-          path="/boards"
-          element={
-            <PrivateRoute token={token} component={<BoardList token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id"
-          element={
-            <PrivateRoute
-              token={token}
-              component={<BoardDetail token={token} setBackgroundColor={setBackgroundColor} />}
+    <div>
+      {showNavbar && <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />}
+      <div style={{ display: 'flex' }}>
+        {showNavbar && token && <CategorySidebar token={token} />}
+        <div
+          style={{
+            flexGrow: 1,
+            marginLeft: showNavbar && token ? '250px' : '0', // Offset for sidebar width
+            marginTop: showNavbar ? '64px' : '0', // Offset for Navbar height
+            padding: '16px', // Optional: padding for content spacing
+          }}
+        >
+          <Routes>
+            <Route path="/" element={<Home1 />} />
+            <Route
+              path="/login"
+              element={
+                <PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />
+              }
             />
-          }
-        />
-        <Route
-          path="/boards/create"
-          element={
-            <PrivateRoute token={token} component={<BoardCreate token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id/update"
-          element={
-            <PrivateRoute token={token} component={<UpdateBoard token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id/delete"
-          element={
-            <PrivateRoute token={token} component={<DeleteBoard token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id/invite-to-column"
-          element={
-            <PrivateRoute token={token} component={<InviteToColumnPage token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id/change-background"
-          element={
-            <PrivateRoute token={token} component={<ChangeBackground token={token} />} />
-          }
-        />
-        <Route
-          path="/boards/:id/columns/create"
-          element={
-            <PrivateRoute token={token} component={<CreateColumn token={token} />} />
-          }
-        />
-        <Route
-          path="/columns/:columnId/edit"
-          element={
-            <PrivateRoute token={token} component={<ColumnEdit token={token} />} />
-          }
-        />
-        <Route
-          path="/columns/:columnId/delete"
-          element={
-            <PrivateRoute token={token} component={<DeleteColumn token={token} />} />
-          }
-        />
-        <Route
-          path="/columns/:columnId/invite-to-column"
-          element={
-            <PrivateRoute token={token} component={<InviteToColumnPage token={token} />} />
-          }
-        />
-        <Route
-          path="/columns/:columnId/cards/create"
-          element={
-            <PrivateRoute token={token} component={<CreateCard token={token} />} />
-          }
-        />
-        <Route
-          path="/cards/:cardId/edit"
-          element={
-            <PrivateRoute token={token} component={<EditCardPage token={token} />} />
-          }
-        />
-        <Route
-          path="/cards/:cardId/delete"
-          element={
-            <PrivateRoute token={token} component={<DeleteCardPage token={token} />} />
-          }
-        />
-        <Route
-          path="/pending-invitations/:userId"
-          element={
-            <PrivateRoute token={token} component={<PendingInvitationsPage token={token} />} />
-          }
-        />
-        <Route
-          path="/chatbot"
-          element={
-            <PrivateRoute token={token} component={<Chatbot />} />
-          }
-        />
-        <Route 
-        path='*'
-        element={<NotFound />}
-        />
-      </Routes>
-    </>
+            <Route
+              path="/register"
+              element={
+                <PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute token={token} component={<UserDashboard token={token} />} />
+              }
+            />
+            <Route
+              path="/boards"
+              element={
+                <PrivateRoute token={token} component={<BoardList token={token} />} />
+              }
+            />
+            <Route
+              path="/boards/:id"
+              element={
+                <PrivateRoute
+                  token={token}
+                  component={<BoardDetail token={token} setBackgroundColor={setBackgroundColor} />}
+                />
+              }
+            />
+            <Route
+              path="/boards/create"
+              element={
+                <PrivateRoute token={token} component={<BoardCreate token={token} />} />
+              }
+            />
+            <Route
+              path="/boards/:id/update"
+              element={
+                <PrivateRoute token={token} component={<UpdateBoard token={token} />} />
+              }
+            />
+            <Route
+              path="/boards/:id/delete"
+              element={
+                <PrivateRoute token={token} component={<DeleteBoard token={token} />} />
+              }
+            />
+            <Route
+              path="/boards/:id/invite-to-column"
+              element={
+                <PrivateRoute token={token} component={<InviteToColumnPage token={token} />} />
+              }
+            />
+            <Route
+              path="/boards/:id/change-background"
+              element={
+                <PrivateRoute token={token} component={<ChangeBackground token={token} />} />
+              }
+            />
+            <Route
+              path="/boards/:id/columns/create"
+              element={
+                <PrivateRoute token={token} component={<CreateColumn token={token} />} />
+              }
+            />
+            <Route
+              path="/columns/:columnId/edit"
+              element={
+                <PrivateRoute token={token} component={<ColumnEdit token={token} />} />
+              }
+            />
+            <Route
+              path="/columns/:columnId/delete"
+              element={
+                <PrivateRoute token={token} component={<DeleteColumn token={token} />} />
+              }
+            />
+            <Route
+              path="/columns/:columnId/invite-to-column"
+              element={
+                <PrivateRoute token={token} component={<InviteToColumnPage token={token} />} />
+              }
+            />
+            <Route
+              path="/columns/:columnId/cards/create"
+              element={
+                <PrivateRoute token={token} component={<CreateCard token={token} />} />
+              }
+            />
+            <Route
+              path="/cards/:cardId/edit"
+              element={
+                <PrivateRoute token={token} component={<EditCardPage token={token} />} />
+              }
+            />
+            <Route
+              path="/cards/:cardId/delete"
+              element={
+                <PrivateRoute token={token} component={<DeleteCardPage token={token} />} />
+              }
+            />
+            <Route
+              path="/pending-invitations/:userId"
+              element={
+                <PrivateRoute token={token} component={<PendingInvitationsPage token={token} />} />
+              }
+            />
+            <Route
+              path="/chatbot"
+              element={
+                <PrivateRoute token={token} component={<Chatbot />} />
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </div>
+    </div>
   );
 }
 
