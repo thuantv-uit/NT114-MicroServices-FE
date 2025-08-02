@@ -1,11 +1,12 @@
 import React from 'react';
-import { Box, Typography, Tooltip } from '@mui/material';
+import { Box, Typography, Tooltip, Button } from '@mui/material';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import ColumnMenu from './ColumnMenu';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import CardList from '../../cards/components/Card';
 import { COLUMN_STYLE, COLUMN_HEADER_STYLE } from '../../../constants/styles';
+import AddIcon from '@mui/icons-material/Add';
 
 /**
  * Component to display a column
@@ -37,7 +38,7 @@ function Column({ column, boardId, token, onRefresh, onEdit, onDelete, onAddCard
       <Box
         sx={{
           ...COLUMN_STYLE,
-          bgcolor: column.backgroundColor,
+          bgcolor: '#EBECF0', // Đổi màu nền thành xám
           borderRadius: '8px',
           p: 1,
           minWidth: '272px',
@@ -72,7 +73,6 @@ function Column({ column, boardId, token, onRefresh, onEdit, onDelete, onAddCard
               token={token}
               onEdit={onEdit}
               onDelete={onDelete}
-              onAddCard={onAddCard}
             />
             <Tooltip title="Drag to move">
               <DragHandleIcon sx={{ cursor: 'pointer' }} {...listeners} />
@@ -86,6 +86,22 @@ function Column({ column, boardId, token, onRefresh, onEdit, onDelete, onAddCard
           column={column}
           onRefresh={onRefresh}
         />
+        <Button
+          variant="text"
+          startIcon={<AddIcon />}
+          onClick={onAddCard}
+          sx={{
+            mt: 1,
+            justifyContent: 'flex-start',
+            textTransform: 'none',
+            color: '#172B4D',
+            '&:hover': {
+              backgroundColor: 'rgba(0, 0, 0, 0.04)',
+            },
+          }}
+        >
+          Create Card
+        </Button>
       </Box>
     </div>
   );

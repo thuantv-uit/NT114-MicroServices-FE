@@ -346,7 +346,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                       '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
                     }}
                   >
-                    Tạo cột mới
+                    Create Column
                   </Button>
                 </Box>
               </Box>

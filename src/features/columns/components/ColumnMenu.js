@@ -3,7 +3,6 @@ import { IconButton, Menu, MenuItem, ListItemIcon } from '@mui/material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import InviteToColumn from '../../invitations/components/InviteToColumn';
 
@@ -15,10 +14,9 @@ import InviteToColumn from '../../invitations/components/InviteToColumn';
  * @param {string} props.token - Authentication token
  * @param {Function} props.onEdit - Edit handler
  * @param {Function} props.onDelete - Delete handler
- * @param {Function} props.onAddCard - Add card handler
  * @returns {JSX.Element}
  */
-const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => {
+const ColumnMenu = ({ column, boardId, token, onEdit, onDelete }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [openInviteColumn, setOpenInviteColumn] = useState(false);
   const open = Boolean(anchorEl);
@@ -48,12 +46,6 @@ const ColumnMenu = ({ column, boardId, token, onEdit, onDelete, onAddCard }) => 
             <DeleteIcon fontSize="small" />
           </ListItemIcon>
           Delete Column
-        </MenuItem>
-        <MenuItem onClick={() => { onAddCard(); handleMenuClose(); }}>
-          <ListItemIcon>
-            <AddIcon fontSize="small" />
-          </ListItemIcon>
-          Add Card
         </MenuItem>
         <MenuItem onClick={() => { setOpenInviteColumn(true); handleMenuClose(); }}>
           <ListItemIcon>

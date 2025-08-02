@@ -169,7 +169,7 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
   const DefaultColumnContainer = ({ children, ...props }) => (
     <Box
       sx={{
-        bgcolor: '#EBECF0',
+        bgcolor: '#EBECF0', // Đảm bảo màu xám cho container mặc định
         borderRadius: '8px',
         p: 1,
         minWidth: '272px',
@@ -287,7 +287,7 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
             boardId={boardId}
             initialValues={{
               title: selectedColumn.title,
-              backgroundColor: selectedColumn.backgroundColor || '#ffffff',
+              backgroundColor: '#EBECF0', // Đảm bảo màu xám trong dialog chỉnh sửa
             }}
             onClose={handleDialogClose}
           />
