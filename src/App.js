@@ -24,6 +24,8 @@ import DeleteCardPage from './features/cards/components/DeleteCardPage';
 import InviteToColumnPage from './features/invitations/components/InviteToColumnPage';
 import PendingInvitationsPage from './features/invitations/components/PendingInvitationsPage';
 import Chatbot from './features/ai/chatbot';
+import StartPage from './features/boards/components/BoardStar';
+import CurrentPage from './features/boards/components/BoardCurrent';
 
 /**
  * Main application component
@@ -32,22 +34,42 @@ import Chatbot from './features/ai/chatbot';
 function App() {
   const { token, setToken, logout } = useAuth();
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Sidebar starts closed
   const location = useLocation();
 
   // Only show Navbar and Sidebar if not on /, /login, /register, or 404 pages
   const showNavbar = !['/', '/login', '/register', '/*'].includes(location.pathname);
 
+  const toggleSidebar = () => {
+    setIsSidebarOpen((prev) => !prev);
+  };
+
   return (
     <div>
-      {showNavbar && <Navbar token={token} logout={logout} backgroundColor={backgroundColor} />}
+      {showNavbar && (
+        <Navbar
+          token={token}
+          logout={logout}
+          backgroundColor={backgroundColor}
+          isSidebarOpen={isSidebarOpen}
+          toggleSidebar={toggleSidebar}
+        />
+      )}
       <div style={{ display: 'flex' }}>
-        {showNavbar && token && <CategorySidebar token={token} />}
+        {showNavbar && token && (
+          <CategorySidebar
+            token={token}
+            logout={logout}
+            isOpen={isSidebarOpen}
+            toggleSidebar={toggleSidebar}
+          />
+        )}
         <div
           style={{
             flexGrow: 1,
-            marginLeft: showNavbar && token ? '250px' : '0', // Offset for sidebar width
-            marginTop: showNavbar ? '64px' : '0', // Offset for Navbar height
-            padding: '16px', // Optional: padding for content spacing
+            marginLeft: showNavbar && token && isSidebarOpen ? '250px' : '0',
+            marginTop: showNavbar ? '64px' : '0',
+            padding: '16px',
           }}
         >
           <Routes>
@@ -74,6 +96,18 @@ function App() {
               path="/boards"
               element={
                 <PrivateRoute token={token} component={<BoardList token={token} />} />
+              }
+            />
+            <Route
+              path="/projects/start"
+              element={
+                <PrivateRoute token={token} component={<StartPage />} />
+              }
+            />
+            <Route
+              path="/projects/current"
+              element={
+                <PrivateRoute token={token} component={<CurrentPage />} />
               }
             />
             <Route
