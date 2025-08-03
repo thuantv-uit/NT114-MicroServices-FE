@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -24,7 +25,6 @@ import {
   ListItemIcon,
   Avatar,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LinearScaleIcon from '@mui/icons-material/LinearScale';
 import ImageIcon from '@mui/icons-material/Image';
@@ -32,6 +32,7 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { updateProcess, updateCardImage } from '../services/cardService';
 import { getUserById } from '../../users/services/userService';
+import { useNavigate } from 'react-router-dom';
 
 // Hàm tính màu sắc dựa trên process
 const getCardBackgroundColor = (process) => {
@@ -58,7 +59,7 @@ const getCardBackgroundColor = (process) => {
   return `rgb(${r}, ${g}, ${b})`;
 };
 
-// Hàm xử lý Drag and Drop
+// Hàm xử lý Drag and Drop (giữ nguyên logic gốc)
 const useDragAndDrop = (cards, setCards, columnId, columnTitle, onRefresh) => {
   const [activeCardId, setActiveCardId] = useState(null);
   const [activeCardData, setActiveCardData] = useState(null);
@@ -124,7 +125,8 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: card._id });
+  } = useSortable({ id: card._id, data: { ...card } });
+  const navigate = useNavigate();
 
   const [openProcessDialog, setOpenProcessDialog] = useState(false);
   const [processValue, setProcessValue] = useState(card.process);
@@ -132,7 +134,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
   const [openImageDialog, setOpenImageDialog] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
-  // eslint-disable-next-line no-unused-vars
   const [user, setUser] = useState(null);
 
   // Lấy thông tin user tạo card
@@ -154,6 +155,19 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.4 : 1,
+  };
+
+  // Xử lý click vào tiêu đề để chuyển hướng đến trang chỉnh sửa
+  const handleTitleClick = (e) => {
+    e.stopPropagation();
+    navigate(`/cards/${card._id}/edit`, {
+      state: {
+        title: card.title,
+        description: card.description,
+        boardId,
+        columnId,
+      },
+    });
   };
 
   const handleOpenProcessDialog = (e) => {
@@ -208,7 +222,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     }
 
     try {
-      // eslint-disable-next-line no-unused-vars
       const response = await updateCardImage(card._id, imageFile);
       showToast('Cập nhật ảnh thẻ thành công!', 'success');
       handleCloseImageDialog();
@@ -224,12 +237,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
   };
 
   const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleEditClick = (e) => {
-    e.stopPropagation();
-    onEdit(card);
     setAnchorEl(null);
   };
 
@@ -292,6 +299,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
             <Typography
               variant="h6"
+              onClick={handleTitleClick}
               sx={{
                 fontSize: '16px',
                 color: '#172B4D',
@@ -299,6 +307,10 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
                 overflow: 'hidden',
                 whiteSpace: 'normal',
                 flexGrow: 1,
+                cursor: 'pointer',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
               }}
             >
               {card.title}
@@ -318,13 +330,13 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           {/* Ngày với icon, bọc trong khung */}
           <Box
             sx={{
-              display: 'inline-flex', // Ôm sát nội dung
+              display: 'inline-flex',
               justifyContent: 'flex-start',
               alignItems: 'center',
               mb: 1,
-              border: '1px solid #000000', // Đường viền màu đen
+              border: '1px solid #000000',
               borderRadius: '4px',
-              padding: '2px 4px', // Giảm padding để ôm sát nội dung
+              padding: '2px 4px',
             }}
           >
             <Stack direction="row" spacing={0.5} alignItems="center">
@@ -349,12 +361,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          <MenuItem onClick={handleEditClick}>
-            <ListItemIcon>
-              <EditIcon fontSize="small" />
-            </ListItemIcon>
-            Chỉnh sửa
-          </MenuItem>
           <MenuItem onClick={handleDeleteClick}>
             <ListItemIcon>
               <DeleteIcon fontSize="small" />
