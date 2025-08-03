@@ -10,7 +10,7 @@ import {
   defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { Card, useDragAndDrop } from './CardList'; // Import from Card.js
+import { Card, useDragAndDrop } from './CardList'; // Import from CardList.js
 
 /**
  * Thành phần hiển thị danh sách thẻ trong cột
@@ -94,7 +94,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
         <Box
           sx={{
             mb: 0,
-            px: 1,
+            px: 0.25, // Giảm khoảng cách giữa card và lề trái/phải của column (2px)
             mt: 0,
           }}
         >

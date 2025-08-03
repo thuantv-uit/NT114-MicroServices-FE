@@ -16,21 +16,20 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  Avatar,
   Input,
   Slider,
   FormHelperText,
   Menu,
   MenuItem,
   ListItemIcon,
+  Avatar,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import LinearScaleIcon from '@mui/icons-material/LinearScale';
 import ImageIcon from '@mui/icons-material/Image';
-import CommentIcon from '@mui/icons-material/Comment';
-import AttachFileIcon from '@mui/icons-material/AttachFile';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import { updateProcess, updateCardImage } from '../services/cardService';
 import { getUserById } from '../../users/services/userService';
 
@@ -112,7 +111,8 @@ const formatDate = (date) => {
   const d = new Date(date);
   const month = d.toLocaleString('en-US', { month: 'short' });
   const day = String(d.getDate()).padStart(2, '0');
-  return `${month} ${day}`;
+  const year = d.getFullYear();
+  return `${month} ${day}, ${year}`;
 };
 
 // Component Card
@@ -132,6 +132,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
   const [openImageDialog, setOpenImageDialog] = useState(false);
   const [imageFile, setImageFile] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [user, setUser] = useState(null);
 
   // Lấy thông tin user tạo card
@@ -238,18 +239,6 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     setAnchorEl(null);
   };
 
-  const handleCommentClick = (e) => {
-    e.stopPropagation();
-    showToast('Chức năng bình luận chưa triển khai', 'info');
-    setAnchorEl(null);
-  };
-
-  const handleAttachClick = (e) => {
-    e.stopPropagation();
-    showToast('Chức năng đính kèm chưa triển khai', 'info');
-    setAnchorEl(null);
-  };
-
   return (
     <>
       <Box
@@ -258,10 +247,10 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
         {...attributes}
         {...listeners}
         sx={{
-          mb: 1.5,
-          p: 1.5,
+          mb: 0.5,
+          p: 0,
           bgcolor: getCardBackgroundColor(card.process),
-          borderRadius: '8px',
+          borderRadius: '4px',
           boxShadow: '0 1px 0 rgba(9, 30, 66, 0.25)',
           cursor: 'grab',
           position: 'relative',
@@ -275,100 +264,90 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           },
         }}
       >
-        {/* Image */}
+        {/* Phần hình ảnh phía trên */}
         {card.image && (
-          <Avatar
-            src={card.image}
-            alt={card.title}
-            variant="square"
+          <Box
             sx={{
               width: '100%',
-              height: '100%',
-              mb: 1.5,
-              borderRadius: '8px',
-              mx: 'auto',
-              my: 1.5,
-            }}
-          />
-        )}
-        {/* Updated Date và User Avatar */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography
-            variant="body2"
-            sx={{
-              color: '#5E6C84',
-              textAlign: 'left',
+              height: '120px',
+              borderRadius: '4px 4px 0 0',
+              overflow: 'hidden',
             }}
           >
-            {formatDate(card.updatedAt)}
-          </Typography>
-          {user && (
             <Avatar
-              src={user.avatar || 'https://via.placeholder.com/24'}
-              alt={user.username}
-              sx={{ width: 24, height: 24 }}
+              src={card.image}
+              alt={card.title}
+              variant="square"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
             />
-          )}
-        </Box>
-        {/* Title */}
-        <Typography
-          variant="body1"
-          sx={{
-            fontSize: '14px',
-            color: '#172B4D',
-            textAlign: 'left',
-            overflow: 'hidden',
-            whiteSpace: 'normal',
-            mb: 1,
-          }}
-        >
-          {card.title}
-        </Typography>
-        {/* Menu và Icons */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <IconButton
-            size="small"
-            onClick={handleMenuClick}
+          </Box>
+        )}
+        {/* Phần nội dung phía dưới */}
+        <Box sx={{ flexGrow: 1, p: 1.5 }}>
+          {/* Title và IconButton */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+            <Typography
+              variant="h6"
+              sx={{
+                fontSize: '16px',
+                color: '#172B4D',
+                textAlign: 'left',
+                overflow: 'hidden',
+                whiteSpace: 'normal',
+                flexGrow: 1,
+              }}
+            >
+              {card.title}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={handleMenuClick}
+              sx={{
+                bgcolor: '#F0F0F0',
+                '&:hover': { bgcolor: '#E0E0E0' },
+                padding: '4px',
+              }}
+            >
+              <MoreHorizIcon sx={{ fontSize: '16px' }} />
+            </IconButton>
+          </Box>
+          {/* Ngày với icon, bọc trong khung */}
+          <Box
             sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '4px',
+              display: 'inline-flex', // Ôm sát nội dung
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              mb: 1,
+              border: '1px solid #000000', // Đường viền màu đen
+              borderRadius: '4px',
+              padding: '2px 4px', // Giảm padding để ôm sát nội dung
             }}
           >
-            <MoreVertIcon sx={{ fontSize: '16px' }} />
-          </IconButton>
-          <Stack direction="row" spacing={0.5}>
-            <IconButton
-              size="small"
-              onClick={handleCommentClick}
-              sx={{
-                bgcolor: '#F0F0F0',
-                '&:hover': { bgcolor: '#E0E0E0' },
-                padding: '4px',
-              }}
-            >
-              <CommentIcon sx={{ fontSize: '12px' }} />
-            </IconButton>
-            <IconButton
-              size="small"
-              onClick={handleAttachClick}
-              sx={{
-                bgcolor: '#F0F0F0',
-                '&:hover': { bgcolor: '#E0E0E0' },
-                padding: '4px',
-              }}
-            >
-              <AttachFileIcon sx={{ fontSize: '12px' }} />
-            </IconButton>
-          </Stack>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <CalendarTodayIcon sx={{ fontSize: '14px', color: '#5E6C84' }} />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#5E6C84',
+                  textAlign: 'left',
+                }}
+              >
+                {formatDate(card.updatedAt)}
+              </Typography>
+            </Stack>
+          </Box>
         </Box>
         {/* Menu */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={handleMenuClose}
-          anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
           <MenuItem onClick={handleEditClick}>
             <ListItemIcon>
