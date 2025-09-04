@@ -206,15 +206,15 @@ function App() {
               }
             />
             <Route
-              path="/calendar"
+              path="/boards/:boardId/calendar"
               element={
-                <PrivateRoute token={token} component={<Calendar />} />
+                <PrivateRoute token={token} component={<Calendar token={token} />} />
               }
-              />
+            />
             <Route
-              path="/summary"
+              path="/boards/:boardId/summary"
               element={
-                <PrivateRoute token={token} component={<Summary />} />
+                <PrivateRoute token={token} component={<Summary token={token} />} />
               }
             />
             <Route path="*" element={<NotFound />} />

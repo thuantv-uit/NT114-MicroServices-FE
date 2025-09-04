@@ -32,7 +32,7 @@ import CodeIcon from '@mui/icons-material/Code';
 import PagesIcon from '@mui/icons-material/Pages';
 import BallotIcon from '@mui/icons-material/Ballot';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import DashboardIcon from '@mui/icons-material/Dashboard';
+// import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 // Styled components
@@ -165,7 +165,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     board?.backgroundColorUpdatedAt &&
     new Date(board.backgroundImageUpdatedAt) > new Date(board.backgroundColorUpdatedAt);
 
-  // Navigation items
+  // Navigation items - Định nghĩa các item navigation, với path dẫn đến route trong App.js
   const navItems = [
     { name: 'Summary', icon: <SummarizeIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/summary` },
     { name: 'Board', icon: <ViewKanbanIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}` },
@@ -179,45 +179,30 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   return (
     <Box
       sx={{
-        backgroundImage: isImageLatest && board?.backgroundImage ? `url(${board.backgroundImage})` : 'none',
-        backgroundColor: !isImageLatest ? board?.backgroundColor || '#FFFFFF' : 'transparent',
+        p: 2,
+        backgroundColor: isImageLatest ? 'transparent' : board?.backgroundColor || '#FFFFFF',
+        backgroundImage: isImageLatest ? `url(${board?.backgroundImage})` : 'none',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        minHeight: '100vh',
-        width: '100%',
-        pt: 0,
-        px: 1,
-        boxSizing: 'border-box',
-        overflow: 'auto',
+        minHeight: 'calc(100vh - 64px)',
+        color: '#172B4D',
       }}
     >
-      {/* Phần phía trên: Header với title, description, nav items, và action buttons */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 1,
-          minHeight: 'auto',
-          mt: 1,
-        }}
-      >
-        <Box sx={{ pl: 2 }}>
-          {board ? (
-            <>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <DashboardIcon sx={{ mr: 1, color: '#172B4D' }} />
-                <Typography
-                  variant="h5"
-                  sx={{
-                    fontWeight: 'bold',
-                    color: '#172B4D',
-                    lineHeight: 1.4,
-                  }}
-                >
-                  {board.title}
-                </Typography>
-              </Box>
+      {/* Header section */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        {board ? (
+          <>
+            <Box sx={{ flex: 1 }}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontWeight: 'bold',
+                  color: '#172B4D',
+                  lineHeight: 1.4,
+                }}
+              >
+                {board.title}
+              </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <DescriptionIcon sx={{ mr: 1, color: '#5E6C84' }} />
                 <Typography
@@ -227,79 +212,79 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                   {board.description || 'Không có mô tả.'}
                 </Typography>
               </Box>
-              {/* Navigation items */}
+              {/* Navigation items - Khi click, navigate đến path tương ứng trong App.js */}
               <Box sx={{ display: 'flex', gap: 2, mt: 1, alignItems: 'center' }}>
                 {navItems.map((item) => (
                   <NavItem
                     key={item.name}
                     isActive={location.pathname === item.path}
-                    onClick={() => navigate(item.path)}
+                    onClick={() => navigate(item.path)} // Chuyển hướng đến route Summary hoặc Calendar khi click
                   >
                     {item.icon}
                     <Typography variant="body1">{item.name}</Typography>
                   </NavItem>
                 ))}
               </Box>
-            </>
-          ) : (
-            <Typography variant="h5">Đang tải...</Typography>
-          )}
-        </Box>
-        {/* Action buttons (loại bỏ Create Column) */}
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          <Tooltip title="Đổi nền">
-            <IconButton
-              color="primary"
-              onClick={() => setOpenBackgroundDialog(true)}
-              sx={{
-                bgcolor: 'rgba(0, 0, 0, 0.05)',
-                '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                p: 1,
-              }}
-            >
-              <PaletteIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Cập nhật bảng">
-            <IconButton
-              color="primary"
-              onClick={() => setOpenUpdateDialog(true)}
-              sx={{
-                bgcolor: 'rgba(0, 0, 0, 0.05)',
-                '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                p: 1,
-              }}
-            >
-              <EditIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Xóa bảng">
-            <IconButton
-              color="error"
-              onClick={() => setOpenDeleteDialog(true)}
-              sx={{
-                bgcolor: 'rgba(0, 0, 0, 0.05)',
-                '&:hover': { bgcolor: 'rgba(235, 90, 90, 0.2)' },
-                p: 1,
-              }}
-            >
-              <DeleteIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title="Mời người dùng">
-            <IconButton
-              color="primary"
-              onClick={() => setOpenInviteBoard(true)}
-              sx={{
-                bgcolor: 'rgba(0, 0, 0, 0.05)',
-                '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                p: 1,
-              }}
-            >
-              <PersonAddIcon fontSize="medium" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+            </Box>
+            {/* Action buttons */}
+            <Box sx={{ display: 'flex', gap: 0.5 }}>
+              <Tooltip title="Đổi nền">
+                <IconButton
+                  color="primary"
+                  onClick={() => setOpenBackgroundDialog(true)}
+                  sx={{
+                    bgcolor: 'rgba(0, 0, 0, 0.05)',
+                    '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
+                    p: 1,
+                  }}
+                >
+                  <PaletteIcon fontSize="medium" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Cập nhật bảng">
+                <IconButton
+                  color="primary"
+                  onClick={() => setOpenUpdateDialog(true)}
+                  sx={{
+                    bgcolor: 'rgba(0, 0, 0, 0.05)',
+                    '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
+                    p: 1,
+                  }}
+                >
+                  <EditIcon fontSize="medium" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Xóa bảng">
+                <IconButton
+                  color="error"
+                  onClick={() => setOpenDeleteDialog(true)}
+                  sx={{
+                    bgcolor: 'rgba(0, 0, 0, 0.05)',
+                    '&:hover': { bgcolor: 'rgba(235, 90, 90, 0.2)' },
+                    p: 1,
+                  }}
+                >
+                  <DeleteIcon fontSize="medium" />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Mời người dùng">
+                <IconButton
+                  color="primary"
+                  onClick={() => setOpenInviteBoard(true)}
+                  sx={{
+                    bgcolor: 'rgba(0, 0, 0, 0.05)',
+                    '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
+                    p: 1,
+                  }}
+                >
+                  <PersonAddIcon fontSize="medium" />
+                </IconButton>
+              </Tooltip>
+            </Box>
+          </>
+        ) : (
+          <Typography variant="h5">Đang tải...</Typography>
+        )}
       </Box>
 
       {/* Thanh ngang phân cách hai phần */}

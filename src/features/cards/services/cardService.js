@@ -18,6 +18,18 @@ export const fetchCards = async (columnId) => {
 };
 
 /**
+ * Fetch cards by board ID (new function for process and deadline)
+ * @param {string} boardId - Board ID
+ * @returns {Promise<Array>} List of cards with title, deadline, process
+ */
+export const fetchCardsByBoard = async (boardId) => {
+  return handleApiCall(
+    () => cardInstance.get(`/board/${boardId}`).then(res => res.data),
+    'Fetch cards by board'
+  );
+};
+
+/**
  * Create a new card
  * @param {string} title - Card title
  * @param {string} description - Card description
