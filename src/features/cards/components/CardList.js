@@ -30,11 +30,12 @@ import LinearScaleIcon from '@mui/icons-material/LinearScale';
 import ImageIcon from '@mui/icons-material/Image';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import { updateProcess, updateCardImage } from '../services/cardService';
+import EventIcon from '@mui/icons-material/Event'; // Thêm icon cho deadline
+import { updateCard, updateCardImage } from '../services/cardService'; // Đổi từ updateProcess thành updateCard
 import { getUserById } from '../../users/services/userService';
 import { useNavigate } from 'react-router-dom';
 
-// Hàm tính màu sắc dựa trên process
+// Hàm tính màu sắc dựa trên process (giữ nguyên)
 const getCardBackgroundColor = (process) => {
   const colors = {
     0: { r: 255, g: 0, b: 0 },
@@ -133,6 +134,9 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
   const [processError, setProcessError] = useState('');
   const [openImageDialog, setOpenImageDialog] = useState(false);
   const [imageFile, setImageFile] = useState(null);
+  const [openDeadlineDialog, setOpenDeadlineDialog] = useState(false); // Thêm state cho dialog deadline
+  const [deadlineValue, setDeadlineValue] = useState(card.deadline ? new Date(card.deadline).toISOString().split('T')[0] : ''); // Format YYYY-MM-DD
+  const [deadlineError, setDeadlineError] = useState('');
   const [anchorEl, setAnchorEl] = useState(null);
   const [user, setUser] = useState(null);
 
@@ -191,7 +195,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     }
 
     try {
-      await updateProcess(card._id, { process: processNum }, token);
+      await updateCard(card._id, { process: processNum }, token);
       showToast('Cập nhật mức độ hoàn thành thành công!', 'success');
       handleCloseProcessDialog();
       onRefresh();
@@ -228,6 +232,35 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
       onRefresh();
     } catch (err) {
       showToast(err.message || 'Không thể cập nhật ảnh thẻ', 'error');
+    }
+  };
+
+  const handleOpenDeadlineDialog = (e) => {
+    e.stopPropagation();
+    setDeadlineValue(card.deadline ? new Date(card.deadline).toISOString().split('T')[0] : '');
+    setDeadlineError('');
+    setOpenDeadlineDialog(true);
+    setAnchorEl(null);
+  };
+
+  const handleCloseDeadlineDialog = () => {
+    setOpenDeadlineDialog(false);
+    setDeadlineError('');
+  };
+
+  const handleUpdateDeadline = async () => {
+    if (!deadlineValue) {
+      setDeadlineError('Vui lòng chọn ngày deadline');
+      return;
+    }
+
+    try {
+      await updateCard(card._id, { deadline: new Date(deadlineValue).toISOString() }, token); // Gửi dưới dạng ISO string
+      showToast('Cập nhật deadline thành công!', 'success');
+      handleCloseDeadlineDialog();
+      onRefresh();
+    } catch (err) {
+      showToast(err.message || 'Không thể cập nhật deadline', 'error');
     }
   };
 
@@ -327,7 +360,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
               <MoreHorizIcon sx={{ fontSize: '16px' }} />
             </IconButton>
           </Box>
-          {/* Ngày với icon, bọc trong khung */}
+          {/* Ngày với icon, bọc trong khung - Thay updatedAt bằng deadline */}
           <Box
             sx={{
               display: 'inline-flex',
@@ -348,12 +381,12 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
                   textAlign: 'left',
                 }}
               >
-                {formatDate(card.updatedAt)}
+                {card.deadline ? formatDate(card.deadline) : 'Chưa đặt deadline'}
               </Typography>
             </Stack>
           </Box>
         </Box>
-        {/* Menu */}
+        {/* Menu - Thêm MenuItem cho deadline */}
         <Menu
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
@@ -379,10 +412,16 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
             </ListItemIcon>
             Cập nhật ảnh
           </MenuItem>
+          <MenuItem onClick={handleOpenDeadlineDialog}>
+            <ListItemIcon>
+              <EventIcon fontSize="small" />
+            </ListItemIcon>
+            Cập nhật deadline
+          </MenuItem>
         </Menu>
       </Box>
 
-      {/* Dialog để chỉnh sửa process */}
+      {/* Dialog để chỉnh sửa process (giữ nguyên) */}
       <Dialog open={openProcessDialog} onClose={handleCloseProcessDialog}>
         <DialogTitle>Chỉnh sửa mức độ hoàn thành</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
@@ -426,7 +465,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
         </DialogActions>
       </Dialog>
 
-      {/* Dialog để cập nhật ảnh */}
+      {/* Dialog để cập nhật ảnh (giữ nguyên) */}
       <Dialog open={openImageDialog} onClose={handleCloseImageDialog}>
         <DialogTitle>Cập nhật ảnh thẻ</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
@@ -442,6 +481,35 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
         <DialogActions>
           <Button onClick={handleCloseImageDialog}>Hủy</Button>
           <Button onClick={handleUpdateImage} color="primary" disabled={!imageFile}>
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog mới để cập nhật deadline */}
+      <Dialog open={openDeadlineDialog} onClose={handleCloseDeadlineDialog}>
+        <DialogTitle>Cập nhật deadline</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ px: 2, py: 1 }}>
+            <Input
+              type="date"
+              value={deadlineValue}
+              onChange={(e) => {
+                setDeadlineValue(e.target.value);
+                setDeadlineError('');
+              }}
+              sx={{ mb: 1, width: '100%' }}
+            />
+            {deadlineError && (
+              <FormHelperText error sx={{ mt: 1 }}>
+                {deadlineError}
+              </FormHelperText>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeadlineDialog}>Hủy</Button>
+          <Button onClick={handleUpdateDeadline} color="primary">
             Lưu
           </Button>
         </DialogActions>

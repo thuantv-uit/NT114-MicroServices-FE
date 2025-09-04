@@ -44,47 +44,28 @@ export const createCard = async (title, description, columnId) => {
 };
 
 /**
- * Update a card
+ * Update a card (hỗ trợ title, description, process, deadline)
  * @param {string} cardId - Card ID
- * @param {string} title - Card title
- * @param {string} description - Card description
+ * @param {Object} updates - Các trường cần cập nhật (title, description, process, deadline)
  * @returns {Promise<Object>} Updated card
  */
-export const updateProcess = async (cardId, updates = {}) => {
+export const updateCard = async (cardId, updates = {}) => {
   return handleApiCall(
     async () => {
-      // Chỉ gửi các trường được cung cấp (title, description, process)
+      // Chỉ gửi các trường được cung cấp
       const body = {};
       if (updates.title !== undefined) body.title = updates.title;
       if (updates.description !== undefined) body.description = updates.description;
       if (updates.process !== undefined) body.process = updates.process;
+      if (updates.deadline !== undefined) body.deadline = updates.deadline; // Thêm hỗ trợ deadline
 
       const response = await cardInstance.put(`/${cardId}`, body);
       return response.data;
     },
     'Cập nhật thẻ',
     (error) => {
-      // Xử lý lỗi chi tiết
       if (error.response) {
-        const message = error.ređponse.data.message || 'Không thể cập nhật thẻ';
-        throw new Error(message);
-      }
-      throw error;
-    }
-  );
-};
-
-export const updateCard = async (cardId, title, description) => {
-  return handleApiCall(
-    async () => {
-      const response = await cardInstance.put(`/${cardId}`, { title, description });
-      return response.data;
-    },
-    'Update card',
-    (error) => {
-      // Xử lý lỗi chi tiết
-      if (error.response) {
-        const message = error.response.data.message || 'Failed to update card';
+        const message = error.response.data.message || 'Không thể cập nhật thẻ';
         throw new Error(message);
       }
       throw error;
@@ -105,7 +86,6 @@ export const deleteCard = async (cardId) => {
     },
     'Delete card',
     (error) => {
-      // Xử lý lỗi chi tiết
       if (error.response) {
         const message = error.response.data.message || 'Failed to delete card';
         throw new Error(message);
