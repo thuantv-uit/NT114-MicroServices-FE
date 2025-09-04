@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, ButtonGroup, Stack } from '@mui/material';
+import { Box, Typography, TextField, Button, ButtonGroup, Stack, List, ListItem, ListItemText, ListItemAvatar, Avatar } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import SendIcon from '@mui/icons-material/Send';
+import CommentIcon from '@mui/icons-material/Comment';
 
-const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, handleClose, loading }) => {
+const EditCardLeftPanel = ({
+  formValues,
+  errors,
+  handleChange,
+  handleSubmit,
+  handleClose,
+  loading,
+  comments,
+  commentText,
+  commentError,
+  handleCommentChange,
+  handleAddComment,
+}) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   const handleTitleClick = () => {
@@ -16,6 +30,11 @@ const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, han
 
   const handleTitleBlur = () => {
     setIsEditingTitle(false);
+  };
+
+  const handleCommentSubmit = (e) => {
+    e.preventDefault();
+    handleAddComment();
   };
 
   return (
@@ -41,23 +60,23 @@ const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, han
         <TextField
           fullWidth
           name="title"
-          value={formValues.title} // Giữ nguyên nội dung cũ
+          value={formValues.title}
           onChange={handleTitleChange}
           onBlur={handleTitleBlur}
           autoFocus
           sx={{
             mb: 2,
             '& .MuiOutlinedInput-root': {
-              borderRadius: 0, // Khung vuông vức
+              borderRadius: 0,
             },
           }}
         />
       )}
       <TextField
         fullWidth
-        label="Description" // Đặt "Description" làm label trực tiếp trên khung
+        label="Description"
         name="description"
-        value={formValues.description} // Giữ nguyên nội dung cũ
+        value={formValues.description}
         onChange={handleChange}
         error={!!errors.description}
         helperText={errors.description}
@@ -66,14 +85,14 @@ const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, han
         minRows={3}
         disabled={loading}
         sx={{
-          mb: 0, // Loại bỏ margin bottom để sát khung
+          mb: 0,
           '& .MuiOutlinedInput-root': {
-            borderRadius: 0, // Khung vuông vức
-            width: '100%', // Chiều dài hết cỡ
+            borderRadius: 0,
+            width: '100%',
           },
         }}
       />
-      <Stack direction="row" spacing={0.5} sx={{ mt: 1, padding: 0, margin: 0 }}> {/* Tăng mt để cách ra 1 tí */}
+      <Stack direction="row" spacing={0.5} sx={{ mt: 1, padding: 0, margin: 0 }}>
         <Button
           type="submit"
           variant="contained"
@@ -82,9 +101,9 @@ const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, han
           disabled={loading}
           startIcon={<SaveIcon />}
           sx={{
-            fontSize: '12px', // Giảm kích thước font
-            padding: '4px 8px', // Giảm padding
-            borderRadius: '2px', // Giảm bo góc
+            fontSize: '12px',
+            padding: '4px 8px',
+            borderRadius: '2px',
             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
             '&:hover': {
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
@@ -100,9 +119,9 @@ const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, han
           disabled={loading}
           startIcon={<CancelIcon />}
           sx={{
-            fontSize: '12px', // Giảm kích thước font
-            padding: '4px 8px', // Giảm padding
-            borderRadius: '2px', // Giảm bo góc
+            fontSize: '12px',
+            padding: '4px 8px',
+            borderRadius: '2px',
             boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
             '&:hover': {
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
@@ -122,17 +141,105 @@ const EditCardLeftPanel = ({ formValues, errors, handleChange, handleSubmit, han
           <Button>History</Button>
           <Button>Work log</Button>
         </ButtonGroup>
-      </Box>
-      <Box sx={{ mt: 3 }}>
-        <TextField
-          fullWidth
-          label="Enter additional details (to be updated later)"
-          multiline
-          rows={4}
-          placeholder="Add notes or details here..."
-          disabled={true}
-          sx={{ mb: 2 }}
-        />
+        <Box sx={{ mt: 2 }}>
+          <form onSubmit={handleCommentSubmit}>
+            <TextField
+              fullWidth
+              label="Add a comment"
+              value={commentText}
+              onChange={handleCommentChange}
+              error={!!commentError}
+              helperText={commentError}
+              multiline
+              rows={2}
+              disabled={loading}
+              sx={{
+                mb: 1,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#3b4252' : '#fff',
+                },
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              disabled={loading || !commentText.trim()}
+              startIcon={<SendIcon />}
+              sx={{
+                fontSize: '12px',
+                padding: '6px 12px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                '&:hover': {
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
+                  backgroundColor: (theme) => theme.palette.primary.dark,
+                },
+              }}
+            >
+              Add Comment
+            </Button>
+          </form>
+          <List sx={{ mt: 2, maxHeight: '300px', overflowY: 'auto' }}>
+            {comments.length > 0 ? (
+              comments.map((comment, index) => (
+                <ListItem
+                  key={index}
+                  sx={{
+                    mb: 1,
+                    borderRadius: '8px',
+                    border: (theme) => `1px solid ${theme.palette.divider}`,
+                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#3b4252' : '#f5f6f8',
+                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+                    p: 2,
+                  }}
+                >
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: (theme) => theme.palette.primary.light, width: 32, height: 32 }}>
+                      <CommentIcon fontSize="small" />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <ListItemText
+                    primary={comment.text}
+                    secondary={new Date(comment.createdAt).toLocaleString('vi-VN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                    primaryTypographyProps={{
+                      variant: 'body1',
+                      sx: { fontWeight: '500', color: (theme) => theme.palette.text.primary },
+                    }}
+                    secondaryTypographyProps={{
+                      variant: 'caption',
+                      sx: { color: (theme) => theme.palette.text.secondary },
+                    }}
+                  />
+                </ListItem>
+              ))
+            ) : (
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  p: 2,
+                  borderRadius: '8px',
+                  border: (theme) => `1px solid ${theme.palette.divider}`,
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#3b4252' : '#f5f6f8',
+                }}
+              >
+                <CommentIcon sx={{ mr: 1, color: (theme) => theme.palette.text.secondary }} />
+                <Typography variant="body2" color="text.secondary">
+                  No comments yet.
+                </Typography>
+              </Box>
+            )}
+          </List>
+        </Box>
       </Box>
     </Box>
   );

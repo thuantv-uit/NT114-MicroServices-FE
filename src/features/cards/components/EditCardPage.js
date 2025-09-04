@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { updateCard, fetchCards } from '../services/cardService';
+import { updateCard, fetchCardById, addComment } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 import { validateCardForm } from '../../../utils/validateUtils';
 import Modal from '@mui/material/Modal';
@@ -22,41 +22,48 @@ const EditCardPage = ({ token }) => {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
-  const [processValue, setProcessValue] = useState(0); // Giả lập mức độ hoàn thành
+  const [processValue, setProcessValue] = useState(0);
   const [processError, setProcessError] = useState('');
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState('');
+  const [commentError, setCommentError] = useState('');
 
   useEffect(() => {
     const loadCard = async () => {
       if (!token) {
         showToast('Authentication token is missing', 'error');
-        navigate(`/boards/${boardId}`);
+        navigate(`/boards/${boardId || 'dashboard'}`);
+        return;
+      }
+      if (!boardId || !columnId) {
+        showToast('Missing board or column information', 'error');
+        navigate('/dashboard');
         return;
       }
       setLoading(true);
       try {
-        const cards = await fetchCards(columnId);
-        const card = cards.find((c) => c._id === cardId);
+        const card = await fetchCardById(cardId);
         if (card) {
           setFormValues({ title: card.title, description: card.description || '' });
-          setProcessValue(card.process || 0); // Giả lập process từ card
+          setProcessValue(card.process || 0);
+          setComments(card.comments || []);
         } else {
           showToast('Card not found', 'error');
           navigate(`/boards/${boardId}`);
         }
       } catch (err) {
+        console.error('Error fetching card:', err);
         showToast(err.message || 'Failed to load card', 'error');
-        navigate(`/boards/${boardId}`);
+        navigate(`/boards/${boardId || 'dashboard'}`);
       } finally {
         setLoading(false);
       }
     };
-    if (!state?.title && columnId) {
-      loadCard();
-    }
-  }, [cardId, columnId, boardId, token]);
+    loadCard();
+  }, [cardId, token]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target || e; // Hỗ trợ cả event và object
+    const { name, value } = e.target || e;
     setFormValues((prev) => ({ ...prev, [name]: value }));
     const validationErrors = validateCardForm({ ...formValues, [name]: value });
     setErrors((prev) => ({ ...prev, [name]: validationErrors[name] }));
@@ -66,13 +73,16 @@ const EditCardPage = ({ token }) => {
     e.preventDefault();
     const validationErrors = validateCardForm(formValues);
     setErrors(validationErrors);
+    if (Object.keys(validationErrors).length > 0) {
+      return;
+    }
     if (!token) {
       showToast('Authentication token is missing', 'error');
       return;
     }
     setLoading(true);
     try {
-      await updateCard(cardId, formValues.title, formValues.description);
+      await updateCard(cardId, formValues);
       showToast('Card updated successfully!', 'success');
       setTimeout(() => navigate(`/boards/${boardId}`), 1500);
     } catch (err) {
@@ -90,15 +100,43 @@ const EditCardPage = ({ token }) => {
     }
     setProcessError('');
     try {
-      // Logic cập nhật process (giả lập, cần tích hợp API thực tế)
+      await updateCard(cardId, { process: processNum });
       showToast('Progress updated successfully!', 'success');
     } catch (err) {
       showToast(err.message || 'Failed to update progress', 'error');
     }
   };
 
+  const handleAddComment = async () => {
+    if (!commentText.trim()) {
+      setCommentError('Bình luận không được để trống');
+      return;
+    }
+    if (commentText.length > 1000) {
+      setCommentError('Bình luận không được vượt quá 1000 ký tự');
+      return;
+    }
+    setCommentError('');
+    setLoading(true);
+    try {
+      const newComment = await addComment(cardId, commentText);
+      setComments((prev) => [...prev, newComment]);
+      setCommentText('');
+      showToast('Comment added successfully!', 'success');
+    } catch (err) {
+      showToast(err.message || 'Failed to add comment', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCommentChange = (e) => {
+    setCommentText(e.target.value);
+    setCommentError('');
+  };
+
   const handleClose = () => {
-    navigate(`/boards/${boardId}`);
+    navigate(`/boards/${boardId || 'dashboard'}`);
   };
 
   return (
@@ -133,6 +171,11 @@ const EditCardPage = ({ token }) => {
             handleSubmit={handleSubmit}
             handleClose={handleClose}
             loading={loading}
+            comments={comments}
+            commentText={commentText}
+            commentError={commentError}
+            handleCommentChange={handleCommentChange}
+            handleAddComment={handleAddComment}
           />
           <EditCardRightPanel
             processValue={processValue}

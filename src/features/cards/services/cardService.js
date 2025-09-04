@@ -6,6 +6,18 @@ import { handleApiCall } from '../../../utils/apiHelper';
  */
 
 /**
+ * Fetch a single card by ID
+ * @param {string} cardId - Card ID
+ * @returns {Promise<Object>} Card data
+ */
+export const fetchCardById = async (cardId) => {
+  return handleApiCall(
+    () => cardInstance.get(`/${cardId}`).then(res => res.data),
+    'Fetch card by ID'
+  );
+};
+
+/**
  * Fetch cards by column ID
  * @param {string} columnId - Column ID
  * @returns {Promise<Array>} List of cards
@@ -18,7 +30,7 @@ export const fetchCards = async (columnId) => {
 };
 
 /**
- * Fetch cards by board ID (new function for process and deadline)
+ * Fetch cards by board ID
  * @param {string} boardId - Board ID
  * @returns {Promise<Array>} List of cards with title, deadline, process
  */
@@ -44,20 +56,19 @@ export const createCard = async (title, description, columnId) => {
 };
 
 /**
- * Update a card (hỗ trợ title, description, process, deadline)
+ * Update a card
  * @param {string} cardId - Card ID
- * @param {Object} updates - Các trường cần cập nhật (title, description, process, deadline)
+ * @param {Object} updates - Fields to update (title, description, process, deadline)
  * @returns {Promise<Object>} Updated card
  */
 export const updateCard = async (cardId, updates = {}) => {
   return handleApiCall(
     async () => {
-      // Chỉ gửi các trường được cung cấp
       const body = {};
       if (updates.title !== undefined) body.title = updates.title;
       if (updates.description !== undefined) body.description = updates.description;
       if (updates.process !== undefined) body.process = updates.process;
-      if (updates.deadline !== undefined) body.deadline = updates.deadline; // Thêm hỗ trợ deadline
+      if (updates.deadline !== undefined) body.deadline = updates.deadline;
 
       const response = await cardInstance.put(`/${cardId}`, body);
       return response.data;
@@ -113,5 +124,30 @@ export const updateCardImage = async (cardId, imageFile) => {
         })
         .then(res => res.data),
     'Update card image'
+  );
+};
+
+/**
+ * Add a comment to a card
+ * @param {string} cardId - Card ID
+ * @param {string} text - Comment text
+ * @returns {Promise<Object>} Created comment
+ */
+export const addComment = async (cardId, text) => {
+  return handleApiCall(
+    () => cardInstance.post(`/${cardId}/comments`, { text }).then(res => res.data),
+    'Add comment'
+  );
+};
+
+/**
+ * Fetch comments for a card
+ * @param {string} cardId - Card ID
+ * @returns {Promise<Array>} List of comments
+ */
+export const fetchCommentsByCard = async (cardId) => {
+  return handleApiCall(
+    () => cardInstance.get(`/${cardId}/comments`).then(res => res.data),
+    'Fetch comments'
   );
 };
