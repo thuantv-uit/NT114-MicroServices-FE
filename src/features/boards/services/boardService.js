@@ -48,11 +48,29 @@ export const fetchBoard = async (boardId) => {
  * @param {string} title - Board title
  * @param {string} description - Board description
  * @param {string} backgroundColor - Board background color (hex code)
+ * @param {FormData|string} backgroundImage - Board background image file or URL
  * @returns {Promise<Object>} Updated board
  */
-export const updateBoard = async (boardId, title, description, backgroundColor) => {
+export const updateBoard = async (boardId, title, description, backgroundColor, backgroundImage) => {
+  const formData = new FormData();
+  if (title !== undefined) formData.append('title', title);
+  if (description !== undefined) formData.append('description', description);
+  if (backgroundColor !== undefined) formData.append('backgroundColor', backgroundColor);
+  if (backgroundImage instanceof FormData) {
+    // FormData from ChangeBackground.js (file upload)
+    formData.append('backgroundImage', backgroundImage.get('backgroundImage'));
+  } else if (typeof backgroundImage === 'string') {
+    // String URL (e.g., from other components)
+    formData.append('backgroundImage', backgroundImage);
+  }
+
   return handleApiCall(
-    () => boardInstance.put(`/${boardId}`, { title, description, backgroundColor }).then(res => res.data),
+    () =>
+      boardInstance.put(`/${boardId}`, formData, {
+        headers: {
+          'Content-Type': backgroundImage instanceof FormData ? 'multipart/form-data' : 'application/json',
+        },
+      }).then((res) => res.data),
     'Update board'
   );
 };
@@ -79,5 +97,28 @@ export const inviteUser = async (boardId, email) => {
   return handleApiCall(
     () => boardInstance.post('/invite', { boardId, email }).then(res => res.data),
     'Invite user'
+  );
+};
+
+/**
+ * Fetch all users by board ID
+ * @param {string} boardId - Board ID
+ * @returns {Promise<Object>} Board data
+ */
+export const getBoardById = async (boardId) => {
+  return handleApiCall(
+    () => boardInstance.get(`all/${boardId}`),
+    'All User get Board by ID'
+  );
+};
+
+/**
+ * Fetch the ID of the latest board
+ * @returns {Promise<Object>} Object containing the latest board ID
+ */
+export const fetchLatestBoardId = async () => {
+  return handleApiCall(
+    () => boardInstance.get('/latest').then(res => res.data),
+    'Fetch latest board ID'
   );
 };

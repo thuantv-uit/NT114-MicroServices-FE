@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { Box, IconButton, Typography } from '@mui/material';
+import { Box, IconButton, Typography, Dialog, DialogContent } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
+import { extractBoardInfo, sendChatMessage, extractColumnTitle, extractEmail, analyzeActions } from './api';
+import ConfirmBoardCreation from '../boards/components/ConfirmBoardCreation';
+import ConfirmColumnCreation from '../columns/components/ConfirmColumnCreation';
+import ConfirmInvitation from '../invitations/components/ConfirmInvitation';
+import Invitation from '../invitations/components/Invitation';
 import './chatbot.css';
 
 /**
@@ -14,28 +19,98 @@ const Chatbot = ({ onClose }) => {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [context, setContext] = useState([]);
+  const [boardInfo, setBoardInfo] = useState({ title: '', description: '' });
+  const [latestBoardId, setLatestBoardId] = useState(null);
+  const [columnTitle, setColumnTitle] = useState('');
+  const [isConfirmBoardOpen, setIsConfirmBoardOpen] = useState(false);
+  const [isConfirmColumnOpen, setIsConfirmColumnOpen] = useState(false);
+  const [isConfirmInvitationOpen, setIsConfirmInvitationOpen] = useState(false);
+  const [pendingEmail, setPendingEmail] = useState('');
+  const [inviteData, setInviteData] = useState(null);
   const chatBodyRef = useRef(null);
 
-  const sendMessage = async (prompt) => {
+  const handleBoardConfirmClose = () => {
+    setIsConfirmBoardOpen(false);
+    setBoardInfo({ title: '', description: '' });
+  };
+
+  const handleBoardCreated = (boardId) => {
+    setLatestBoardId(boardId);
+    setMessages((prev) => [
+      ...prev,
+      { sender: 'bot', text: 'Board created successfully!' },
+    ]);
+  };
+
+  const handleColumnCreated = () => {
+    setMessages((prev) => [
+      ...prev,
+      { sender: 'bot', text: 'Column created successfully!' },
+    ]);
+  };
+
+  const handleCancelColumnConfirm = () => {
+    setIsConfirmColumnOpen(false);
+    setColumnTitle('');
+  };
+
+  const handleInvitationConfirmed = () => {
+    setIsConfirmInvitationOpen(false);
+    setInviteData({ email: pendingEmail, boardId: latestBoardId });
+  };
+
+  const handleCancelInvitation = () => {
+    setIsConfirmInvitationOpen(false);
+    setPendingEmail('');
+  };
+
+const sendMessage = async (prompt) => {
     if (!prompt.trim()) return;
 
     setMessages((prev) => [...prev, { sender: 'user', text: prompt }]);
     setInput('');
 
     try {
-      const response = await fetch('http://localhost:5000/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, context }),
-      });
-      const data = await response.json();
+      const actions = await analyzeActions(prompt);
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (actions.length === 0) {
+        const chatData = await sendChatMessage(prompt, context);
+        setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
+        setContext(chatData.context);
+        return;
       }
 
-      setMessages((prev) => [...prev, { sender: 'bot', text: data.response }]);
-      setContext(data.context);
+      actions.forEach((action, index) => {
+        setMessages((prev) => [
+          ...prev,
+          { sender: 'bot', text: `Action ${index + 1}: Type: ${action.type}, Data: ${action.data}` },
+        ]);
+      });
+
+      // Xử lý ưu tiên: create_board, invite_user, create_column
+      for (const action of actions) {
+        if (action.type === 'create_board') {
+          const extractedData = await extractBoardInfo(action.data);
+          const { title, description } = extractedData;
+          setBoardInfo({ title, description });
+          setIsConfirmBoardOpen(true);
+        } else if (action.type === 'invite_user') {
+          const extractedEmail = await extractEmail(action.data);
+          setPendingEmail(extractedEmail);
+          setIsConfirmInvitationOpen(true);
+        } else if (action.type === 'create_column') {
+          const columnData = await extractColumnTitle(action.data);
+          const extractedTitle = columnData.title;
+          setColumnTitle(extractedTitle);
+          setIsConfirmColumnOpen(true);
+        }
+      }
+
+      if (actions.every(action => !['create_board', 'invite_user', 'create_column'].includes(action.type))) {
+        const chatData = await sendChatMessage(prompt, context);
+        setMessages((prev) => [...prev, { sender: 'bot', text: chatData.response }]);
+        setContext(chatData.context);
+      }
     } catch (error) {
       setMessages((prev) => [
         ...prev,
@@ -60,6 +135,16 @@ const Chatbot = ({ onClose }) => {
     }
   }, [messages]);
 
+  const textareaRef = useRef(null);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset chiều cao
+      textarea.style.height = `${textarea.scrollHeight}px`; // Điều chỉnh theo nội dung
+    }
+  }, [input]);
+
   return (
     <Box className="chat-container">
       <Box className="chat-header">
@@ -72,7 +157,7 @@ const Chatbot = ({ onClose }) => {
         {messages.length === 0 ? (
           <Box className="message bot welcome">
             <ReactMarkdown>
-              Welcome to TimelineBot! Ask about boards, columns, cards, or anything else.
+              Welcome to TimelineBot! Ask about boards, columns, cards, or say "create board" to extract board info, "create column" to extract column title, or "invite user with email" to extract an email.
             </ReactMarkdown>
           </Box>
         ) : (
@@ -84,13 +169,13 @@ const Chatbot = ({ onClose }) => {
         )}
       </Box>
       <Box className="chat-input-container">
-        <input
+        <textarea
           className="chat-input"
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask about boards, columns, cards..."
+          placeholder="Ask about boards, columns, cards,..."
         />
         <button
           className="send-button"
@@ -100,6 +185,57 @@ const Chatbot = ({ onClose }) => {
           Send
         </button>
       </Box>
+      <Dialog open={isConfirmBoardOpen} onClose={handleBoardConfirmClose}>
+        <DialogContent>
+          <ConfirmBoardCreation
+            title={boardInfo.title}
+            description={boardInfo.description}
+            onClose={handleBoardConfirmClose}
+            onBoardCreated={handleBoardCreated}
+          />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isConfirmColumnOpen} onClose={handleCancelColumnConfirm}>
+        <DialogContent>
+          <ConfirmColumnCreation
+            title={columnTitle}
+            boardId={latestBoardId}
+            onColumnCreated={handleColumnCreated}
+            onCancel={handleCancelColumnConfirm}
+          />
+        </DialogContent>
+      </Dialog>
+      <Dialog open={isConfirmInvitationOpen} onClose={handleCancelInvitation}>
+        <DialogContent>
+          <ConfirmInvitation
+            email={pendingEmail}
+            boardId={latestBoardId}
+            onConfirm={handleInvitationConfirmed}
+            onCancel={handleCancelInvitation}
+          />
+        </DialogContent>
+      </Dialog>
+      {inviteData && (
+        <Invitation
+          boardId={inviteData.boardId}
+          email={inviteData.email}
+          action="inviteToBoard"
+          onSuccess={(response) => {
+            setMessages((prev) => [
+              ...prev,
+              { sender: 'bot', text: 'Invitation sent successfully!' },
+            ]);
+            setInviteData(null);
+          }}
+          onError={(err) => {
+            setMessages((prev) => [
+              ...prev,
+              { sender: 'bot', text: `Failed to send invitation: ${err.message}` },
+            ]);
+            setInviteData(null);
+          }}
+        />
+      )}
     </Box>
   );
 };

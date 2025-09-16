@@ -1,78 +1,145 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { Box, Typography, Paper, IconButton } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
-import { CARD_PAPER_STYLE } from '../../../constants/styles';
+import { fetchCards } from '../services/cardService';
+import { showToast } from '../../../utils/toastUtils';
+import { Box, Typography } from '@mui/material';
+import {
+  DndContext,
+  closestCorners,
+  DragOverlay,
+  defaultDropAnimationSideEffects,
+} from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { Card, useDragAndDrop } from './CardList'; // Import from CardList.js
 
 /**
- * Component to display a card
+ * Thành phần hiển thị danh sách thẻ trong cột
  * @param {Object} props
- * @param {Object} props.card - Card data
- * @param {string} props.boardId - Board ID
- * @param {string} props.columnId - Column ID
- * @param {string} props.token - Authentication token
- * @param {Function} props.onEdit - Edit handler
- * @param {Function} props.onDelete - Delete handler
- * @param {Function} props.onRefresh - Refresh callback
+ * @param {string} props.columnId - ID của cột
+ * @param {string} props.token - Mã xác thực
+ * @param {string} props.boardId - ID của bảng
+ * @param {Object} props.column - Dữ liệu cột
+ * @param {Function} props.onRefresh - Hàm làm mới cột
  * @returns {JSX.Element}
  */
-const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onRefresh }) => {
+const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
+  const [cards, setCards] = useState([]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: card._id,
-    data: { ...card, type: 'CARD' },
-  });
 
-  const dndKitCardStyles = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+  // Sử dụng hàm Drag and Drop
+  const { sensors, activeCardId, activeCardData, handleDragStart, handleDragEnd } = useDragAndDrop(
+    cards,
+    setCards,
+    columnId,
+    column.title,
+    onRefresh
+  );
+
+  useEffect(() => {
+    const loadCards = async () => {
+      if (!token) {
+        showToast('Thiếu mã xác thực', 'error');
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await fetchCards(columnId);
+        const sortedCards = column.cardOrderIds
+          ? column.cardOrderIds
+              .map((cardId) => data.find((card) => card._id === cardId))
+              .filter((card) => card)
+          : data;
+        setCards(sortedCards);
+      } catch (err) {
+        showToast(err.message || 'Không thể tải thẻ', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadCards();
+  }, [columnId, column.cardOrderIds, token]);
+
+  const handleEdit = (card) => {
+    navigate(`/cards/${card._id}/edit`, {
+      state: {
+        title: card.title,
+        description: card.description,
+        boardId,
+        columnId,
+      },
+    });
+  };
+
+  const handleDelete = (cardId) => {
+    navigate(`/cards/${cardId}/delete`, { state: { boardId } });
+  };
+
+  const handleInviteUser = (card) => {
+    showToast(`Mời người dùng cho thẻ ${card._id} (chưa triển khai)`, 'info');
+  };
+
+  const customDropAnimation = {
+    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
   };
 
   return (
-    <div ref={setNodeRef} style={dndKitCardStyles} {...attributes} {...listeners}>
-      <Paper elevation={1} sx={CARD_PAPER_STYLE}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Typography variant="subtitle2">{card.title}</Typography>
-            {card.description && (
-              <Typography variant="body2" color="textSecondary">{card.description}</Typography>
-            )}
-          </Box>
-          <Box>
-            <IconButton
-              aria-label="edit"
-              onClick={() => onEdit(card)}
-              color="primary"
-              data-no-dnd="true"
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              aria-label="delete"
-              onClick={() => onDelete(card._id)}
-              color="error"
-              data-no-dnd="true"
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-            <IconButton
-              aria-label="assign-to-card"
-              onClick={() => navigate(`/cards/${card._id}/assign-to-card`, { state: { boardId, columnId } })}
-              color="primary"
-              data-no-dnd="true"
-            >
-              <AssignmentIndIcon fontSize="small" />
-            </IconButton>
-          </Box>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCorners}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
+        <Box
+          sx={{
+            mb: 0,
+            px: 0.25, // Giảm khoảng cách giữa card và lề trái/phải của column (2px)
+            mt: 0,
+          }}
+        >
+          {loading && (
+            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
+              Đang tải thẻ...
+            </Typography>
+          )}
+          {cards.length > 0 ? (
+            cards.map((card) => (
+              <Card
+                key={card._id}
+                card={card}
+                boardId={boardId}
+                columnId={columnId}
+                token={token}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onInviteUser={handleInviteUser}
+                onRefresh={onRefresh}
+              />
+            ))
+          ) : (
+            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
+              Không có thẻ trong cột này.
+            </Typography>
+          )}
         </Box>
-      </Paper>
-    </div>
+      </SortableContext>
+      <DragOverlay dropAnimation={customDropAnimation}>
+        {activeCardId && activeCardData ? (
+          <Card
+            card={activeCardData}
+            boardId={boardId}
+            columnId={columnId}
+            token={token}
+            onEdit={() => {}}
+            onDelete={() => {}}
+            onInviteUser={() => {}}
+            onRefresh={() => {}}
+          />
+        ) : null}
+      </DragOverlay>
+    </DndContext>
   );
 };
 
-export default Card;
+export default CardList;

@@ -1,36 +1,48 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { fetchCards, updateProcess } from '../services/cardService'; // Thêm updateCard
-import { updateColumn } from '../../columns/services/columnService';
-import { showToast } from '../../../utils/toastUtils';
-import { Box, IconButton, Stack, Typography, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
-import {
-  DndContext,
-  closestCorners,
-  useSensor,
-  useSensors,
-  DragOverlay,
-  defaultDropAnimationSideEffects
-} from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { arrayMove } from '@dnd-kit/sortable';
-import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import EditIcon from '@mui/icons-material/Edit';
+import { useSensor, useSensors } from '@dnd-kit/core';
+import { arrayMove } from '@dnd-kit/sortable';
+import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
+import { showToast } from '../../../utils/toastUtils';
+import { updateColumn } from '../../columns/services/columnService';
+import {
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  Input,
+  Slider,
+  FormHelperText,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  Avatar,
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LinearScaleIcon from '@mui/icons-material/LinearScale'; // Icon cho chỉnh sửa process
-import Slider from '@mui/material/Slider';
-import FormHelperText from '@mui/material/FormHelperText';
+import LinearScaleIcon from '@mui/icons-material/LinearScale';
+import ImageIcon from '@mui/icons-material/Image';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
+import EventIcon from '@mui/icons-material/Event'; // Thêm icon cho deadline
+import { updateCard, updateCardImage } from '../services/cardService'; // Đổi từ updateProcess thành updateCard
+import { getUserById } from '../../users/services/userService';
+import { useNavigate } from 'react-router-dom';
 
-// Hàm tính màu sắc dựa trên process (0: đỏ, 100: xanh lá)
+// Hàm tính màu sắc dựa trên process (giữ nguyên)
 const getCardBackgroundColor = (process) => {
   const colors = {
-    0: { r: 255, g: 0, b: 0 }, // Đỏ
-    25: { r: 255, g: 128, b: 0 }, // Cam
-    50: { r: 255, g: 255, b: 0 }, // Vàng
-    75: { r: 128, g: 255, b: 0 }, // Xanh lá nhạt
-    100: { r: 0, g: 255, b: 0 }, // Xanh lá
+    0: { r: 255, g: 0, b: 0 },
+    25: { r: 255, g: 128, b: 0 },
+    50: { r: 255, g: 255, b: 0 },
+    75: { r: 128, g: 255, b: 0 },
+    100: { r: 0, g: 255, b: 0 },
   };
 
   const processValues = Object.keys(colors).map(Number).sort((a, b) => a - b);
@@ -48,7 +60,64 @@ const getCardBackgroundColor = (process) => {
   return `rgb(${r}, ${g}, ${b})`;
 };
 
-// Component Card để hiển thị title và các icon hành động
+// Hàm xử lý Drag and Drop (giữ nguyên logic gốc)
+const useDragAndDrop = (cards, setCards, columnId, columnTitle, onRefresh) => {
+  const [activeCardId, setActiveCardId] = useState(null);
+  const [activeCardData, setActiveCardData] = useState(null);
+
+  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
+  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } });
+  const sensors = useSensors(mouseSensor, touchSensor);
+
+  const handleDragStart = (event) => {
+    setActiveCardId(event?.active?.id);
+    setActiveCardData(event?.active?.data?.current);
+  };
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    setActiveCardId(null);
+    setActiveCardData(null);
+
+    if (!active || !over || active.id === over.id) return;
+
+    const oldIndex = cards.findIndex((card) => card._id === active.id);
+    const newIndex = cards.findIndex((card) => card._id === over.id);
+
+    const newCards = arrayMove(cards, oldIndex, newIndex);
+    const newCardOrderIds = newCards.map((card) => card._id);
+
+    setCards(newCards);
+
+    try {
+      await updateColumn(columnId, columnTitle, newCardOrderIds);
+      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
+      onRefresh();
+    } catch (err) {
+      setCards(cards);
+      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
+    }
+  };
+
+  return {
+    sensors,
+    activeCardId,
+    activeCardData,
+    handleDragStart,
+    handleDragEnd,
+  };
+};
+
+// Hàm format ngày tháng
+const formatDate = (date) => {
+  const d = new Date(date);
+  const month = d.toLocaleString('en-US', { month: 'short' });
+  const day = String(d.getDate()).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${month} ${day}, ${year}`;
+};
+
+// Component Card
 const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, onRefresh }) => {
   const {
     attributes,
@@ -57,11 +126,34 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: card._id });
+  } = useSortable({ id: card._id, data: { ...card } });
+  const navigate = useNavigate();
 
   const [openProcessDialog, setOpenProcessDialog] = useState(false);
   const [processValue, setProcessValue] = useState(card.process);
   const [processError, setProcessError] = useState('');
+  const [openImageDialog, setOpenImageDialog] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [openDeadlineDialog, setOpenDeadlineDialog] = useState(false); // Thêm state cho dialog deadline
+  const [deadlineValue, setDeadlineValue] = useState(card.deadline ? new Date(card.deadline).toISOString().split('T')[0] : ''); // Format YYYY-MM-DD
+  const [deadlineError, setDeadlineError] = useState('');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [user, setUser] = useState(null);
+
+  // Lấy thông tin user tạo card
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (card.userId) {
+        try {
+          const userData = await getUserById(card.userId);
+          setUser(userData);
+        } catch (err) {
+          showToast(err.message || 'Không thể tải thông tin user', 'error');
+        }
+      }
+    };
+    fetchUser();
+  }, [card.userId]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -69,11 +161,25 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     opacity: isDragging ? 0.4 : 1,
   };
 
+  // Xử lý click vào tiêu đề để chuyển hướng đến trang chỉnh sửa
+  const handleTitleClick = (e) => {
+    e.stopPropagation();
+    navigate(`/cards/${card._id}/edit`, {
+      state: {
+        title: card.title,
+        description: card.description,
+        boardId,
+        columnId,
+      },
+    });
+  };
+
   const handleOpenProcessDialog = (e) => {
     e.stopPropagation();
     setProcessValue(card.process);
     setProcessError('');
     setOpenProcessDialog(true);
+    setAnchorEl(null);
   };
 
   const handleCloseProcessDialog = () => {
@@ -89,16 +195,91 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
     }
 
     try {
-      await updateProcess(card._id, { process: processNum }, token);
+      await updateCard(card._id, { process: processNum }, token);
       showToast('Cập nhật mức độ hoàn thành thành công!', 'success');
       handleCloseProcessDialog();
-      onRefresh(); // Làm mới danh sách thẻ
+      onRefresh();
     } catch (err) {
       showToast(err.message || 'Không thể cập nhật mức độ hoàn thành', 'error');
     }
   };
 
-return (
+  const handleOpenImageDialog = (e) => {
+    e.stopPropagation();
+    setImageFile(null);
+    setOpenImageDialog(true);
+    setAnchorEl(null);
+  };
+
+  const handleCloseImageDialog = () => {
+    setOpenImageDialog(false);
+  };
+
+  const handleImageChange = (event) => {
+    setImageFile(event.target.files[0]);
+  };
+
+  const handleUpdateImage = async () => {
+    if (!imageFile) {
+      showToast('Vui lòng chọn một file ảnh', 'error');
+      return;
+    }
+
+    try {
+      const response = await updateCardImage(card._id, imageFile);
+      showToast('Cập nhật ảnh thẻ thành công!', 'success');
+      handleCloseImageDialog();
+      onRefresh();
+    } catch (err) {
+      showToast(err.message || 'Không thể cập nhật ảnh thẻ', 'error');
+    }
+  };
+
+  const handleOpenDeadlineDialog = (e) => {
+    e.stopPropagation();
+    setDeadlineValue(card.deadline ? new Date(card.deadline).toISOString().split('T')[0] : '');
+    setDeadlineError('');
+    setOpenDeadlineDialog(true);
+    setAnchorEl(null);
+  };
+
+  const handleCloseDeadlineDialog = () => {
+    setOpenDeadlineDialog(false);
+    setDeadlineError('');
+  };
+
+  const handleUpdateDeadline = async () => {
+    if (!deadlineValue) {
+      setDeadlineError('Vui lòng chọn ngày deadline');
+      return;
+    }
+
+    try {
+      await updateCard(card._id, { deadline: new Date(deadlineValue).toISOString() }, token); // Gửi dưới dạng ISO string
+      showToast('Cập nhật deadline thành công!', 'success');
+      handleCloseDeadlineDialog();
+      onRefresh();
+    } catch (err) {
+      showToast(err.message || 'Không thể cập nhật deadline', 'error');
+    }
+  };
+
+  const handleMenuClick = (event) => {
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleDeleteClick = (e) => {
+    e.stopPropagation();
+    onDelete(card._id);
+    setAnchorEl(null);
+  };
+
+  return (
     <>
       <Box
         ref={setNodeRef}
@@ -106,10 +287,10 @@ return (
         {...attributes}
         {...listeners}
         sx={{
-          mb: 1,
-          p: 0.5,
+          mb: 0.5,
+          p: 0,
           bgcolor: getCardBackgroundColor(card.process),
-          borderRadius: '8px',
+          borderRadius: '4px',
           boxShadow: '0 1px 0 rgba(9, 30, 66, 0.25)',
           cursor: 'grab',
           position: 'relative',
@@ -123,80 +304,124 @@ return (
           },
         }}
       >
-        <Typography
-          variant="body1"
-          sx={{
-            fontWeight: 600,
-            fontSize: '14px',
-            color: '#172B4D',
-            textAlign: 'center',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-            flexGrow: 1,
-            padding: '2px 0',
-          }}
+        {/* Phần hình ảnh phía trên */}
+        {card.image && (
+          <Box
+            sx={{
+              width: '100%',
+              height: '120px',
+              borderRadius: '4px 4px 0 0',
+              overflow: 'hidden',
+            }}
+          >
+            <Avatar
+              src={card.image}
+              alt={card.title}
+              variant="square"
+              sx={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+              }}
+            />
+          </Box>
+        )}
+        {/* Phần nội dung phía dưới */}
+        <Box sx={{ flexGrow: 1, p: 1.5 }}>
+          {/* Title và IconButton */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 0.5 }}>
+            <Typography
+              variant="h6"
+              onClick={handleTitleClick}
+              sx={{
+                fontSize: '16px',
+                color: '#172B4D',
+                textAlign: 'left',
+                overflow: 'hidden',
+                whiteSpace: 'normal',
+                flexGrow: 1,
+                cursor: 'pointer',
+                '&:hover': {
+                  textDecoration: 'underline',
+                },
+              }}
+            >
+              {card.title}
+            </Typography>
+            <IconButton
+              size="small"
+              onClick={handleMenuClick}
+              sx={{
+                bgcolor: '#F0F0F0',
+                '&:hover': { bgcolor: '#E0E0E0' },
+                padding: '4px',
+              }}
+            >
+              <MoreHorizIcon sx={{ fontSize: '16px' }} />
+            </IconButton>
+          </Box>
+          {/* Ngày với icon, bọc trong khung - Thay updatedAt bằng deadline */}
+          <Box
+            sx={{
+              display: 'inline-flex',
+              justifyContent: 'flex-start',
+              alignItems: 'center',
+              mb: 1,
+              border: '1px solid #000000',
+              borderRadius: '4px',
+              padding: '2px 4px',
+            }}
+          >
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <CalendarTodayIcon sx={{ fontSize: '14px', color: '#5E6C84' }} />
+              <Typography
+                variant="body2"
+                sx={{
+                  color: '#5E6C84',
+                  textAlign: 'left',
+                }}
+              >
+                {card.deadline ? formatDate(card.deadline) : 'Chưa đặt deadline'}
+              </Typography>
+            </Stack>
+          </Box>
+        </Box>
+        {/* Menu - Thêm MenuItem cho deadline */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          {card.title}
-        </Typography>
-        <Stack
-          direction="row"
-          spacing={0.2}
-          sx={{
-            justifyContent: 'center',
-            opacity: 0,
-            '&:hover': {
-              opacity: 1,
-            },
-            mt: 0.25,
-          }}
-        >
-          <IconButton
-            color="primary"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(card);
-            }}
-            sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '2px',
-            }}
-          >
-            <EditIcon sx={{ fontSize: '12px' }} />
-          </IconButton>
-          <IconButton
-            color="error"
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(card._id);
-            }}
-            sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '2px',
-            }}
-          >
-            <DeleteIcon sx={{ fontSize: '12px' }} />
-          </IconButton>
-          <IconButton
-            color="info"
-            size="small"
-            onClick={handleOpenProcessDialog}
-            sx={{
-              bgcolor: '#F0F0F0',
-              '&:hover': { bgcolor: '#E0E0E0' },
-              padding: '2px',
-            }}
-          >
-            <LinearScaleIcon sx={{ fontSize: '12px' }} />
-          </IconButton>
-        </Stack>
+          <MenuItem onClick={handleDeleteClick}>
+            <ListItemIcon>
+              <DeleteIcon fontSize="small" />
+            </ListItemIcon>
+            Xóa
+          </MenuItem>
+          <MenuItem onClick={handleOpenProcessDialog}>
+            <ListItemIcon>
+              <LinearScaleIcon fontSize="small" />
+            </ListItemIcon>
+            Cập nhật tiến độ
+          </MenuItem>
+          <MenuItem onClick={handleOpenImageDialog}>
+            <ListItemIcon>
+              <ImageIcon fontSize="small" />
+            </ListItemIcon>
+            Cập nhật ảnh
+          </MenuItem>
+          <MenuItem onClick={handleOpenDeadlineDialog}>
+            <ListItemIcon>
+              <EventIcon fontSize="small" />
+            </ListItemIcon>
+            Cập nhật deadline
+          </MenuItem>
+        </Menu>
       </Box>
 
-      {/* Dialog để chỉnh sửa process với Slider */}
+      {/* Dialog để chỉnh sửa process (giữ nguyên) */}
       <Dialog open={openProcessDialog} onClose={handleCloseProcessDialog}>
         <DialogTitle>Chỉnh sửa mức độ hoàn thành</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
@@ -239,166 +464,58 @@ return (
           <Button onClick={handleUpdateProcess} color="primary">Lưu</Button>
         </DialogActions>
       </Dialog>
+
+      {/* Dialog để cập nhật ảnh (giữ nguyên) */}
+      <Dialog open={openImageDialog} onClose={handleCloseImageDialog}>
+        <DialogTitle>Cập nhật ảnh thẻ</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ px: 2, py: 1 }}>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              sx={{ mb: 1 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseImageDialog}>Hủy</Button>
+          <Button onClick={handleUpdateImage} color="primary" disabled={!imageFile}>
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog mới để cập nhật deadline */}
+      <Dialog open={openDeadlineDialog} onClose={handleCloseDeadlineDialog}>
+        <DialogTitle>Cập nhật deadline</DialogTitle>
+        <DialogContent sx={{ pt: 2 }}>
+          <Box sx={{ px: 2, py: 1 }}>
+            <Input
+              type="date"
+              value={deadlineValue}
+              onChange={(e) => {
+                setDeadlineValue(e.target.value);
+                setDeadlineError('');
+              }}
+              sx={{ mb: 1, width: '100%' }}
+            />
+            {deadlineError && (
+              <FormHelperText error sx={{ mt: 1 }}>
+                {deadlineError}
+              </FormHelperText>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDeadlineDialog}>Hủy</Button>
+          <Button onClick={handleUpdateDeadline} color="primary">
+            Lưu
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
-  
 };
 
-/**
- * Thành phần hiển thị danh sách thẻ trong cột
- * @param {Object} props
- * @param {string} props.columnId - ID của cột
- * @param {string} props.token - Mã xác thực
- * @param {string} props.boardId - ID của bảng
- * @param {Object} props.column - Dữ liệu cột
- * @param {Function} props.onRefresh - Hàm làm mới cột
- * @returns {JSX.Element}
- */
-const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
-  const [cards, setCards] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [activeCardId, setActiveCardId] = useState(null);
-  const [activeCardData, setActiveCardData] = useState(null);
-  const navigate = useNavigate();
-
-  const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
-  const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } });
-  const sensors = useSensors(mouseSensor, touchSensor);
-
-  useEffect(() => {
-    const loadCards = async () => {
-      if (!token) {
-        showToast('Thiếu mã xác thực', 'error');
-        return;
-      }
-      setLoading(true);
-      try {
-        const data = await fetchCards(columnId);
-        const sortedCards = column.cardOrderIds
-          ? column.cardOrderIds
-              .map((cardId) => data.find((card) => card._id === cardId))
-              .filter((card) => card)
-          : data;
-        setCards(sortedCards);
-      } catch (err) {
-        showToast(err.message || 'Không thể tải thẻ', 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadCards();
-  }, [columnId, column.cardOrderIds, token]);
-
-  const handleEdit = (card) => {
-    navigate(`/cards/${card._id}/edit`, {
-      state: {
-        title: card.title,
-        description: card.description,
-        boardId,
-        columnId,
-      },
-    });
-  };
-
-  const handleDelete = (cardId) => {
-    navigate(`/cards/${cardId}/delete`, { state: { boardId } });
-  };
-
-  const handleInviteUser = (card) => {
-    showToast(`Mời người dùng cho thẻ ${card._id} (chưa triển khai)`, 'info');
-  };
-
-  const handleDragStart = (event) => {
-    setActiveCardId(event?.active?.id);
-    setActiveCardData(event?.active?.data?.current);
-  };
-
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-    setActiveCardId(null);
-    setActiveCardData(null);
-
-    if (!active || !over || active.id === over.id) return;
-
-    const oldIndex = cards.findIndex((card) => card._id === active.id);
-    const newIndex = cards.findIndex((card) => card._id === over.id);
-
-    const newCards = arrayMove(cards, oldIndex, newIndex);
-    const newCardOrderIds = newCards.map((card) => card._id);
-
-    setCards(newCards);
-
-    try {
-      await updateColumn(columnId, column.title, newCardOrderIds);
-      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
-      onRefresh();
-    } catch (err) {
-      setCards(cards);
-      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
-    }
-  };
-
-  const customDropAnimation = {
-    sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
-  };
-
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={cards.map((card) => card._id)} strategy={verticalListSortingStrategy}>
-        <Box
-          sx={{
-            mb: 0,
-            px: 1,
-            mt: 0,
-          }}
-        >
-          {loading && (
-            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
-              Đang tải thẻ...
-            </Typography>
-          )}
-          {cards.length > 0 ? (
-            cards.map((card) => (
-              <Card
-                key={card._id}
-                card={card}
-                boardId={boardId}
-                columnId={columnId}
-                token={token}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-                onInviteUser={handleInviteUser}
-                onRefresh={onRefresh}
-              />
-            ))
-          ) : (
-            <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
-              Không có thẻ trong cột này.
-            </Typography>
-          )}
-        </Box>
-      </SortableContext>
-      <DragOverlay dropAnimation={customDropAnimation}>
-        {activeCardId && activeCardData ? (
-          <Card
-            card={activeCardData}
-            boardId={boardId}
-            columnId={columnId}
-            token={token}
-            onEdit={() => {}}
-            onDelete={() => {}}
-            onInviteUser={() => {}}
-            onRefresh={() => {}}
-          />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
-  );
-};
-
-export default CardList;
+export { Card, useDragAndDrop, getCardBackgroundColor };
