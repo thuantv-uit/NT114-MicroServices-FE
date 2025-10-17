@@ -1,7 +1,6 @@
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Đảm bảo import CSS cho react-toastify
+import 'react-toastify/dist/ReactToastify.css';
 
-// Định danh duy nhất cho toast để tránh hiển thị nhiều toast
 const TOAST_ID = 'unique-toast';
 
 /**
@@ -10,7 +9,6 @@ const TOAST_ID = 'unique-toast';
  * @param {string} type - Toast type (info, success, error)
  */
 export const showToast = (message, type = 'info') => {
-  // Nếu toast đang hiển thị, cập nhật nó thay vì tạo mới
   if (toast.isActive(TOAST_ID)) {
     toast.update(TOAST_ID, {
       render: message,

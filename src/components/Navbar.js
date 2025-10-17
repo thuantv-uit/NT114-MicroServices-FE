@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { AppBar, Toolbar, Box, IconButton, Badge, Avatar, Popover, Button, Input, Typography, TextField, InputAdornment } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
-import HomeIcon from '@mui/icons-material/Home'; // Placeholder for Thunio logo icon
+import HomeIcon from '@mui/icons-material/Home';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SearchIcon from '@mui/icons-material/Search';
@@ -137,7 +137,7 @@ const Navbar = ({ token, logout, backgroundColor, isSidebarOpen, toggleSidebar }
             <MenuIcon />
           </IconButton>
           <IconButton color="inherit" sx={{ ml: 1 }}>
-            <HomeIcon /> {/* Placeholder icon for Thunio logo; replace with <img src="path/to/thunio-logo.png" alt="Thunio" /> if available */}
+            <HomeIcon />
           </IconButton>
           <Typography variant="h6" sx={{ ml: 1, color: '#000000' }}>
             Thunio

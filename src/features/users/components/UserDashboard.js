@@ -19,6 +19,7 @@ import {
 } from '@mui/material';
 import { Chat as ChatIcon, Task, GroupAdd, Edit } from '@mui/icons-material';
 import Chatbot from '../../ai/chatbot';
+import { COLORS } from '../../../constants/color';
 
 /**
  * Component to display user dashboard
@@ -34,15 +35,13 @@ const UserDashboard = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      if (!token) {
-        return;
-      }
+      if (!token) return;
       setLoading(true);
       try {
         const [userData] = await Promise.all([fetchUserData()]);
         setUser(userData);
       } catch (err) {
-        // Errors are handled by axios interceptor
+        // Errors handled by interceptor
       } finally {
         setLoading(false);
       }
@@ -50,23 +49,12 @@ const UserDashboard = () => {
     loadData();
   }, [token]);
 
-  const toggleChat = () => {
-    setIsChatOpen((prev) => !prev);
-  };
-
-  const handleAvatarChange = (event) => {
-    setAvatarFile(event.target.files[0]);
-  };
+  const toggleChat = () => setIsChatOpen((prev) => !prev);
+  const handleAvatarChange = (e) => setAvatarFile(e.target.files[0]);
 
   const handleAvatarUpload = async () => {
-    if (!avatarFile) {
-      alert('Please select an image file');
-      return;
-    }
-    if (!token) {
-      alert('You must be logged in to update avatar');
-      return;
-    }
+    if (!avatarFile) return alert('Please select an image file');
+    if (!token) return alert('You must be logged in to update avatar');
 
     try {
       setLoading(true);
@@ -88,11 +76,29 @@ const UserDashboard = () => {
   };
 
   return (
-    <Box sx={{ maxWidth: 1400, mx: 'auto', my: 4, p: { xs: 2, md: 4 } }}>
+    <Box
+      sx={{
+      position: 'fixed', // ✅ giúp layout full viewport, không padding
+      top: 0,
+      left: 0,
+      width: '100vw',
+      height: '100vh',
+      overflowY: 'auto', // ✅ cho phép cuộn nếu nội dung vượt khung
+      bgcolor: COLORS.background,
+      m: 0,
+      p: 0,
+    }}
+    >
+      
       {/* Header */}
       <Typography
         variant="h3"
-        sx={{ fontWeight: 'bold', mb: 4, color: 'primary.main' }}
+        sx={{
+          fontWeight: 'bold',
+          mb: 4,
+          color: COLORS.primary,
+          textAlign: 'center',
+        }}
       >
         User Dashboard
       </Typography>
@@ -100,7 +106,7 @@ const UserDashboard = () => {
       {/* Loading State */}
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress size={60} />
+          <CircularProgress size={60} sx={{ color: COLORS.primary }} />
         </Box>
       )}
 
@@ -109,11 +115,22 @@ const UserDashboard = () => {
         <Grid container spacing={3}>
           {/* User Info Card */}
           <Grid item xs={12} md={4}>
-            <Card sx={{ boxShadow: 3, borderRadius: 3, bgcolor: 'background.paper' }}>
+            <Card
+              sx={{
+                boxShadow: 3,
+                borderRadius: 3,
+                bgcolor: COLORS.card,
+                '&:hover': { boxShadow: 6 },
+              }}
+            >
               <CardContent>
-                <Typography variant="h5" sx={{ fontWeight: 'medium', mb: 2 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 'medium', mb: 2, color: COLORS.text }}
+                >
                   Profile
                 </Typography>
+
                 {user ? (
                   <>
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -122,15 +139,24 @@ const UserDashboard = () => {
                         alt={user.username}
                         sx={{ width: 100, height: 100, mr: 2 }}
                       />
-                      <Typography variant="h6" color="text.secondary">
+                      <Typography variant="h6" sx={{ color: COLORS.textLight }}>
                         Welcome, {user.username}!
                       </Typography>
                     </Box>
+
                     <Box sx={{ mt: 2 }}>
                       <Button
                         variant="outlined"
                         onClick={toggleAvatarInput}
-                        sx={{ mb: 1 }}
+                        sx={{
+                          mb: 1,
+                          borderColor: COLORS.primary,
+                          color: COLORS.primary,
+                          '&:hover': {
+                            borderColor: COLORS.textLight,
+                            color: COLORS.textLight,
+                          },
+                        }}
                       >
                         {showAvatarInput ? 'Cancel' : 'Change Avatar'}
                       </Button>
@@ -146,6 +172,12 @@ const UserDashboard = () => {
                             variant="contained"
                             onClick={handleAvatarUpload}
                             disabled={!avatarFile || loading}
+                            sx={{
+                              bgcolor: COLORS.primary,
+                              color: COLORS.white,
+                              textTransform: 'none',
+                              '&:hover': { bgcolor: COLORS.textLight },
+                            }}
                           >
                             Upload
                           </Button>
@@ -164,15 +196,25 @@ const UserDashboard = () => {
 
           {/* Recent Activity Card */}
           <Grid item xs={12} md={4}>
-            <Card sx={{ boxShadow: 3, borderRadius: 3, bgcolor: 'background.paper' }}>
+            <Card
+              sx={{
+                boxShadow: 3,
+                borderRadius: 3,
+                bgcolor: COLORS.card,
+                '&:hover': { boxShadow: 6 },
+              }}
+            >
               <CardContent>
-                <Typography variant="h5" sx={{ fontWeight: 'medium', mb: 2 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 'medium', mb: 2, color: COLORS.text }}
+                >
                   Recent Activity
                 </Typography>
                 <List>
                   <ListItem>
                     <ListItemIcon>
-                      <Task sx={{ color: '#1976d2' }} />
+                      <Task sx={{ color: COLORS.primary }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Completed task: Project Plan"
@@ -181,7 +223,7 @@ const UserDashboard = () => {
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
-                      <GroupAdd sx={{ color: '#d81b60' }} />
+                      <GroupAdd sx={{ color: COLORS.expense }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Invited user to Team Board"
@@ -190,7 +232,7 @@ const UserDashboard = () => {
                   </ListItem>
                   <ListItem>
                     <ListItemIcon>
-                      <Edit sx={{ color: '#388e3c' }} />
+                      <Edit sx={{ color: COLORS.income }} />
                     </ListItemIcon>
                     <ListItemText
                       primary="Updated profile information"
@@ -204,9 +246,19 @@ const UserDashboard = () => {
 
           {/* Task Deadlines Card */}
           <Grid item xs={12} md={4}>
-            <Card sx={{ boxShadow: 3, borderRadius: 3, bgcolor: 'background.paper' }}>
+            <Card
+              sx={{
+                boxShadow: 3,
+                borderRadius: 3,
+                bgcolor: COLORS.card,
+                '&:hover': { boxShadow: 6 },
+              }}
+            >
               <CardContent>
-                <Typography variant="h5" sx={{ fontWeight: 'medium', mb: 2 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 'medium', mb: 2, color: COLORS.text }}
+                >
                   Total of all Deadlines
                 </Typography>
                 <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
@@ -216,7 +268,7 @@ const UserDashboard = () => {
                       value={80}
                       size={100}
                       thickness={5}
-                      sx={{ color: '#1976d2' }}
+                      sx={{ color: COLORS.primary }}
                     />
                     <Box
                       sx={{
@@ -230,13 +282,20 @@ const UserDashboard = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <Typography variant="h6" component="div" color="text.secondary">
+                      <Typography
+                        variant="h6"
+                        component="div"
+                        sx={{ color: COLORS.text }}
+                      >
                         80%
                       </Typography>
                     </Box>
                   </Box>
                 </Box>
-                <Typography variant="body1" color="text.secondary" align="center">
+                <Typography
+                  variant="body1"
+                  sx={{ color: COLORS.textLight, textAlign: 'center' }}
+                >
                   80% Completed
                 </Typography>
               </CardContent>
@@ -245,16 +304,16 @@ const UserDashboard = () => {
         </Grid>
       )}
 
-      {/* Chatbot Toggle Button */}
+      {/* Chatbot Floating Button */}
       <IconButton
         onClick={toggleChat}
         sx={{
           position: 'fixed',
           bottom: 24,
           right: 24,
-          bgcolor: 'primary.main',
-          color: 'white',
-          '&:hover': { bgcolor: 'primary.dark' },
+          bgcolor: COLORS.primary,
+          color: COLORS.white,
+          '&:hover': { bgcolor: COLORS.textLight },
           width: 60,
           height: 60,
           boxShadow: 3,

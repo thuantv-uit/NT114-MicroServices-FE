@@ -30,7 +30,6 @@ const BoardList = ({ token }) => {
       setLoading(true);
       try {
         const data = await fetchBoards();
-        // console.log('Fetched boards:', data); // Debug
         setBoards(data);
       } catch (err) {
         showToast(err.message, 'error');
@@ -110,7 +109,6 @@ const BoardList = ({ token }) => {
                       overflow: 'hidden',
                     }}
                   >
-                    {/* Phần Background */}
                     <Box
                       sx={{
                         flex: '0 0 80%',
@@ -120,8 +118,6 @@ const BoardList = ({ token }) => {
                         backgroundPosition: 'center',
                       }}
                     />
-
-                    {/* Phần Title */}
                     <CardContent
                       sx={{
                         flex: '0 0 20%',
@@ -168,7 +164,6 @@ const BoardList = ({ token }) => {
         </Grid>
       )}
 
-      {/* Create Board Dialog */}
       <Dialog open={openCreateDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <BoardCreate token={token} onClose={handleDialogClose} />
       </Dialog>

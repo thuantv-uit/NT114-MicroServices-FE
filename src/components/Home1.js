@@ -3,19 +3,18 @@ import Header from '../components/Header';
 import { Container, Typography, Button, Box } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import GetAppIcon from '@mui/icons-material/GetApp';
-import websiteImage from '../assets/Home/home.png'; // Giả định đường dẫn hình ảnh
+import websiteImage from '../assets/Home/home.png';
 
 const Home = () => {
   return (
     <Box
       sx={{
         background: 'linear-gradient(180deg, #e3f2fd 0%, #ffffff 100%)',
-        minHeight: '100vh', // Đảm bảo phủ toàn trang
+        minHeight: '100vh',
       }}
     >
       <Header />
       <Container sx={{ mt: 4, textAlign: 'center', py: 4 }}>
-        {/* Hai dòng chữ với cỡ chữ nhỏ hơn */}
         <Typography variant="h4" component="h1" sx={{ fontWeight: 'medium' }}>
           Thunio brings all your{' '}
           <span style={{ fontWeight: 'bold', color: '#1976d2' }}>tasks</span>
@@ -29,8 +28,6 @@ const Home = () => {
           and <span style={{ fontWeight: 'bold', color: '#1976d2' }}>tools</span>{' '}
           together
         </Typography>
-
-        {/* Hai nút với icon */}
         <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 4 }}>
           <Button
             variant="outlined"
@@ -49,8 +46,6 @@ const Home = () => {
             Download Now
           </Button>
         </Box>
-
-        {/* Hình ảnh */}
         <Box sx={{ maxWidth: '100%', mx: 'auto' }}>
           <img
             src={websiteImage}

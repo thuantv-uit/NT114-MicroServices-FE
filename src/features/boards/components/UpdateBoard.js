@@ -60,9 +60,9 @@ const UpdateBoard = ({ token, onClose }) => {
           }
         }}
         submitLabel="Update Board"
-        cancelPath={null} // No navigation, use onClose
+        cancelPath={null}
         fields={fields}
-        onCancel={onClose} // Pass onClose as cancel handler
+        onCancel={onClose}
       />
     </FormContainer>
   );
