@@ -1,8 +1,4 @@
 /**
- * Utility functions for form validation
- */
-
-/**
  * Validate required field
  * @param {string} value - Field value
  * @param {string} fieldName - Field name for error message
