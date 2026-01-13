@@ -4,17 +4,17 @@ on:
   workflow_call:
     inputs:
       image_tag_suffix:
-        description: 'Suffix cho tag image (ví dụ: datetime hoặc github.sha)'
+        description: 'Suffix cho tag image (mặc định dùng github.sha)'
         required: false
         type: string
-        default: '${{ github.sha }}'  # Mặc định dùng commit SHA để unique
+        default: '${{ github.sha }}'
       severity:
-        description: 'Mức độ severity cần báo (CRITICAL,HIGH,MEDIUM,LOW)'
+        description: 'Mức độ severity cần báo'
         required: false
         type: string
         default: 'CRITICAL,HIGH,MEDIUM,LOW'
       ignore_unfixed:
-        description: 'Bỏ qua vuln chưa có fix'
+        description: 'Bỏ qua lỗ hổng chưa có bản fix'
         required: false
         type: boolean
         default: true
@@ -25,43 +25,47 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      security-events: write  # Để upload SARIF nếu bạn muốn (optional)
+      security-events: write  # Optional: nếu sau này muốn upload SARIF
 
     steps:
       - name: Sao chép kho lưu trữ
         uses: actions/checkout@v4
 
       - name: Thiết lập Docker Buildx
-        uses: docker/setup-buildx-action@v3  # Tốt hơn docker build thông thường
+        uses: docker/setup-buildx-action@v3
 
       - name: Xây dựng hình ảnh Docker
-        run: |
-          TAG="app:${{ inputs.image_tag_suffix }}"
-          docker build -t $TAG -f Dockerfile .
+        run: docker build -t app:${{ inputs.image_tag_suffix }} -f Dockerfile .
         env:
           DOCKER_BUILDKIT: 1
 
       - name: Chạy Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.33.1  # Version mới nhất ổn định
+        id: trivy
+        uses: aquasecurity/trivy-action@0.33.1
         with:
           image-ref: 'app:${{ inputs.image_tag_suffix }}'
           format: 'json'
-          output: 'trivy-results/scan-results-${{ inputs.image_tag_suffix }}.json'
+          output: 'trivy-scan-results-${{ inputs.image_tag_suffix }}.json'  # File lưu trực tiếp ở root workspace
           severity: ${{ inputs.severity }}
           ignore-unfixed: ${{ inputs.ignore_unfixed }}
           vuln-type: 'os,library'
-          exit-code: '0'  # Không fail workflow nếu có vuln (bạn có thể đổi thành 1 nếu muốn fail)
-          skip-setup-trivy: false  # Tự install + cache DB
+          exit-code: '0'  # Không fail workflow nếu phát hiện vuln (có thể đổi thành '1' nếu muốn fail)
+          skip-setup-trivy: false
 
-      - name: Kiểm tra và hiển thị kết quả nếu fail (debug)
-        if: failure()
+      - name: Kiểm tra kết quả (debug nếu cần)
+        if: always()
         run: |
-          ls -la trivy-results/
-          cat trivy-results/scan-results-${{ inputs.image_tag_suffix }}.json || echo "Không có file kết quả"
+          ls -la *.json || echo "Không tìm thấy file JSON kết quả"
+          if [ -f "trivy-scan-results-${{ inputs.image_tag_suffix }}.json" ]; then
+            echo "File JSON đã được tạo thành công"
+          else
+            echo "Không tạo được file JSON → kiểm tra log bước Trivy"
+          fi
 
-      - name: Lưu kết quả quét dưới dạng artifact
+      - name: Upload kết quả quét dưới dạng artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trivy-scan-results-${{ inputs.image_tag_suffix }}
-          path: trivy-results/scan-results-${{ inputs.image_tag_suffix }}.json
-          retention-days: 7  # Giữ artifact 7 ngày
+          path: trivy-scan-results-${{ inputs.image_tag_suffix }}.json
+          retention-days: 7
