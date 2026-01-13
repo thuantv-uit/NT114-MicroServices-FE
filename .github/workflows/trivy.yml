@@ -18,10 +18,6 @@ on:
         required: false
         type: boolean
         default: true
-    secrets:
-      # Nếu cần push image hoặc scan private registry, thêm secret sau
-      # DOCKER_USERNAME: 
-      # DOCKER_PASSWORD: 
 
 jobs:
   scan:
