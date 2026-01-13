@@ -14,6 +14,9 @@ jobs:
     needs: detect
     if: ${{ needs.detect.outputs.has_changes == 'true' }}
     uses: ./.github/workflows/build-service.yml
-    # Nếu muốn truyền input (ví dụ node_versions):
-    # with:
-    #   node_versions: '["20.x", "22.x"]'
+  
+  sonarqube:
+    needs: build-and-test
+    if: ${{ needs.detect.outputs.has_changes == 'true' }}
+    uses: ./.github/workflows/sonarqube-scan.yml
+    secrets: inherit
