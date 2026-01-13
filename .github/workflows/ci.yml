@@ -18,5 +18,5 @@ jobs:
   sonarqube:
     needs: build-and-test
     if: ${{ needs.detect.outputs.has_changes == 'true' }}
-    uses: ./.github/workflows/sonarqube-scan.yml
+    uses: ./.github/workflows/sonarqube.yml
     secrets: inherit
