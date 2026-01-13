@@ -16,7 +16,12 @@ jobs:
     uses: ./.github/workflows/build-service.yml
   
   sonarqube:
-    needs: build-and-test
+    needs: [detect, build-and-test]
     if: ${{ needs.detect.outputs.has_changes == 'true' }}
     uses: ./.github/workflows/sonarqube.yml
     secrets: inherit
+
+  trivy:
+    needs: [detect, build-and-test, sonarqube]
+    if: ${{ needs.detect.outputs.has_changes == 'true' }}
+    uses: ./.github/workflows/trivy.yml
