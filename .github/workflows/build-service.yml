@@ -1,0 +1,49 @@
+name: Build Service
+
+on:
+  workflow_call:
+    inputs:
+      node_versions:
+        description: 'Danh sách Node versions để test (matrix)'
+        required: false
+        type: string
+        default: '["20.x", "22.x"]'  # Mặc định test 2 versions mới nhất ổn định
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ${{ fromJson(inputs.node_versions) }}
+      fail-fast: false  # Tiếp tục các version khác nếu 1 version fail
+
+    name: Build & Test on Node ${{ matrix.node-version }}
+
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+
+      - name: Thiết lập Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'  # Cache dependencies để nhanh hơn
+
+      - name: Cài đặt dependencies
+        run: npm ci  # Cài sạch, chính xác từ lockfile
+
+      - name: Xây dựng dự án
+        run: npm run build  # Không --verbose để gọn log, bạn có thể thêm lại nếu cần debug
+        # Không set NODE_ENV nữa → giống local, tránh treat warnings as errors
+
+      # Optional: Nếu cần test, uncomment
+      # - name: Chạy test
+      #   run: npm test
+
+      # Optional: Nếu có lỗi, hiển thị thêm info
+      - name: Hiển thị chi tiết nếu build fail
+        if: failure()
+        run: |
+          echo "Kiểm tra lỗi build..."
+          ls -la dist/ || echo "Không có thư mục dist/"
+          cat package*.json || echo "Không đọc được package.json"

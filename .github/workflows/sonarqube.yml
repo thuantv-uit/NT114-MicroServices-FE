@@ -1,0 +1,22 @@
+name: SonarQube Scan
+
+on:
+  workflow_call:
+    secrets:
+      SONAR_TOKEN:
+        description: 'SonarQube authentication token'
+        required: true
+
+jobs:
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Bắt buộc để analysis chính xác (full history)
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6  # Hoặc @v7 nếu bạn muốn mới nhất
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

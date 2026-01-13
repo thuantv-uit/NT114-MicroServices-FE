@@ -36,7 +36,6 @@ const BoardCreate = ({ onClose, title = '', description = '' }) => {
         validate={validateBoardForm}
         onSubmit={async (values) => {
           try {
-            // Giả định token được xử lý trong createBoard hoặc lấy từ context/hook
             await createBoard(values.title, values.description, values.backgroundColor);
             showToast('Board created successfully!', 'success');
             onClose();
@@ -45,8 +44,8 @@ const BoardCreate = ({ onClose, title = '', description = '' }) => {
           }
         }}
         submitLabel="Create Board"
-        cancelPath={null} // No navigation, use onClose
-        onCancel={onClose} // Pass onClose as cancel handler
+        cancelPath={null}
+        onCancel={onClose}
         fields={fields}
       />
     </FormContainer>

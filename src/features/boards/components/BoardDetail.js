@@ -28,11 +28,6 @@ import AddIcon from '@mui/icons-material/Add';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-// import CodeIcon from '@mui/icons-material/Code';
-// import PagesIcon from '@mui/icons-material/Pages';
-// import BallotIcon from '@mui/icons-material/Ballot';
-// import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-// import DashboardIcon from '@mui/icons-material/Dashboard';
 import DescriptionIcon from '@mui/icons-material/Description';
 
 // Styled components
@@ -169,11 +164,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   const navItems = [
     { name: 'Summary', icon: <SummarizeIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/summary` },
     { name: 'Board', icon: <ViewKanbanIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}` },
-    { name: 'Calendar', icon: <CalendarTodayIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/calendar` },
-    // { name: 'Code', icon: <CodeIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/code` },
-    // { name: 'Pages', icon: <PagesIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/pages` },
-    // { name: 'Forms', icon: <BallotIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/forms` },
-    // { name: 'More', icon: <MoreHorizIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/more` },
+    { name: 'Calendar', icon: <CalendarTodayIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/calendar` }
   ];
 
   return (
@@ -287,10 +278,8 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         )}
       </Box>
 
-      {/* Thanh ngang phân cách hai phần */}
       <Divider sx={{ my: 2, borderColor: '#EBECF0' }} />
 
-      {/* Phần phía dưới: Columns section (chỉ hiển thị khi ở trang Board) */}
       {location.pathname === `/boards/${id}` && (
         <>
           {loading && (

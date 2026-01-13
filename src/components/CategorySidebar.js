@@ -2,17 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-// import PersonIcon from '@mui/icons-material/Person';
-// import HistoryIcon from '@mui/icons-material/History';
-// import StarIcon from '@mui/icons-material/Star';
-// import AppsIcon from '@mui/icons-material/Apps';
-// import AssignmentIcon from '@mui/icons-material/Assignment';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import FolderIcon from '@mui/icons-material/Folder';
-// import GroupIcon from '@mui/icons-material/Group';
-// import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import LogoutIcon from '@mui/icons-material/Logout';
-// import CloseIcon from '@mui/icons-material/Close';
 import { showToast } from '../utils/toastUtils';
 
 /**
@@ -68,42 +60,6 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
     >
       {/* Close button at the top */}
       <List sx={{ flexGrow: 1 }}>
-        {/* For You */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('For You')}>
-            <ListItemIcon><PersonIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="For You" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
-        {/* Recent */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('Recent')}>
-            <ListItemIcon><HistoryIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Recent" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
-        {/* Starred */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('Starred')}>
-            <ListItemIcon><StarIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Starred" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
-        {/* Apps */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('Apps')}>
-            <ListItemIcon><AppsIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Apps" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
-        {/* Plans */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('Plans')}>
-            <ListItemIcon><AssignmentIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Plans" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
-        {/* Dashboard */}
         <ListItem disablePadding>
           <ListItemButton component={Link} to="/dashboard">
             <ListItemIcon><DashboardIcon sx={{ color: '#000000' }} /></ListItemIcon>
@@ -118,16 +74,6 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
           </AccordionSummary>
           <AccordionDetails sx={{ p: 0 }}>
             <List component="div" disablePadding>
-              {/* <ListItem disablePadding sx={{ pl: 4 }}>
-                <ListItemButton component={Link} to="/projects/start">
-                  <ListItemText primary="Start" sx={{ color: '#000000' }} />
-                </ListItemButton>
-              </ListItem>
-              <ListItem disablePadding sx={{ pl: 4 }}>
-                <ListItemButton component={Link} to="/projects/current">
-                  <ListItemText primary="Current" sx={{ color: '#000000' }} />
-                </ListItemButton>
-              </ListItem> */}
               <ListItem disablePadding sx={{ pl: 4 }}>
                 <ListItemButton component={Link} to="/boards">
                   <ListItemText primary="Board" sx={{ color: '#000000' }} />
@@ -136,20 +82,6 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
             </List>
           </AccordionDetails>
         </Accordion>
-        {/* Teams */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('Teams')}>
-            <ListItemIcon><GroupIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Teams" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
-        {/* More */}
-        {/* <ListItem disablePadding>
-          <ListItemButton onClick={() => handlePlaceholderClick('More')}>
-            <ListItemIcon><MoreHorizIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="More" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem> */}
       </List>
       {/* Logout at the bottom */}
       <List>

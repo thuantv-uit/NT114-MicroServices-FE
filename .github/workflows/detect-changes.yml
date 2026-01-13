@@ -1,0 +1,33 @@
+name: Detect Frontend Changes
+
+on:
+  workflow_call:
+    outputs:
+      has_changes:
+        description: "True If there are changes in the frontend source code (JS/TS, config...)"
+        value: ${{ jobs.detect.outputs.has_changes }}
+
+jobs:
+  detect:
+    runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Cần để detect chính xác trên cả push và pull_request
+
+      - name: Check for frontend changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - 'src/**'              # code JS/TS/JSX/...
+              - 'public/**'           # assets static (images, favicon...)
+              - 'package*.json'       # dependencies & scripts
+              - '*.js'                # root files as server.js if any
+              - 'jsconfig*.json'      # config JS
+              - 'docker-compose.yml'  
+              - 'docker-compose.*.yml'   
+              - '!**/*.md'            # ignore markdown/docs

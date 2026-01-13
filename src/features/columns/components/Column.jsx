@@ -5,7 +5,6 @@ import { CSS } from '@dnd-kit/utilities';
 import ColumnMenu from './ColumnMenu';
 import DragHandleIcon from '@mui/icons-material/DragHandle';
 import CardList from '../../cards/components/Card';
-import { COLUMN_STYLE, COLUMN_HEADER_STYLE } from '../../../constants/styles';
 import AddIcon from '@mui/icons-material/Add';
 
 /**
@@ -37,8 +36,7 @@ function Column({ column, boardId, token, onRefresh, onEdit, onDelete, onAddCard
     <div ref={setNodeRef} style={dndKitColumnStyles} {...attributes}>
       <Box
         sx={{
-          ...COLUMN_STYLE,
-          bgcolor: '#EBECF0', // Đổi màu nền thành xám
+          bgcolor: '#EBECF0',
           borderRadius: '8px',
           p: 1,
           minWidth: '272px',
@@ -49,7 +47,6 @@ function Column({ column, boardId, token, onRefresh, onEdit, onDelete, onAddCard
       >
         <Box
           sx={{
-            ...COLUMN_HEADER_STYLE,
             mb: 0.5,
             display: 'flex',
             alignItems: 'center',
