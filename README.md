@@ -29,6 +29,21 @@ Calendar-based visualization helps users track deadlines and scheduled tasks eff
 <p align="center"> <img src="./screenshots/calendar-card.png" alt="Calendar Card View" width="700"/> </p>
 
 
+## 🔁 CI/CD Pipeline Demo
+This section demonstrates the automated CI/CD workflow of Thunio, highlighting both the integration and deployment processes.
+
+## 🧪 CI Workflow Overview
+<p align="center"> <img src="./screenshots/workflow-ci.png" alt="CI Workflow Overview" width="800"/> </p>
+
+## 🔎 CI Detail – Code Quality & Security
+<p align="center"> <img src="./screenshots/detail-ci.png" alt="CI SonarQube Analysis" width="800"/> </p>
+
+## 🧭 CD Workflow Overview
+<p align="center"> <img src="./screenshots/workflow-cd.png" alt="CD Workflow Overview" width="800"/> </p>
+
+## 🐳 CD Detail – Build & Push Docker Image
+<p align="center"> <img src="./screenshots/detail-cd.png" alt="CD Build and Push Image" width="800"/> </p>
+
 ## Key Features
 ### 🧩 Core Collaboration Features
 - 📋 Create and manage Boards
