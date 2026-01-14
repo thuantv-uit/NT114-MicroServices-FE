@@ -6,6 +6,29 @@ It helps individuals and teams organize their work using boards, columns, and ca
 
 The application is designed with a clean UI, intuitive workflows, and modern front-end technologies, making it suitable for academic projects, team productivity tools, and portfolio demonstrations.
 
+
+## 📸 Application Demo
+### 🏠 Home
+The landing page provides quick access to user boards and recent activities.
+<p align="center"> <img src="./screenshots/home.png" alt="Thunio Home" width="700"/> </p>
+
+### 📊 Dashboard
+The dashboard displays an overview of boards, collaboration status, and productivity insights.
+<p align="center"> <img src="./screenshots/dashboard.png" alt="Thunio Dashboard" width="700"/> </p>
+
+### 🧩 Board Detail
+A detailed board view where users can manage columns and cards collaboratively.
+<p align="center"> <img src="./screenshots/detail-board.png" alt="Board Detail View" width="700"/> </p>
+
+### 📝 Card Summary
+Each card provides a summarized view of task information, status, and related metadata.
+<p align="center"> <img src="./screenshots/summary-card.png" alt="Card Summary" width="700"/> </p>
+
+### 📅 Calendar Card
+Calendar-based visualization helps users track deadlines and scheduled tasks efficiently.
+<p align="center"> <img src="./screenshots/calendar-card.png" alt="Calendar Card View" width="700"/> </p>
+
+
 ## Key Features
 ### 🧩 Core Collaboration Features
 - 📋 Create and manage Boards
