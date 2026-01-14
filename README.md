@@ -42,7 +42,7 @@ This section demonstrates the automated CI/CD workflow of Thunio, highlighting b
 <p align="center"> <img src="./screenshots/workflow-cd.png" alt="CD Workflow Overview" width="800"/> </p>
 
 ## 🐳 CD Detail – Build & Push Docker Image
-<p align="center"> <img src="./screenshots/detail-cd.png" alt="CD Build and Push Image" width="800"/> </p>
+<p align="center"> <img src="./screenshots/" alt="CD Build and Push Image" width="800"/> </p>
 
 ## Key Features
 ### 🧩 Core Collaboration Features
