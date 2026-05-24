@@ -180,9 +180,11 @@
    ════════════════════════════════════════════════════════════════ */
 
 .board-detail-page {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - var(--navbar-h, 60px));
   padding: 24px;
   transition: background-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 /* ── Detail header ───────────────────────────────────────────── */
@@ -301,7 +303,10 @@
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 16px;
-  /* Hide scrollbar but keep scroll */
+  width: 100%;
+  box-sizing: border-box;
+  /* Smooth resize when sidebar opens/closes */
+  transition: width 0.18s ease;
   scrollbar-width: thin;
   scrollbar-color: rgba(0,0,0,0.15) transparent;
 }

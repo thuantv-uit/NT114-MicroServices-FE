@@ -44,7 +44,7 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
         onClick={toggleSidebar}
       />
 
-      <aside className={`app-sidebar${isOpen ? ' app-sidebar--open' : ''}`}>
+      <aside className={`app-sidebar${isOpen ? ' app-sidebar--open' : ' app-sidebar--collapsed'}`}>
 
         {/* Nav items */}
         <nav className="sidebar-nav">

@@ -106,6 +106,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     backgroundImage: isImageLatest ? `url(${board?.backgroundImage})` : 'none',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
+    minHeight: 'calc(100vh - var(--navbar-h, 60px))',
   };
 
   return (
