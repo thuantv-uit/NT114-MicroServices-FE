@@ -274,7 +274,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
             </Box>
           </>
         ) : (
-          <Typography variant="h5">Đang tải...</Typography>
+          <Typography variant="h5">Loading...</Typography>
         )}
       </Box>
 
@@ -326,7 +326,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
               </Box>
             </ColumnsWrapper>
           ) : (
-            <Typography color="error">Không tìm thấy bảng</Typography>
+            <Typography color="error"></Typography>
           )}
         </>
       )}

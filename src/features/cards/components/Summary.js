@@ -42,7 +42,7 @@ const Summary = ({ token }) => {
 
   if (loading) return (
     <Typography sx={{ textAlign: 'center', mt: 4, color: '#172B4D' }}>
-      Đang tải...
+      Loading...
     </Typography>
   );
   if (error) return (

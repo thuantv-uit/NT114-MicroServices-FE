@@ -75,7 +75,7 @@ const ConfirmTable = ({ items, onConfirm, onCancel }) => {
   const labelOf = (object, fields) => {
     if (object === 'board')  return `Board: "${fields.title}" — ${fields.description}`;
     if (object === 'column') return `Column: "${fields.title}"`;
-    if (object === 'invite') return `Invite: ${fields.email}`;
+    if (object === 'invite') return `Invite: ${fields.email} (role: ${fields.role || 'viewer'})`;
     return object;
   };
 
@@ -214,20 +214,20 @@ const Chatbot = ({ onClose }) => {
   };
 
   const execInvite = async (fields, currentBoardId) => {
-    const { email } = fields;
+    const { email, role = 'viewer' } = fields;   // default role: viewer
     const boardId = fields.boardId || currentBoardId;
     if (!boardId) {
       pushMessage(`❌ Invite to **${email}** skipped: no board available. Create a board first.`);
       return;
     }
-    pushMessage(`Inviting **${email}**…`);
+    pushMessage(`Inviting **${email}** as **${role}**…`);
     try {
       await handleApiCall(
-        () => invitationInstance.post('/board', { boardId, email }).then(r => r.data),
+        () => invitationInstance.post('/board', { boardId, email, role }).then(r => r.data),
         'Invite user to board'
       );
       showToast('Invitation sent!', 'success');
-      pushMessage(`✅ Invitation sent to **${email}**!`);
+      pushMessage(`✅ Invitation sent to **${email}** (role: **${role}**)!`);
     } catch (err) {
       showToast(err.message, 'error');
       pushMessage(`❌ Failed to invite **${email}**: ${err.message}`);

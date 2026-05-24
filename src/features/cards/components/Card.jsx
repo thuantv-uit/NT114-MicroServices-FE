@@ -100,7 +100,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
         >
           {loading && (
             <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
-              Đang tải thẻ...
+              Loading cards...
             </Typography>
           )}
           {cards.length > 0 ? (
