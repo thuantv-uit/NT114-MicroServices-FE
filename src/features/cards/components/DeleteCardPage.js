@@ -3,6 +3,7 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { deleteCard } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
 import DeleteConfirmation from '../../../components/DeleteConfirmation';
+import '../styles/card.css';
 
 /**
  * Component to delete a card

@@ -4,6 +4,7 @@ import FormContainer from '../../../components/FormContainer';
 import GenericForm from '../../../components/GenericForm';
 import { validateCardForm } from '../../../utils/validateUtils';
 import { createCard } from '../services/cardService';
+import '../styles/card.css';
 
 /**
  * Component to create a new card

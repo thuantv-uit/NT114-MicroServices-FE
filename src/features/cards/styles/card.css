@@ -1,0 +1,656 @@
+/* ═══════════════════════════════════════════════════════════════
+   CARD DESIGN SYSTEM
+   Nhất quán với board.css + column.css + invitation.css
+   ═══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ════════════════════════════════════════════════════════════════
+   CARD ITEM (inside column)
+   ════════════════════════════════════════════════════════════════ */
+
+.card-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  cursor: pointer;
+  position: relative;
+  font-family: 'DM Sans', sans-serif;
+}
+.card-item:hover {
+  box-shadow: 0 4px 14px rgba(0,0,0,0.10);
+  transform: translateY(-1px);
+}
+.card-item--dragging { opacity: 0.5; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+
+/* Progress bar strip at top of card */
+.card-item__progress-strip {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 10px 10px 0 0;
+}
+
+.card-item__title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #1A202C;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+
+.card-item__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.card-item__deadline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: #9AA5B4;
+  font-family: 'DM Sans', sans-serif;
+}
+.card-item__deadline--overdue { color: #E53E3E; }
+.card-item__deadline svg { font-size: 13px !important; }
+
+.card-item__progress-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.card-item__actions {
+  display: flex;
+  gap: 2px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.card-action-btn {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 6px !important;
+  color: #9AA5B4 !important;
+  transition: background 0.15s, color 0.15s !important;
+}
+.card-action-btn:hover { background: #F7F8FA !important; color: #4A5568 !important; }
+.card-action-btn--danger:hover { background: #FFF5F5 !important; color: #E53E3E !important; }
+
+/* Empty state */
+.card-empty {
+  text-align: center;
+  padding: 16px 8px;
+  color: #C4CAD4;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   CREATE CARD — dùng FormContainer + GenericForm (nhất quán)
+   ════════════════════════════════════════════════════════════════ */
+/* CreateCard.js dùng FormContainer/GenericForm → board.css đã cover */
+
+/* ════════════════════════════════════════════════════════════════
+   DELETE CARD PAGE
+   ════════════════════════════════════════════════════════════════ */
+/* DeleteCardPage dùng DeleteConfirmation component riêng → không cần thêm */
+
+/* ════════════════════════════════════════════════════════════════
+   EDIT CARD MODAL
+   ════════════════════════════════════════════════════════════════ */
+
+.edit-card-modal {
+  position: fixed;
+  /* luôn bắt đầu từ 0, không bị sidebar ảnh hưởng */
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1080px, calc(100vw - 48px));
+  max-height: calc(100vh - 60px);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  font-family: 'DM Sans', sans-serif;
+  outline: 0;
+  z-index: 1400;
+}
+
+/* ── Edit Card Header ── */
+.edit-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid #E4E7ED;
+  background: #F7F8FA;
+  flex-shrink: 0;
+}
+
+.edit-card-header__left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4A5568;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.edit-card-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.edit-card-header__btn {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #9AA5B4;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.edit-card-header__btn:hover { background: #F0F2F5; color: #4A5568; }
+.edit-card-header__btn--close:hover { background: #FFF5F5; color: #E53E3E; }
+.edit-card-header__btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+/* ── Body panels ── */
+.edit-card-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ── Left Panel ── */
+.edit-card-left {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #E4E7ED;
+  overflow-y: auto;
+  padding: 20px 24px;
+  background: #FAFBFC;
+}
+.edit-card-left::-webkit-scrollbar { width: 4px; }
+.edit-card-left::-webkit-scrollbar-thumb { background: #E4E7ED; border-radius: 4px; }
+
+/* Title */
+.edit-card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A202C;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  border: 1.5px solid transparent;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1.3;
+}
+.edit-card-title:hover {
+  background: #F0F2F5;
+  border-color: #E4E7ED;
+}
+
+.edit-card-title-input {
+  font-family: 'Outfit', sans-serif !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  margin-bottom: 14px !important;
+}
+
+/* Save / Cancel row */
+.edit-card-save-row {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 20px;
+}
+
+/* Activity section */
+.edit-card-section-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A202C;
+  margin-bottom: 12px;
+}
+
+.edit-card-tab-group {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.edit-card-tab {
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid #E4E7ED;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.edit-card-tab:hover { background: #F0F2F5; color: #1A202C; }
+.edit-card-tab.active {
+  background: #EEF2FF;
+  border-color: rgba(59,91,219,0.4);
+  color: #3B5BDB;
+}
+
+/* Comment input */
+.edit-card-comment-box {
+  background: #fff;
+  border: 1.5px solid #E4E7ED;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.edit-card-comment-box:focus-within {
+  border-color: #3B5BDB;
+  box-shadow: 0 0 0 3px rgba(59,91,219,0.08);
+}
+
+.edit-card-comment-textarea {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13.5px;
+  color: #1A202C;
+  resize: none;
+  background: transparent;
+  min-height: 56px;
+  max-height: 140px;
+  overflow-y: auto;
+}
+.edit-card-comment-textarea::placeholder { color: #C4CAD4; }
+
+/* Comment item */
+.comment-item {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #F7F8FA;
+  border: 1px solid #E4E7ED;
+  margin-bottom: 8px;
+  animation: msgIn 0.2s ease;
+}
+@keyframes msgIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.comment-item__avatar {
+  width: 30px !important; height: 30px !important;
+  flex-shrink: 0;
+  background: #EEF2FF !important;
+  color: #3B5BDB !important;
+}
+
+.comment-item__text {
+  font-size: 13.5px;
+  color: #1A202C;
+  font-family: 'DM Sans', sans-serif;
+  line-height: 1.5;
+}
+
+.comment-item__time {
+  font-size: 11px;
+  color: #9AA5B4;
+  margin-top: 3px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.comment-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #F7F8FA;
+  border: 1px solid #E4E7ED;
+  color: #9AA5B4;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Right Panel ── */
+.edit-card-right {
+  flex: 0 0 280px;
+  width: 280px;
+  min-width: 280px;
+  max-width: 280px;
+  padding: 20px 20px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #fff;
+  box-sizing: border-box;
+}
+.edit-card-right::-webkit-scrollbar { width: 4px; }
+.edit-card-right::-webkit-scrollbar-thumb { background: #E4E7ED; border-radius: 4px; }
+
+/* Progress section */
+.edit-card-progress-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 500;
+  color: #4A5568;
+  font-family: 'DM Sans', sans-serif;
+  margin-bottom: 6px;
+}
+
+.edit-card-progress-value {
+  font-family: 'Outfit', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1A202C;
+}
+
+/* Card info box */
+.edit-card-info-box {
+  margin-top: 20px;
+  padding: 16px;
+  background: #F7F8FA;
+  border: 1px solid #E4E7ED;
+  border-radius: 10px;
+}
+
+.edit-card-info-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1A202C;
+  margin-bottom: 10px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SUMMARY PAGE
+   ════════════════════════════════════════════════════════════════ */
+
+.summary-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 36px 24px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.summary-page__title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(24px, 4vw, 34px);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  text-align: center;
+  margin-bottom: 6px;
+  background: linear-gradient(135deg, #1A202C 0%, #3B5BDB 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.summary-page__subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #9AA5B4;
+  margin-bottom: 32px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.summary-stat-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 28px;
+  text-align: center;
+  transition: box-shadow 0.18s, transform 0.18s;
+  margin-bottom: 20px;
+}
+.summary-stat-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.09); transform: translateY(-2px); }
+.summary-stat-card__num {
+  font-family: 'Outfit', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  color: #1A202C;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.summary-stat-card__label { font-size: 14px; color: #9AA5B4; }
+
+.summary-chart-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.summary-legend { display: flex; flex-wrap: wrap; gap: 8px; }
+.summary-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #fff;
+  cursor: default;
+  transition: opacity 0.15s;
+}
+.summary-legend-chip:hover { opacity: 0.85; }
+
+.summary-empty {
+  text-align: center;
+  padding: 60px 24px;
+  color: #9AA5B4;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+}
+.summary-empty__icon { font-size: 48px; margin-bottom: 10px; opacity: 0.4; }
+
+/* ════════════════════════════════════════════════════════════════
+   CALENDAR PAGE
+   ════════════════════════════════════════════════════════════════ */
+
+.calendar-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 36px 24px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.calendar-page__title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(22px, 3.5vw, 30px);
+  font-weight: 800;
+  letter-spacing: -0.4px;
+  text-align: center;
+  margin-bottom: 28px;
+  background: linear-gradient(135deg, #1A202C 0%, #3B5BDB 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Calendar card */
+.cal-card {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.cal-nav__title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1A202C;
+}
+.cal-nav__btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  border: 1px solid #E4E7ED;
+  background: transparent;
+  color: #4A5568;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+}
+.cal-nav__btn:hover { background: #F0F2F5; border-color: #C4CAD4; }
+
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.cal-day-header {
+  text-align: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #9AA5B4;
+  padding-bottom: 8px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.cal-day {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: #4A5568;
+  cursor: default;
+  transition: background 0.15s, color 0.15s;
+  min-height: 36px;
+  display: flex; align-items: center; justify-content: center;
+}
+.cal-day--has-deadline {
+  background: #EEF2FF;
+  color: #3B5BDB;
+  font-weight: 600;
+  cursor: pointer;
+}
+.cal-day--has-deadline:hover { background: #E0E7FF; }
+.cal-day--selected { background: #3B5BDB !important; color: #fff !important; }
+.cal-day--overdue { background: #FFF5F5; color: #E53E3E; }
+
+/* Todo list cards */
+.cal-todo-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.cal-todo-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.09); transform: translateY(-1px); }
+.cal-todo-card--overdue { border-left: 3px solid #E53E3E; }
+
+.cal-todo-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1A202C;
+  margin-bottom: 4px;
+}
+.cal-todo-deadline {
+  font-size: 12px;
+  color: #9AA5B4;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.cal-todo-deadline--overdue { color: #E53E3E; }
+.cal-todo-deadline svg { font-size: 13px !important; }
+
+.cal-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #9AA5B4;
+}
+
+.cal-empty {
+  text-align: center;
+  padding: 40px 24px;
+  color: #9AA5B4;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+}
+.cal-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1A202C;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #E4E7ED;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .edit-card-modal { top: 8px; width: calc(100vw - 16px); max-height: calc(100vh - 16px); }
+  .edit-card-body { flex-direction: column; }
+  .edit-card-left { flex: none; border-right: none; border-bottom: 1px solid #E4E7ED; max-height: 55vh; }
+  .edit-card-right { flex: none; width: 100% !important; min-width: unset !important; max-width: unset !important; }
+  .summary-page { padding: 20px 14px; }
+  .calendar-page { padding: 20px 14px; }
+}
+
+@media (max-width: 480px) {
+  .edit-card-modal { margin: 8px auto; max-height: calc(100vh - 16px); border-radius: 12px; }
+  .edit-card-left { padding: 14px; }
+  .edit-card-right { padding: 14px; }
+}
+
+/* Add Comment button — không full width */
+.edit-card-add-comment-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  width: auto !important;
+}
