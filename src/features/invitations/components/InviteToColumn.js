@@ -13,6 +13,7 @@ import {
   ListItemText,
   Avatar,
   Typography,
+  MenuItem,
 } from '@mui/material';
 import { showToast } from '../../../utils/toastUtils';
 import Invitation from './Invitation';
@@ -26,14 +27,24 @@ import Invitation from './Invitation';
  * @param {Function} props.onClose - Callback to close the dialog
  * @returns {JSX.Element}
  */
+
+const COLUMN_ROLES = [
+  { value: 'admin', label: 'Admin', description: 'Xem, chỉnh sửa và xóa column' },
+  { value: 'member', label: 'Member', description: 'Xem và chỉnh sửa column' },
+  { value: 'viewer', label: 'Viewer', description: 'Chỉ xem column' },
+];
+
 const InviteToColumn = ({ boardId, column, open, onClose }) => {
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState('member');
   const [submitEmail, setSubmitEmail] = useState('');
+  const [submitRole, setSubmitRole] = useState('member');
 
   const handleSubmit = (event) => {
     event.preventDefault();
     if (email.trim()) {
       setSubmitEmail(email);
+      setSubmitRole(role);
     } else {
       showToast('Please enter a valid email', 'error');
     }
@@ -42,13 +53,16 @@ const InviteToColumn = ({ boardId, column, open, onClose }) => {
   const handleSuccess = () => {
     showToast('User invited to column successfully!', 'success');
     setEmail('');
+    setRole('member');
     setSubmitEmail('');
+    setSubmitRole('member');
     onClose();
   };
 
   const handleError = (err) => {
     showToast(err.message || 'Failed to invite user', 'error');
     setSubmitEmail('');
+    setSubmitRole('member');
   };
 
   return (
@@ -57,8 +71,9 @@ const InviteToColumn = ({ boardId, column, open, onClose }) => {
         <DialogTitle>Share Column</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            {/* Email input and Share button */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+
+            {/* Email + Role + Share button */}
+            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
               <TextField
                 label="User Email"
                 value={email}
@@ -68,19 +83,41 @@ const InviteToColumn = ({ boardId, column, open, onClose }) => {
                 type="email"
                 autoFocus
                 required
-                error={!email.trim() && submitEmail}
+                error={!email.trim() && !!submitEmail}
                 helperText={!email.trim() && submitEmail ? 'Email is required' : ''}
               />
+              <TextField
+                select
+                label="Role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                margin="normal"
+                sx={{ minWidth: 130 }}
+              >
+                {COLUMN_ROLES.map((r) => (
+                  <MenuItem key={r.value} value={r.value}>
+                    <Box>
+                      <Typography variant="body2" fontWeight={500}>
+                        {r.label}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {r.description}
+                      </Typography>
+                    </Box>
+                  </MenuItem>
+                ))}
+              </TextField>
               <Button
                 onClick={handleSubmit}
                 color="primary"
                 variant="contained"
                 disabled={!email.trim()}
-                sx={{ minWidth: 100, height: 'fit-content', py: 1 }}
+                sx={{ minWidth: 100, height: 'fit-content', mt: 2, py: 1 }}
               >
                 Share
               </Button>
             </Box>
+
             {/* Owner and Members list */}
             <Box sx={{ mt: 2 }}>
               <Typography variant="h6" sx={{ mb: 1 }}>
@@ -112,7 +149,12 @@ const InviteToColumn = ({ boardId, column, open, onClose }) => {
                           alt={member.username}
                         />
                       </ListItemAvatar>
-                      <ListItemText primary={member.username || 'Unknown'} secondary="Member" />
+                      <ListItemText
+                        primary={member.username || 'Unknown'}
+                        secondary={
+                          COLUMN_ROLES.find((r) => r.value === member.role)?.label || 'Member'
+                        }
+                      />
                     </ListItem>
                   ))
                 ) : (
@@ -136,6 +178,7 @@ const InviteToColumn = ({ boardId, column, open, onClose }) => {
           boardId={boardId}
           columnId={column._id}
           email={submitEmail}
+          role={submitRole}
           action="inviteToColumn"
           onSuccess={handleSuccess}
           onError={handleError}
