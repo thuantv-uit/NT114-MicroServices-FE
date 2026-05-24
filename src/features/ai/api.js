@@ -1,121 +1,99 @@
 /**
- * Sends a request to analyze actions from text
- * @param {string} prompt - The input text to analyze actions from
- * @returns {Promise<Array>} - Array of actions
+ * api.js — FE API layer for TimelineBot.
+ *
+ * Services:
+ *   QUESTION_API  :3006  →  api_question.py  (POST /ask,   GET /health)
+ *   ACTION_API    :3007  →  api_request.py   (POST /query, GET /health)
  */
-export const analyzeActions = async (prompt) => {
-  try {
-    const response = await fetch('http://localhost:5004/analyze-actions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt }),
-    });
-    const data = await response.json();
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    console.log('1:', data);
-    console.log('2:', data.actions);
+export const QUESTION_API = process.env.REACT_APP_QUESTION_API_URL || 'http://localhost:3006';
+export const ACTION_API   = process.env.REACT_APP_ACTION_API_URL   || 'http://localhost:3007';
 
-    return data.actions;
-  } catch (error) {
-    throw new Error(`Action analysis error: ${error.message}`);
+// ── Shared POST helper ─────────────────────────────────────────────────────────
+const postJSON = async (url, body) => {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try {
+      const err = await res.json();
+      msg = err.error || err.detail || msg;
+    } catch (_) {}
+    throw new Error(msg);
   }
+
+  return res.json();
 };
 
-/**
- * Sends a request to extract email from raw text
- * @param {string} text - The input text to extract email from
- * @returns {Promise<string>} - Extracted email address
- */
-export const extractEmail = async (text) => {
-  try {
-    const response = await fetch('http://localhost:5003/extract-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: text }),
-    });
-    const data = await response.json();
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    return data.email; // Trả về email trực tiếp từ { email: "..." }
-  } catch (error) {
-    throw new Error(`Email extraction error: ${error.message}`);
-  }
-};
+// ── Health checks ──────────────────────────────────────────────────────────────
+/**
+ * @typedef {'online' | 'offline' | 'checking'} HealthStatus
+ */
 
 /**
- * Sends a request to extract column title from raw text
- * @param {string} text - The input text to extract column title from
- * @returns {Promise<string>} - Extracted column title
+ * Ping a service's /health endpoint.
+ * Resolves true if reachable and returns { status: "ok" }, false otherwise.
+ * Hard timeout: 5 s — avoids hanging the UI indefinitely.
+ *
+ * @param {'question' | 'action'} service
+ * @returns {Promise<boolean>}
  */
-export const extractColumnTitle = async (text) => {
-  try {
-    const response = await fetch('http://localhost:5002/extract1', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-    const data = await response.json();
+export const checkHealth = async (service) => {
+  const base = service === 'question' ? QUESTION_API : ACTION_API;
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
-    return data;
-  } catch (error) {
-    throw new Error(`Extraction error: ${error.message}`);
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('timeout')), 5000)
+  );
+
+  try {
+    const res = await Promise.race([
+      fetch(`${base}/health`),
+      timeout,
+    ]);
+
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    return data?.status === 'ok';
+  } catch (_) {
+    return false;
   }
 };
 
 
+// ── Question mode: POST /ask ───────────────────────────────────────────────────
 /**
- * Sends a request to extract board information (title and description) from text
- * @param {string} text - The input text to extract information from
- * @returns {Promise<Object>} - Object containing title and description
+ * @param {string} question
+ * @returns {Promise<string>}  answer text
+ *
+ * Contract:  { question } → { answer }
  */
-export const extractBoardInfo = async (text) => {
-  try {
-    const response = await fetch('http://localhost:5001/extract', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
-    });
-    const data = await response.json();
-
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return data; // Giả định API trả về { title, description }
-  } catch (error) {
-    throw new Error(`Extraction error: ${error.message}`);
-  }
+export const askQuestion = async (question) => {
+  const data = await postJSON(`${QUESTION_API}/ask`, { question });
+  return data.answer;
 };
 
+
+// ── Action mode: POST /query ───────────────────────────────────────────────────
 /**
- * Sends a chat message to the chat endpoint
- * @param {string} prompt - The user's input prompt
- * @param {Array} context - The conversation context
- * @returns {Promise<Object>} - Object containing response and updated context
+ * @param {string} query
+ * @returns {Promise<ActionResult[]>}
+ *
+ * @typedef {{ object: string, action: string, fields: Record<string,any> }} ActionResult
+ *
+ * Contract:  { query } → { success, results: ActionResult[], error? }
  */
-export const sendChatMessage = async (prompt, context) => {
-  try {
-    const response = await fetch('http://localhost:5000/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, context }),
-    });
-    const data = await response.json();
+export const parseActions = async (query) => {
+  const data = await postJSON(`${ACTION_API}/query`, { query });
 
-    if (data.error) {
-      throw new Error(data.error);
-    }
-
-    return { response: data.response, context: data.context };
-  } catch (error) {
-    throw new Error(`Chat error: ${error.message}`);
+  if (!data.success) {
+    throw new Error(data.error || 'Action parsing failed.');
   }
+
+  return Array.isArray(data.results) ? data.results : [];
 };
