@@ -91,11 +91,11 @@ const useDragAndDrop = (cards, setCards, columnId, columnTitle, onRefresh) => {
 
     try {
       await updateColumn(columnId, columnTitle, newCardOrderIds);
-      showToast('Cập nhật thứ tự thẻ thành công!', 'success');
+      showToast('Card order updated successfully!', 'success');
       onRefresh();
     } catch (err) {
       setCards(cards);
-      showToast(err.message || 'Không thể cập nhật thứ tự thẻ', 'error');
+      showToast(err.message || 'Cannot update card order', 'error');
     }
   };
 
@@ -190,17 +190,17 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
   const handleUpdateProcess = async () => {
     const processNum = Number(processValue);
     if (isNaN(processNum) || processNum < 0 || processNum > 100) {
-      setProcessError('Mức độ hoàn thành phải là số từ 0 đến 100');
+      setProcessError('Progress must be a number between 0 and 100');
       return;
     }
 
     try {
       await updateCard(card._id, { process: processNum }, token);
-      showToast('Cập nhật mức độ hoàn thành thành công!', 'success');
+      showToast('Progress updated successfully!', 'success');
       handleCloseProcessDialog();
       onRefresh();
     } catch (err) {
-      showToast(err.message || 'Không thể cập nhật mức độ hoàn thành', 'error');
+      showToast(err.message || 'Cannot update progress', 'error');
     }
   };
 
@@ -221,17 +221,17 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
 
   const handleUpdateImage = async () => {
     if (!imageFile) {
-      showToast('Vui lòng chọn một file ảnh', 'error');
+      showToast('Please select an image file', 'error');
       return;
     }
 
     try {
       const response = await updateCardImage(card._id, imageFile);
-      showToast('Cập nhật ảnh thẻ thành công!', 'success');
+      showToast('Card image updated successfully!', 'success');
       handleCloseImageDialog();
       onRefresh();
     } catch (err) {
-      showToast(err.message || 'Không thể cập nhật ảnh thẻ', 'error');
+      showToast(err.message || 'Cannot update card image', 'error');
     }
   };
 
@@ -250,17 +250,17 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
 
   const handleUpdateDeadline = async () => {
     if (!deadlineValue) {
-      setDeadlineError('Vui lòng chọn ngày deadline');
+      setDeadlineError('Please select a deadline date');
       return;
     }
 
     try {
       await updateCard(card._id, { deadline: new Date(deadlineValue).toISOString() }, token); // Gửi dưới dạng ISO string
-      showToast('Cập nhật deadline thành công!', 'success');
+      showToast('Deadline updated successfully!', 'success');
       handleCloseDeadlineDialog();
       onRefresh();
     } catch (err) {
-      showToast(err.message || 'Không thể cập nhật deadline', 'error');
+      showToast(err.message || 'Cannot update deadline', 'error');
     }
   };
 
@@ -381,7 +381,7 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
                   textAlign: 'left',
                 }}
               >
-                {card.deadline ? formatDate(card.deadline) : 'Chưa đặt deadline'}
+                {card.deadline ? formatDate(card.deadline) : 'No deadline has been set'}
               </Typography>
             </Stack>
           </Box>
@@ -398,35 +398,35 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
             <ListItemIcon>
               <DeleteIcon fontSize="small" />
             </ListItemIcon>
-            Xóa
+            Delete
           </MenuItem>
           <MenuItem onClick={handleOpenProcessDialog}>
             <ListItemIcon>
               <LinearScaleIcon fontSize="small" />
             </ListItemIcon>
-            Cập nhật tiến độ
+            Update progress
           </MenuItem>
           <MenuItem onClick={handleOpenImageDialog}>
             <ListItemIcon>
               <ImageIcon fontSize="small" />
             </ListItemIcon>
-            Cập nhật ảnh
+            Update image
           </MenuItem>
           <MenuItem onClick={handleOpenDeadlineDialog}>
             <ListItemIcon>
               <EventIcon fontSize="small" />
             </ListItemIcon>
-            Cập nhật deadline
+            Update deadline
           </MenuItem>
         </Menu>
       </Box>
 
       {/* Dialog để chỉnh sửa process (giữ nguyên) */}
       <Dialog open={openProcessDialog} onClose={handleCloseProcessDialog}>
-        <DialogTitle>Chỉnh sửa mức độ hoàn thành</DialogTitle>
+        <DialogTitle>Update progress</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <Box sx={{ px: 2, py: 1 }}>
-            <Typography gutterBottom>Mức độ hoàn thành (%): {processValue}</Typography>
+            <Typography gutterBottom>Progress (%): {processValue}</Typography>
             <Slider
               value={Number(processValue)}
               onChange={(e, newValue) => {
@@ -460,14 +460,14 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseProcessDialog}>Hủy</Button>
-          <Button onClick={handleUpdateProcess} color="primary">Lưu</Button>
+          <Button onClick={handleCloseProcessDialog}>Cancel</Button>
+          <Button onClick={handleUpdateProcess} color="primary">Save</Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog để cập nhật ảnh (giữ nguyên) */}
       <Dialog open={openImageDialog} onClose={handleCloseImageDialog}>
-        <DialogTitle>Cập nhật ảnh thẻ</DialogTitle>
+        <DialogTitle>Update card image</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <Box sx={{ px: 2, py: 1 }}>
             <Input
@@ -479,16 +479,16 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseImageDialog}>Hủy</Button>
+          <Button onClick={handleCloseImageDialog}>Cancel</Button>
           <Button onClick={handleUpdateImage} color="primary" disabled={!imageFile}>
-            Lưu
+            Save
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Dialog mới để cập nhật deadline */}
       <Dialog open={openDeadlineDialog} onClose={handleCloseDeadlineDialog}>
-        <DialogTitle>Cập nhật deadline</DialogTitle>
+        <DialogTitle>Update deadline</DialogTitle>
         <DialogContent sx={{ pt: 2 }}>
           <Box sx={{ px: 2, py: 1 }}>
             <Input
@@ -508,9 +508,9 @@ const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, 
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDeadlineDialog}>Hủy</Button>
+          <Button onClick={handleCloseDeadlineDialog}>Cancel</Button>
           <Button onClick={handleUpdateDeadline} color="primary">
-            Lưu
+            Save
           </Button>
         </DialogActions>
       </Dialog>

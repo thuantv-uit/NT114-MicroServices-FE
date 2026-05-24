@@ -297,7 +297,7 @@ const Calendar = ({ token }) => {
           </Typography>
         ) : (
           <Typography variant="body1" sx={{ textAlign: 'center', py: 4, color: '#172B4D' }}>
-            Không có card với deadline để hiển thị.
+            There are no cards with deadlines to display.
           </Typography>
         )}
       </Box>

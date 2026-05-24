@@ -102,7 +102,7 @@ const Summary = ({ token }) => {
             WebkitTextFillColor: 'transparent',
           }}
         >
-          Tổng quan tiến độ
+          Progress overview
         </Typography>
         <Typography
           variant="subtitle1"
@@ -113,7 +113,7 @@ const Summary = ({ token }) => {
             fontSize: { xs: '1rem', md: '1.2rem' },
           }}
         >
-          Xem tiến độ công việc của bạn qua biểu đồ và thống kê
+          View your work progress through charts and statistics.
         </Typography>
         <Grid container spacing={3}>
           {/* Tổng số card */}
@@ -143,7 +143,7 @@ const Summary = ({ token }) => {
                       {totalCards}
                     </Typography>
                     <Typography variant="body1" sx={{ color: '#5E6C84' }}>
-                      Tổng số công việc
+                      Total number of jobs
                     </Typography>
                   </CardContent>
                 </Card>
@@ -212,7 +212,7 @@ const Summary = ({ token }) => {
                     {/* Chú thích */}
                     <Grid item xs={12} md={6}>
                       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 2, color: '#172B4D' }}>
-                        Chú thích
+                        Legend
                       </Typography>
                       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, flexWrap: 'wrap', gap: 1 }}>
                         {progressLegend.map((item) => (
@@ -244,7 +244,7 @@ const Summary = ({ token }) => {
           ) : (
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ textAlign: 'center', py: 4, color: '#5E6C84' }}>
-                Không có công việc để hiển thị.
+                There are no jobs to display.
               </Typography>
             </Grid>
           )}

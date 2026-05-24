@@ -93,7 +93,7 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
 
       try {
         await updateBoardColumnOrder(boardId, newOrderedColumnIds);
-        showToast('Cập nhật thứ tự cột thành công!', 'success');
+        showToast('Column order updated successfully!', 'success');
       } catch (err) {
         setOrderedColumnIds(prevOrderedColumnIds);
         showToast(err.message, 'error');
@@ -240,8 +240,8 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
                   })
                 ) : (
                   <Box sx={{ textAlign: 'center', py: 2, px: 2 }}>
-                    <Typography sx={{ color: '#5E6C84', mb: 1 }}>
-                      Không tìm thấy cột nào.
+                    <Typography sx={{ color: '#5E6C84', mb: 1 }}>           
+                      No columns found.
                     </Typography>
                   </Box>
                 )}

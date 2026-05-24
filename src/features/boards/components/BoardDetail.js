@@ -219,7 +219,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
             </Box>
             {/* Action buttons */}
             <Box sx={{ display: 'flex', gap: 0.5 }}>
-              <Tooltip title="Đổi nền">
+              <Tooltip title="Change background">
                 <IconButton
                   color="primary"
                   onClick={() => setOpenBackgroundDialog(true)}
@@ -232,7 +232,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                   <PaletteIcon fontSize="medium" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Cập nhật bảng">
+              <Tooltip title="Edit Board">
                 <IconButton
                   color="primary"
                   onClick={() => setOpenUpdateDialog(true)}
@@ -245,7 +245,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                   <EditIcon fontSize="medium" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Xóa bảng">
+              <Tooltip title="Delete Board">
                 <IconButton
                   color="error"
                   onClick={() => setOpenDeleteDialog(true)}
@@ -258,7 +258,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                   <DeleteIcon fontSize="medium" />
                 </IconButton>
               </Tooltip>
-              <Tooltip title="Mời người dùng">
+              <Tooltip title="Invite users to board">
                 <IconButton
                   color="primary"
                   onClick={() => setOpenInviteBoard(true)}

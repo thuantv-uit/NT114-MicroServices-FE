@@ -119,7 +119,7 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
             ))
           ) : (
             <Typography variant="body2" sx={{ color: '#5E6C84', textAlign: 'center' }}>
-              Không có thẻ trong cột này.
+              There are no tags in this column.
             </Typography>
           )}
         </Box>
