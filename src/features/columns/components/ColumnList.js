@@ -1,321 +1,202 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { fetchColumns, updateBoardColumnOrder, updateColumn } from '../services/columnService';
 import { fetchBoard } from '../../boards/services/boardService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, Typography, CircularProgress } from '@mui/material';
-import Column from './Column';
+import { CircularProgress, Dialog } from '@mui/material';
+import Column   from './Column';
 import CreateCard from '../../cards/components/CreateCard';
-import ColumnEdit from './ColumnEdit';
+import ColumnEdit   from './ColumnEdit';
 import DeleteColumn from './DeleteColumn';
+import Card from '../../cards/components/Card';
 import {
-  DndContext,
-  useSensor,
-  useSensors,
-  DragOverlay,
-  defaultDropAnimationSideEffects,
-  closestCorners,
+  DndContext, useSensor, useSensors, DragOverlay,
+  defaultDropAnimationSideEffects, closestCorners,
 } from '@dnd-kit/core';
 import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
-import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { arrayMove } from '@dnd-kit/sortable';
-import { Dialog } from '@mui/material';
-import Card from '../../cards/components/Card';
+import { SortableContext, horizontalListSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import '../styles/column.css';
 
 const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
-  const [columns, setColumns] = useState([]);
-  const [orderedColumnIds, setOrderedColumnIds] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [activeDragItemId, setActiveDragItemId] = useState(null);
+  const [columns,           setColumns]           = useState([]);
+  const [orderedColumnIds,  setOrderedColumnIds]  = useState([]);
+  const [loading,           setLoading]           = useState(false);
+  const [activeDragItemId,   setActiveDragItemId]   = useState(null);
   const [activeDragItemType, setActiveDragItemType] = useState(null);
   const [activeDragItemData, setActiveDragItemData] = useState(null);
-  const [sourceColumn, setSourceColumn] = useState(null);
-  const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [sourceColumn,       setSourceColumn]       = useState(null);
+  const [openEditDialog,       setOpenEditDialog]       = useState(false);
+  const [openDeleteDialog,     setOpenDeleteDialog]     = useState(false);
   const [openCreateCardDialog, setOpenCreateCardDialog] = useState(false);
-  const [selectedColumn, setSelectedColumn] = useState(null);
+  const [selectedColumn,       setSelectedColumn]       = useState(null);
 
   const mouseSensor = useSensor(MouseSensor, { activationConstraint: { distance: 10 } });
   const touchSensor = useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 500 } });
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors     = useSensors(mouseSensor, touchSensor);
 
   const loadColumns = async () => {
     setLoading(true);
     try {
-      const [data, board] = await Promise.all([
-        fetchColumns(boardId),
-        fetchBoard(boardId),
-      ]);
+      const [data, board] = await Promise.all([fetchColumns(boardId), fetchBoard(boardId)]);
       setColumns(data);
       setOrderedColumnIds(board.columnOrderIds || data.map((c) => c._id));
     } catch (err) {
       showToast(err.message, 'error');
-    } finally {
-      setLoading(false);
-    }
+    } finally { setLoading(false); }
   };
 
-  useEffect(() => {
-    loadColumns();
-  }, [boardId]);
+  useEffect(() => { loadColumns(); }, [boardId]);
 
-  const findColumnByCardId = (cardId) => {
-    return columns.find((column) => column?.cardOrderIds?.includes(cardId));
-  };
+  const findColumnByCardId = (cardId) =>
+    columns.find((col) => col?.cardOrderIds?.includes(cardId));
 
-  const handleDragStart = (event) => {
-    const { active } = event;
+  const handleDragStart = ({ active }) => {
     setActiveDragItemId(active.id);
     setActiveDragItemType(active.data.current.type);
     setActiveDragItemData(active.data.current);
-    if (active.data.current.type === 'CARD') {
+    if (active.data.current.type === 'CARD')
       setSourceColumn(findColumnByCardId(active.id));
-    }
   };
 
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-    setActiveDragItemId(null);
-    setActiveDragItemType(null);
-    setActiveDragItemData(null);
-    setSourceColumn(null);
-
+  const handleDragEnd = async ({ active, over }) => {
+    setActiveDragItemId(null); setActiveDragItemType(null);
+    setActiveDragItemData(null); setSourceColumn(null);
     if (!active || !over || active.id === over.id) return;
 
     if (activeDragItemType === 'COLUMN') {
-      const oldIndex = orderedColumnIds.findIndex((id) => id === active.id);
-      const newIndex = orderedColumnIds.findIndex((id) => id === over.id);
-      const newOrderedColumnIds = arrayMove(orderedColumnIds, oldIndex, newIndex);
-
-      const prevOrderedColumnIds = [...orderedColumnIds];
-      setOrderedColumnIds(newOrderedColumnIds);
-
-      try {
-        await updateBoardColumnOrder(boardId, newOrderedColumnIds);
-        showToast('Column order updated successfully!', 'success');
-      } catch (err) {
-        setOrderedColumnIds(prevOrderedColumnIds);
-        showToast(err.message, 'error');
-      }
+      const oldIdx = orderedColumnIds.indexOf(active.id);
+      const newIdx = orderedColumnIds.indexOf(over.id);
+      const next   = arrayMove(orderedColumnIds, oldIdx, newIdx);
+      const prev   = [...orderedColumnIds];
+      setOrderedColumnIds(next);
+      try { await updateBoardColumnOrder(boardId, next); showToast('Column order updated!', 'success'); }
+      catch (err) { setOrderedColumnIds(prev); showToast(err.message, 'error'); }
     } else if (activeDragItemType === 'CARD') {
-      const sourceCol = findColumnByCardId(active.id);
+      const srcCol  = findColumnByCardId(active.id);
       const destCol = findColumnByCardId(over.id) || findColumnByCardId(over.data.current?.columnId);
+      if (!srcCol || !destCol) return;
 
-      if (!sourceCol || !destCol) return;
-
-      if (sourceCol._id === destCol._id) {
-        const oldIndex = sourceCol.cardOrderIds.findIndex((id) => id === active.id);
-        const newIndex = sourceCol.cardOrderIds.findIndex((id) => id === over.id);
-        const newCardOrderIds = arrayMove(sourceCol.cardOrderIds, oldIndex, newIndex);
-
-        setColumns((prev) =>
-          prev.map((col) =>
-            col._id === sourceCol._id ? { ...col, cardOrderIds: newCardOrderIds } : col
-          )
-        );
-
-        try {
-          await updateColumn(sourceCol._id, sourceCol.title, newCardOrderIds);
-          showToast('Cập nhật thứ tự thẻ thành công!', 'success');
-        } catch (err) {
-          setColumns(columns);
-          showToast(err.message, 'error');
-        }
+      if (srcCol._id === destCol._id) {
+        const oi = srcCol.cardOrderIds.indexOf(active.id);
+        const ni = srcCol.cardOrderIds.indexOf(over.id);
+        const next = arrayMove(srcCol.cardOrderIds, oi, ni);
+        setColumns((p) => p.map((c) => c._id === srcCol._id ? { ...c, cardOrderIds: next } : c));
+        try { await updateColumn(srcCol._id, srcCol.title, next); showToast('Card reordered!', 'success'); }
+        catch (err) { setColumns(columns); showToast(err.message, 'error'); }
       } else {
-        const sourceCardOrderIds = sourceCol.cardOrderIds.filter((id) => id !== active.id);
-        const destCardOrderIds = [...destCol.cardOrderIds];
-        const overIndex = destCol.cardOrderIds.findIndex((id) => id === over.id);
-        const insertIndex = overIndex >= 0 ? overIndex : destCol.cardOrderIds.length;
-        destCardOrderIds.splice(insertIndex, 0, active.id);
-
-        setColumns((prev) =>
-          prev.map((col) =>
-            col._id === sourceCol._id
-              ? { ...col, cardOrderIds: sourceCardOrderIds }
-              : col._id === destCol._id
-              ? { ...col, cardOrderIds: destCardOrderIds }
-              : col
-          )
-        );
-
+        const srcIds  = srcCol.cardOrderIds.filter((id) => id !== active.id);
+        const destIds = [...destCol.cardOrderIds];
+        const oi = destCol.cardOrderIds.indexOf(over.id);
+        destIds.splice(oi >= 0 ? oi : destIds.length, 0, active.id);
+        setColumns((p) => p.map((c) =>
+          c._id === srcCol._id  ? { ...c, cardOrderIds: srcIds  } :
+          c._id === destCol._id ? { ...c, cardOrderIds: destIds } : c
+        ));
         try {
           await Promise.all([
-            updateColumn(sourceCol._id, sourceCol.title, sourceCardOrderIds),
-            updateColumn(destCol._id, destCol.title, destCardOrderIds),
+            updateColumn(srcCol._id,  srcCol.title,  srcIds),
+            updateColumn(destCol._id, destCol.title, destIds),
           ]);
-          showToast('Di chuyển thẻ thành công!', 'success');
-        } catch (err) {
-          setColumns(columns);
-          showToast(err.message, 'error');
-        }
+          showToast('Card moved!', 'success');
+        } catch (err) { setColumns(columns); showToast(err.message, 'error'); }
       }
     }
   };
 
   const handleDialogClose = () => {
-    setOpenEditDialog(false);
-    setOpenDeleteDialog(false);
-    setOpenCreateCardDialog(false);
-    setSelectedColumn(null);
+    setOpenEditDialog(false); setOpenDeleteDialog(false);
+    setOpenCreateCardDialog(false); setSelectedColumn(null);
     loadColumns();
   };
 
-  const customDropAnimation = {
+  const dropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
   };
 
-  // Default ColumnContainer with Trello style
-  const DefaultColumnContainer = ({ children, ...props }) => (
-    <Box
-      sx={{
-        bgcolor: '#EBECF0', // Đảm bảo màu xám cho container mặc định
-        borderRadius: '8px',
-        p: 1,
-        minWidth: '272px',
-        maxWidth: '272px',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.2s ease',
-      }}
-      {...props}
-    >
-      {children}
-    </Box>
-  );
-
   return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
+    <DndContext sensors={sensors} collisionDetection={closestCorners}
+      onDragStart={handleDragStart} onDragEnd={handleDragEnd}
     >
-      <Box sx={{ my: 1, width: '100%' }}>
-        {loading ? (
-          <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <SortableContext items={orderedColumnIds} strategy={horizontalListSortingStrategy}>
-            <Box
-              sx={{
-                overflowX: 'auto',
-                whiteSpace: 'nowrap',
-                pb: 1,
-                width: '100%',
-              }}
-            >
-              <Box sx={{ display: 'inline-flex', gap: 1.5 }}>
-                {orderedColumnIds.length > 0 ? (
-                  orderedColumnIds.map((columnId) => {
-                    const column = columns.find((c) => c._id === columnId);
-                    return column ? (
-                      <Column
-                        key={column._id}
-                        column={column}
-                        boardId={boardId}
-                        token={token}
-                        onRefresh={loadColumns}
-                        onEdit={() => {
-                          setSelectedColumn(column);
-                          setOpenEditDialog(true);
-                        }}
-                        onDelete={() => {
-                          setSelectedColumn(column);
-                          setOpenDeleteDialog(true);
-                        }}
-                        onAddCard={() => {
-                          if (column?._id) {
-                            setSelectedColumn(column);
-                            setOpenCreateCardDialog(true);
-                          } else {
-                            showToast('Không thể tạo thẻ: Thiếu ID cột', 'error');
-                          }
-                        }}
-                        ColumnContainer={ColumnContainer || DefaultColumnContainer}
-                        CardContainer={CardContainer}
-                      />
-                    ) : null;
-                  })
-                ) : (
-                  <Box sx={{ textAlign: 'center', py: 2, px: 2 }}>
-                    <Typography sx={{ color: '#5E6C84', mb: 1 }}>           
-                      No columns found.
-                    </Typography>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          </SortableContext>
-        )}
-        <DragOverlay dropAnimation={customDropAnimation}>
-          {activeDragItemType === 'COLUMN' && activeDragItemData ? (
-            <Column
-              column={activeDragItemData}
-              boardId={boardId}
-              token={token}
-              onRefresh={loadColumns}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              onAddCard={() => {}}
-              ColumnContainer={ColumnContainer || DefaultColumnContainer}
-              CardContainer={CardContainer}
-            />
-          ) : activeDragItemType === 'CARD' && activeDragItemData ? (
-            <Card
-              card={activeDragItemData}
-              boardId={boardId}
-              columnId={sourceColumn?._id}
-              token={token}
-              onEdit={() => {}}
-              onDelete={() => {}}
-              onInviteUser={() => {}}
-              onRefresh={() => {}}
-              CardContainer={CardContainer}
-            />
-          ) : null}
-        </DragOverlay>
-      </Box>
-
-      {/* Edit Column Dialog */}
-      {selectedColumn && (
-        <Dialog open={openEditDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
-          <ColumnEdit
-            token={token}
-            columnId={selectedColumn._id}
-            boardId={boardId}
-            initialValues={{
-              title: selectedColumn.title,
-              backgroundColor: '#EBECF0', // Đảm bảo màu xám trong dialog chỉnh sửa
-            }}
-            onClose={handleDialogClose}
-          />
-        </Dialog>
+      {loading ? (
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
+          <CircularProgress size={36} style={{ color: '#3B5BDB' }} />
+        </div>
+      ) : (
+        <SortableContext items={orderedColumnIds} strategy={horizontalListSortingStrategy}>
+          <div className="col-list-wrapper">
+            {orderedColumnIds.length > 0 ? (
+              orderedColumnIds.map((colId) => {
+                const col = columns.find((c) => c._id === colId);
+                return col ? (
+                  <Column
+                    key={col._id}
+                    column={col}
+                    boardId={boardId}
+                    token={token}
+                    onRefresh={loadColumns}
+                    onEdit={() => { setSelectedColumn(col); setOpenEditDialog(true); }}
+                    onDelete={() => { setSelectedColumn(col); setOpenDeleteDialog(true); }}
+                    onAddCard={() => {
+                      if (col?._id) { setSelectedColumn(col); setOpenCreateCardDialog(true); }
+                      else showToast('Cannot create card: missing column ID', 'error');
+                    }}
+                    ColumnContainer={ColumnContainer}
+                    CardContainer={CardContainer}
+                  />
+                ) : null;
+              })
+            ) : (
+              <div className="col-empty">
+                <div className="col-empty__icon">📋</div>
+                <p>No columns yet. Add one to get started!</p>
+              </div>
+            )}
+          </div>
+        </SortableContext>
       )}
 
-      {/* Delete Column Dialog */}
-      {selectedColumn && (
-        <Dialog open={openDeleteDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
-          <DeleteColumn
-            token={token}
-            columnId={selectedColumn._id}
-            boardId={boardId}
-            onClose={handleDialogClose}
+      <DragOverlay dropAnimation={dropAnimation}>
+        {activeDragItemType === 'COLUMN' && activeDragItemData ? (
+          <Column
+            column={activeDragItemData} boardId={boardId} token={token}
+            onRefresh={loadColumns} onEdit={() => {}} onDelete={() => {}} onAddCard={() => {}}
+            ColumnContainer={ColumnContainer} CardContainer={CardContainer}
           />
-        </Dialog>
-      )}
+        ) : activeDragItemType === 'CARD' && activeDragItemData ? (
+          <Card
+            card={activeDragItemData} boardId={boardId}
+            columnId={sourceColumn?._id} token={token}
+            onEdit={() => {}} onDelete={() => {}} onInviteUser={() => {}} onRefresh={() => {}}
+            CardContainer={CardContainer}
+          />
+        ) : null}
+      </DragOverlay>
 
-      {/* Create Card Dialog */}
+      {/* Dialogs */}
       {selectedColumn && (
-        <Dialog open={openCreateCardDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
-          <CreateCard
-            token={token}
-            columnId={selectedColumn._id}
-            boardId={boardId}
-            onClose={handleDialogClose}
-          />
-        </Dialog>
+        <>
+          <Dialog open={openEditDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+            <ColumnEdit
+              token={token} columnId={selectedColumn._id} boardId={boardId}
+              initialValues={{ title: selectedColumn.title, backgroundColor: selectedColumn.backgroundColor || '#EBECF0' }}
+              onClose={handleDialogClose}
+            />
+          </Dialog>
+
+          <Dialog open={openDeleteDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+            <DeleteColumn
+              token={token} columnId={selectedColumn._id}
+              boardId={boardId} onClose={handleDialogClose}
+            />
+          </Dialog>
+
+          <Dialog open={openCreateCardDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+            <CreateCard
+              token={token} columnId={selectedColumn._id}
+              boardId={boardId} onClose={handleDialogClose}
+            />
+          </Dialog>
+        </>
       )}
     </DndContext>
   );
