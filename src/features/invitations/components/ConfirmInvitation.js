@@ -1,31 +1,38 @@
-// ConfirmInvitation.js
 import React from 'react';
-import { Button, Typography, Box } from '@mui/material';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import '../styles/invitation.css';
 
-/**
- * Component để xác nhận việc mời user vào board (chỉ cho board)
- * @param {Object} props
- * @param {string} props.email - Email của user cần mời
- * @param {string} props.boardId - ID của board
- * @param {Function} props.onConfirm - Callback khi xác nhận (Yes)
- * @param {Function} props.onCancel - Callback khi hủy (No)
- * @returns {JSX.Element}
- */
-const ConfirmInvitation = ({ email, boardId, onConfirm, onCancel }) => {
-  return (
-    <Box sx={{ padding: 2, marginTop: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-      <Typography variant="h6">Confirm Invitation</Typography>
-      <Typography variant="body1"><strong>Email:</strong> {email || 'Not provided'}</Typography>
-      <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={onConfirm}>
-          Yes
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={onCancel}>
-          No
-        </Button>
-      </Box>
-    </Box>
-  );
-};
+const ConfirmInvitation = ({ email, boardId, onConfirm, onCancel }) => (
+  <div className="inv-confirm">
+    <div className="inv-confirm__icon">
+      <PersonAddIcon style={{ fontSize: 22 }} />
+    </div>
+    <h3 className="inv-confirm__title">Confirm Invitation</h3>
+    <div className="inv-confirm__row">
+      <span className="inv-confirm__label">Email</span>
+      <span className="inv-confirm__value">{email || '—'}</span>
+    </div>
+    {boardId && (
+      <div className="inv-confirm__row">
+        <span className="inv-confirm__label">Board</span>
+        <span className="inv-confirm__value">{boardId}</span>
+      </div>
+    )}
+    <div style={{ display: 'flex', gap: 10, marginTop: 18 }}>
+      <button className="inv-action-btn inv-action-btn--accept"
+        style={{ flex: 1, padding: '10px 0', borderRadius: 9, fontSize: 14 }}
+        onClick={onConfirm}
+      >
+        Send invitation
+      </button>
+      <button className="inv-action-btn inv-action-btn--reject"
+        style={{ flex: 1, padding: '10px 0', borderRadius: 9, fontSize: 14 }}
+        onClick={onCancel}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+);
 
 export default ConfirmInvitation;

@@ -1,261 +1,175 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Button,
-  Box,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  Avatar,
-  Typography,
-  MenuItem,
-  Chip,
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, Button, Avatar, MenuItem,
 } from '@mui/material';
 import { showToast } from '../../../utils/toastUtils';
 import Invitation from './Invitation';
+import '../styles/invitation.css';
 
-// ── Role config ────────────────────────────────────────────────────────────────
 const ROLES = [
-  {
-    value: 'admin',
-    label: 'Admin',
-    description: 'Can manage board settings and members',
-    color: '#f87171',   // red
-  },
-  {
-    value: 'member',
-    label: 'Member',
-    description: 'Can create and edit cards',
-    color: '#6366f1',   // indigo
-  },
-  {
-    value: 'viewer',
-    label: 'Viewer',
-    description: 'Can view board content only',
-    color: '#4ade80',   // green
-  },
+  { value: 'admin',  label: 'Admin',  color: '#f87171', description: 'Can manage board settings and members' },
+  { value: 'member', label: 'Member', color: '#6366f1', description: 'Can create and edit cards' },
+  { value: 'viewer', label: 'Viewer', color: '#4ade80', description: 'Can view board content only' },
 ];
 
-/**
- * Component to display UI for inviting a user to a board.
- * @param {Object}   props
- * @param {string}   props.boardId  - Board ID
- * @param {Object}   props.board    - Board data (owner + members)
- * @param {boolean}  props.open     - Whether the dialog is open
- * @param {Function} props.onClose  - Callback to close the dialog
- */
 const InviteToBoard = ({ boardId, board, open, onClose }) => {
   const navigate = useNavigate();
-  const [email, setEmail]           = useState('');
-  const [role, setRole]             = useState('member');   // default role
+  const [email,       setEmail]       = useState('');
+  const [role,        setRole]        = useState('member');
   const [submitEmail, setSubmitEmail] = useState('');
-  const [submitRole, setSubmitRole]   = useState('');
+  const [submitRole,  setSubmitRole]  = useState('');
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    if (email.trim()) {
-      setSubmitEmail(email);
-      setSubmitRole(role);
-    } else {
-      showToast('Please enter a valid email', 'error');
-    }
+  const selectedRole = ROLES.find((r) => r.value === role);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!email.trim()) { showToast('Please enter a valid email', 'error'); return; }
+    setSubmitEmail(email);
+    setSubmitRole(role);
   };
 
   const handleSuccess = () => {
     showToast('User invited to board successfully!', 'success');
-    setEmail('');
-    setRole('member');
-    setSubmitEmail('');
-    setSubmitRole('');
+    setEmail(''); setRole('member');
+    setSubmitEmail(''); setSubmitRole('');
     onClose();
     setTimeout(() => navigate(`/boards/${boardId}`), 2000);
   };
 
   const handleError = (err) => {
     showToast(err.message || 'Failed to invite user', 'error');
-    setSubmitEmail('');
-    setSubmitRole('');
+    setSubmitEmail(''); setSubmitRole('');
   };
-
-  const selectedRole = ROLES.find((r) => r.value === role);
 
   return (
     <>
-      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-        <DialogTitle>Share Board</DialogTitle>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm"
+        PaperProps={{ sx: { borderRadius: '16px', overflow: 'hidden' } }}
+      >
+        <DialogTitle className="inv-dialog-title">Share Board</DialogTitle>
 
-        <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+        <DialogContent className="inv-dialog-content">
 
-            {/* ── Email + Role + Share ─────────────────────────────────────── */}
-            <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+          {/* ── Email + Role + Share ── */}
+          <div className="inv-input-row">
+            <TextField
+              label="User Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              fullWidth
+              type="email"
+              autoFocus
+              required
+              size="small"
+              error={!email.trim() && !!submitEmail}
+              helperText={!email.trim() && submitEmail ? 'Email is required' : ''}
+            />
+            <TextField
+              select
+              label="Role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              size="small"
+              sx={{ minWidth: 120, flexShrink: 0 }}
+            >
+              {ROLES.map((r) => (
+                <MenuItem key={r.value} value={r.value}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: r.color, flexShrink: 0 }} />
+                    {r.label}
+                  </div>
+                </MenuItem>
+              ))}
+            </TextField>
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              disabled={!email.trim()}
+              sx={{
+                height: 40, minWidth: 80, flexShrink: 0,
+                borderRadius: '8px', textTransform: 'none',
+                fontFamily: 'DM Sans', fontWeight: 500,
+                background: '#3B5BDB',
+                '&:hover': { background: '#2F4AC5' },
+              }}
+            >
+              Share
+            </Button>
+          </div>
 
-              {/* Email field */}
-              <TextField
-                label="User Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                fullWidth
-                margin="normal"
-                type="email"
-                autoFocus
-                required
-                error={!email.trim() && !!submitEmail}
-                helperText={!email.trim() && submitEmail ? 'Email is required' : ''}
-                sx={{ mt: 0 }}
+          {/* ── Role hint ── */}
+          {selectedRole && (
+            <div className="inv-role-hint">
+              <span
+                className="inv-role-chip"
+                style={{ background: selectedRole.color + '22', color: selectedRole.color }}
+              >
+                {selectedRole.label}
+              </span>
+              <span className="inv-role-desc">{selectedRole.description}</span>
+            </div>
+          )}
+
+          {/* ── Member list ── */}
+          <p className="inv-section-title">Board Members</p>
+
+          {board?.owner && (
+            <div className="inv-member-item">
+              <Avatar className="inv-member-avatar"
+                src={board.owner.avatar || 'https://via.placeholder.com/36'}
+                alt={board.owner.username}
               />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p className="inv-member-name">{board.owner.username || 'Unknown'}</p>
+                <p className="inv-member-sub">Owner</p>
+              </div>
+              <span className="inv-member-chip" style={{ background: '#EEF2FF', color: '#3B5BDB' }}>
+                Owner
+              </span>
+            </div>
+          )}
 
-              {/* Role dropdown */}
-              <TextField
-                select
-                label="Role"
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                sx={{ minWidth: 130, mt: 0 }}
-                margin="normal"
-              >
-                {ROLES.map((r) => (
-                  <MenuItem key={r.value} value={r.value}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box
-                        sx={{
-                          width: 8,
-                          height: 8,
-                          borderRadius: '50%',
-                          background: r.color,
-                          flexShrink: 0,
-                        }}
-                      />
-                      {r.label}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </TextField>
+          {board?.members?.length > 0 ? (
+            board.members.map((m) => {
+              const mr = ROLES.find((r) => r.value === m.role) || ROLES[1];
+              return (
+                <div key={m._id || m.id} className="inv-member-item">
+                  <Avatar className="inv-member-avatar"
+                    src={m.avatar || 'https://via.placeholder.com/36'}
+                    alt={m.username}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p className="inv-member-name">{m.username || 'Unknown'}</p>
+                    <p className="inv-member-sub">{m.email || ''}</p>
+                  </div>
+                  <span className="inv-member-chip"
+                    style={{ background: mr.color + '22', color: mr.color }}
+                  >
+                    {mr.label}
+                  </span>
+                </div>
+              );
+            })
+          ) : (
+            !board?.owner && <p className="inv-empty-members">No members yet.</p>
+          )}
 
-              {/* Share button */}
-              <Button
-                onClick={handleSubmit}
-                color="primary"
-                variant="contained"
-                disabled={!email.trim()}
-                sx={{ minWidth: 90, height: 56, mt: 0, flexShrink: 0 }}
-              >
-                Share
-              </Button>
-            </Box>
-
-            {/* Role description hint */}
-            {selectedRole && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                  px: 1.5,
-                  py: 1,
-                  borderRadius: 2,
-                  background: 'rgba(0,0,0,0.04)',
-                  border: '1px solid',
-                  borderColor: 'divider',
-                }}
-              >
-                <Chip
-                  label={selectedRole.label}
-                  size="small"
-                  sx={{
-                    background: selectedRole.color + '22',
-                    color: selectedRole.color,
-                    fontWeight: 600,
-                    fontSize: 11,
-                  }}
-                />
-                <Typography variant="caption" color="text.secondary">
-                  {selectedRole.description}
-                </Typography>
-              </Box>
-            )}
-
-            {/* ── Member list ──────────────────────────────────────────────── */}
-            <Box sx={{ mt: 1 }}>
-              <Typography variant="h6" sx={{ mb: 1 }}>
-                Board Members
-              </Typography>
-              <List disablePadding>
-
-                {/* Owner */}
-                {board?.owner && (
-                  <ListItem disablePadding sx={{ py: 0.5 }}>
-                    <ListItemAvatar>
-                      <Avatar
-                        src={board.owner.avatar || 'https://via.placeholder.com/24'}
-                        alt={board.owner.username}
-                      />
-                    </ListItemAvatar>
-                    <ListItemText
-                      primary={board.owner.username || 'Unknown'}
-                      secondary="Owner"
-                    />
-                    <Chip
-                      label="Owner"
-                      size="small"
-                      sx={{ fontSize: 11, fontWeight: 600 }}
-                    />
-                  </ListItem>
-                )}
-
-                {/* Members */}
-                {board?.members?.length > 0 ? (
-                  board.members.map((member) => {
-                    const memberRole = ROLES.find((r) => r.value === member.role) || ROLES[1];
-                    return (
-                      <ListItem disablePadding sx={{ py: 0.5 }} key={member._id || member.id}>
-                        <ListItemAvatar>
-                          <Avatar
-                            src={member.avatar || 'https://via.placeholder.com/24'}
-                            alt={member.username}
-                          />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={member.username || 'Unknown'}
-                          secondary={member.email || ''}
-                        />
-                        <Chip
-                          label={memberRole.label}
-                          size="small"
-                          sx={{
-                            fontSize: 11,
-                            fontWeight: 600,
-                            background: memberRole.color + '22',
-                            color: memberRole.color,
-                          }}
-                        />
-                      </ListItem>
-                    );
-                  })
-                ) : (
-                  <Typography variant="body2" color="text.secondary" sx={{ pl: 1 }}>
-                    No members yet.
-                  </Typography>
-                )}
-              </List>
-            </Box>
-          </Box>
         </DialogContent>
 
-        <DialogActions>
-          <Button onClick={onClose} color="secondary" variant="outlined">
+        <DialogActions className="inv-dialog-actions">
+          <Button onClick={onClose} variant="outlined" size="small"
+            sx={{
+              borderRadius: '8px', textTransform: 'none',
+              fontFamily: 'DM Sans', color: '#4A5568', borderColor: '#E4E7ED',
+            }}
+          >
             Cancel
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Fire invitation when submitEmail is set */}
       {submitEmail && (
         <Invitation
           boardId={boardId}
