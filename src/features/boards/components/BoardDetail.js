@@ -9,20 +9,23 @@ import ChangeBackground from './ChangeColor';
 import DeleteBoard from './DeleteBoard';
 import CreateColumn from '../../columns/components/CreateColumn';
 import {
-  CircularProgress, Tooltip, Dialog, styled, Box, Paper,
+  CircularProgress, Tooltip, Dialog, styled, Box,
 } from '@mui/material';
-import PaletteIcon    from '@mui/icons-material/Palette';
-import EditIcon       from '@mui/icons-material/Edit';
-import DeleteIcon     from '@mui/icons-material/Delete';
-import PersonAddIcon  from '@mui/icons-material/PersonAdd';
-import AddIcon        from '@mui/icons-material/Add';
-import SummarizeIcon  from '@mui/icons-material/Summarize';
-import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DescriptionIcon   from '@mui/icons-material/Description';
-import '../styles/board.css';
+import PaletteIcon      from '@mui/icons-material/Palette';
+import EditIcon         from '@mui/icons-material/Edit';
+import DeleteIcon       from '@mui/icons-material/Delete';
+import PersonAddIcon    from '@mui/icons-material/PersonAdd';
+import AddIcon          from '@mui/icons-material/Add';
+import MoreHorizIcon    from '@mui/icons-material/MoreHoriz';
+import SummarizeIcon    from '@mui/icons-material/Summarize';
+import ViewKanbanIcon   from '@mui/icons-material/ViewKanban';
+import CalendarTodayIcon   from '@mui/icons-material/CalendarToday';
+import DescriptionIcon     from '@mui/icons-material/Description';
+import TimelineIcon        from '@mui/icons-material/Timeline';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import BarChartIcon        from '@mui/icons-material/BarChart';
+import '../styles/board-detail.css';
 
-// Keep styled components for ColumnList compatibility
 const ColumnContainer = styled(Box)(({ theme }) => ({
   minWidth: 272, maxWidth: 272,
   backgroundColor: 'rgba(235,236,240,0.9)',
@@ -43,12 +46,20 @@ const CardContainer = styled(Box)(({ theme }) => ({
   '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transform: 'translateY(-1px)' },
 }));
 
+// Fake members — replace with real API data later
+const FAKE_MEMBERS = [
+  { initials: 'AJ', color: '#3B5BDB' },
+  { initials: 'ST', color: '#7C3AED' },
+  { initials: 'MK', color: '#38A169' },
+  { initials: 'LN', color: '#D97706' },
+];
+
 const BoardDetail = ({ token, setBackgroundColor }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [board, setBoard]   = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [board,                   setBoard]                   = useState(null);
+  const [loading,                 setLoading]                 = useState(false);
   const [openInviteBoard,         setOpenInviteBoard]         = useState(false);
   const [openUpdateDialog,        setOpenUpdateDialog]        = useState(false);
   const [openBackgroundDialog,    setOpenBackgroundDialog]    = useState(false);
@@ -96,13 +107,16 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     new Date(board.backgroundImageUpdatedAt) > new Date(board.backgroundColorUpdatedAt);
 
   const navItems = [
-    { name: 'Summary',  icon: <SummarizeIcon  style={{ fontSize: 17 }} />, path: `/boards/${id}/summary`  },
-    { name: 'Board',    icon: <ViewKanbanIcon  style={{ fontSize: 17 }} />, path: `/boards/${id}`          },
-    { name: 'Calendar', icon: <CalendarTodayIcon style={{ fontSize: 17 }} />, path: `/boards/${id}/calendar` },
+    { name: 'Board',     icon: <ViewKanbanIcon    style={{ fontSize: 16 }} />, path: `/boards/${id}`           },
+    { name: 'Summary',   icon: <SummarizeIcon     style={{ fontSize: 16 }} />, path: `/boards/${id}/summary`   },
+    { name: 'Timeline',  icon: <TimelineIcon      style={{ fontSize: 16 }} />, path: `/boards/${id}/timeline`  },
+    { name: 'Calendar',  icon: <CalendarTodayIcon style={{ fontSize: 16 }} />, path: `/boards/${id}/calendar`  },
+    { name: 'Analytics', icon: <BarChartIcon      style={{ fontSize: 16 }} />, path: `/boards/${id}/analytics` },
+    { name: 'Files',     icon: <InsertDriveFileIcon style={{ fontSize: 16 }} />, path: `/boards/${id}/files`   },
   ];
 
   const pageStyle = {
-    backgroundColor: isImageLatest ? 'transparent' : board?.backgroundColor || '#F7F8FA',
+    backgroundColor: isImageLatest ? 'transparent' : board?.backgroundColor || '#3B5BDB',
     backgroundImage: isImageLatest ? `url(${board?.backgroundImage})` : 'none',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
@@ -117,23 +131,44 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         {board ? (
           <>
             <div className="board-detail-info">
-              <h1 className="board-detail-title">{board.title}</h1>
+
+              {/* Breadcrumb */}
+              <div className="board-breadcrumb">
+                <span className="board-breadcrumb__link" onClick={() => navigate('/boards')}>
+                  Your Boards
+                </span>
+                <span className="board-breadcrumb__sep">/</span>
+                <span className="board-breadcrumb__current">{board.title}</span>
+              </div>
+
+              {/* Title */}
+              <div className="board-title-row">
+                <h1 className="board-detail-title">{board.title}</h1>
+                <span className="board-visibility-badge">
+                  {board.visibility || 'Private'}
+                </span>
+              </div>
+
+              {/* Description */}
               <div className="board-detail-desc">
-                <DescriptionIcon style={{ fontSize: 15, flexShrink: 0 }} />
+                <DescriptionIcon style={{ fontSize: 14, flexShrink: 0 }} />
                 <span>{board.description || 'No description.'}</span>
               </div>
-              <nav className="board-nav">
-                {navItems.map((item) => (
-                  <button
-                    key={item.name}
-                    className={`board-nav-item${location.pathname === item.path ? ' board-nav-item--active' : ''}`}
-                    onClick={() => navigate(item.path)}
-                  >
-                    {item.icon}
-                    {item.name}
-                  </button>
+
+              {/* Members */}
+              <div className="board-members-row">
+                {FAKE_MEMBERS.map((m, i) => (
+                  <div key={i} className="board-member-av" style={{ background: m.color }}>
+                    {m.initials}
+                  </div>
                 ))}
-              </nav>
+                <span className="board-members-count">{FAKE_MEMBERS.length} members</span>
+                <button className="board-invite-btn" onClick={() => setOpenInviteBoard(true)}>
+                  <PersonAddIcon style={{ fontSize: 13 }} />
+                  Invite
+                </button>
+              </div>
+
             </div>
 
             {/* Action buttons */}
@@ -148,34 +183,50 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
                   <EditIcon style={{ fontSize: 18 }} />
                 </button>
               </Tooltip>
+              <Tooltip title="More options" placement="bottom">
+                <button className="board-action-btn">
+                  <MoreHorizIcon style={{ fontSize: 18 }} />
+                </button>
+              </Tooltip>
               <Tooltip title="Delete board" placement="bottom">
                 <button className="board-action-btn board-action-btn--danger" onClick={() => setOpenDeleteDialog(true)}>
                   <DeleteIcon style={{ fontSize: 18 }} />
                 </button>
               </Tooltip>
-              <Tooltip title="Invite members" placement="bottom">
-                <button className="board-action-btn" onClick={() => setOpenInviteBoard(true)}>
-                  <PersonAddIcon style={{ fontSize: 18 }} />
-                </button>
-              </Tooltip>
             </div>
           </>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#4A5568' }}>
-            <CircularProgress size={20} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.8)' }}>
+            <CircularProgress size={20} style={{ color: '#fff' }} />
             <span>Loading board…</span>
           </div>
         )}
       </div>
 
-      <hr className="board-detail-divider" />
+      {/* ── Nav tabs ── */}
+      {board && (
+        <nav className="board-nav">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              className={`board-nav-item${location.pathname === item.path ? ' board-nav-item--active' : ''}`}
+              onClick={() => navigate(item.path)}
+            >
+              {item.icon}
+              {item.name}
+            </button>
+          ))}
+        </nav>
+      )}
+
+      <div className="board-detail-divider" />
 
       {/* ── Columns area ── */}
       {location.pathname === `/boards/${id}` && board && (
         <>
           {loading && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
-              <CircularProgress size={36} />
+              <CircularProgress size={36} style={{ color: '#fff' }} />
             </div>
           )}
           <div className="columns-wrapper" ref={columnsWrapperRef}>
