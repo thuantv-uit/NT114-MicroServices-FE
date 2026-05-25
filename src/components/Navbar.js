@@ -1,23 +1,26 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import MenuIcon         from '@mui/icons-material/Menu';
-import HomeIcon         from '@mui/icons-material/Home';
+import MenuIcon          from '@mui/icons-material/Menu';
+import SearchIcon        from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import HelpOutlineIcon  from '@mui/icons-material/HelpOutline';
-import SettingsIcon     from '@mui/icons-material/Settings';
-import SearchIcon       from '@mui/icons-material/Search';
+import HelpOutlineIcon   from '@mui/icons-material/HelpOutline';
+import PersonIcon        from '@mui/icons-material/Person';
+import PhotoCameraIcon   from '@mui/icons-material/PhotoCamera';
+import SettingsIcon      from '@mui/icons-material/Settings';
+import LogoutIcon        from '@mui/icons-material/Logout';
 import { showToast } from '../utils/toastUtils';
 import { getPendingBoardInvitations, getPendingColumnInvitations } from '../features/invitations/components/Invitation';
 import { fetchUserData, changeAvatar } from '../features/users/services/userService';
-import '../styles/auth-dashboard.css';
+import '../styles/navbar.css';
 
 const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(0);
-  const [user,    setUser]    = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [user,         setUser]         = useState(null);
+  const [loading,      setLoading]      = useState(false);
+  const [avatarFile,   setAvatarFile]   = useState(null);
+  const [popoverOpen,  setPopoverOpen]  = useState(false);
+  const [showUpload,   setShowUpload]   = useState(false);
   const popoverRef = useRef(null);
 
   let userId = null;
@@ -52,7 +55,6 @@ const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
     loadUser();
   }, [token, userId]);
 
-  // Close popover on outside click
   useEffect(() => {
     const handler = (e) => {
       if (popoverRef.current && !popoverRef.current.contains(e.target))
@@ -70,39 +72,61 @@ const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
       setUser(res.user);
       setAvatarFile(null);
       setPopoverOpen(false);
+      setShowUpload(false);
       showToast('Avatar updated successfully', 'success');
     } catch (err) {
       showToast('Failed to update avatar: ' + (err.message || 'Unknown error'), 'error');
     } finally { setLoading(false); }
   };
 
+  const handleLogout = () => {
+    if (typeof logout === 'function') {
+      logout();
+      navigate('/login');
+    } else {
+      showToast('Unable to logout. Please try again.', 'error');
+    }
+  };
+
+  const getInitials = (name = '') =>
+    name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
   return (
     <header className="app-navbar">
-      {/* Left */}
+
+      {/* ── Left ── */}
       <div className="navbar-left">
         <button className="navbar-icon-btn" onClick={toggleSidebar} title="Toggle menu">
           <MenuIcon style={{ fontSize: 22 }} />
         </button>
-        <button className="navbar-icon-btn" onClick={() => navigate('/dashboard')} title="Home">
-          <HomeIcon style={{ fontSize: 22 }} />
-        </button>
-        <Link to="/dashboard" className="navbar-logo">Thunio</Link>
+        <Link to="/dashboard" className="navbar-logo">
+          Thun<span className="navbar-logo__accent">io</span>
+        </Link>
       </div>
 
-      {/* Search */}
+      {/* ── Search ── */}
       <div className="navbar-search">
         <span className="navbar-search__icon">
-          <SearchIcon style={{ fontSize: 18 }} />
+          <SearchIcon style={{ fontSize: 17 }} />
         </span>
         <input
           className="navbar-search__input"
           type="text"
-          placeholder="Search…"
+          placeholder="Search boards, tasks, members…"
         />
+        <span className="navbar-search__kbd">⌘K</span>
       </div>
 
-      {/* Right */}
+      {/* ── Right ── */}
       <div className="navbar-right">
+
+        <button className="navbar-icon-btn" title="Help">
+          <HelpOutlineIcon style={{ fontSize: 22 }} />
+        </button>
+
+        <div className="navbar-divider" />
+
+        {/* Notifications */}
         {token && (
           <div className="navbar-badge-wrap">
             <button
@@ -118,38 +142,92 @@ const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
           </div>
         )}
 
-        <button className="navbar-icon-btn" title="Help">
-          <HelpOutlineIcon style={{ fontSize: 22 }} />
-        </button>
-        <button className="navbar-icon-btn" title="Settings">
-          <SettingsIcon style={{ fontSize: 22 }} />
-        </button>
+        <div className="navbar-divider" />
 
+        {/* Avatar + popover */}
         {token && user ? (
-          <div style={{ position: 'relative' }} ref={popoverRef}>
-            <img
-              className="navbar-avatar"
-              src={user.avatar || 'https://via.placeholder.com/150'}
-              alt={user.username}
-              onClick={() => setPopoverOpen((p) => !p)}
-            />
+          <div className="navbar-user-wrap" ref={popoverRef}>
+            <div className="navbar-user-info">
+              <span className="navbar-user-name">{user.username}</span>
+              <span className="navbar-user-role">{user.role || 'Member'}</span>
+            </div>
+
+            <div
+              className="navbar-avatar-wrap"
+              onClick={() => setPopoverOpen(p => !p)}
+            >
+              {user.avatar
+                ? <img className="navbar-avatar" src={user.avatar} alt={user.username} />
+                : <div className="navbar-avatar navbar-avatar--initials">{getInitials(user.username)}</div>
+              }
+            </div>
+
             {popoverOpen && (
               <div className="navbar-popover">
-                <p className="navbar-popover__title">Change Avatar</p>
-                <input
-                  className="navbar-popover__file"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setAvatarFile(e.target.files[0])}
-                />
-                <button
-                  className="btn btn-primary"
-                  style={{ width: '100%' }}
-                  onClick={handleAvatarUpload}
-                  disabled={!avatarFile || loading}
-                >
-                  {loading ? 'Uploading…' : 'Upload'}
-                </button>
+                {/* Header */}
+                <div className="navbar-popover__header">
+                  <div className="navbar-popover__avatar">
+                    {user.avatar
+                      ? <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      : getInitials(user.username)
+                    }
+                  </div>
+                  <div>
+                    <div className="navbar-popover__name">{user.username}</div>
+                    <div className="navbar-popover__email">{user.email || 'No email'}</div>
+                  </div>
+                </div>
+
+                {/* Menu */}
+                <div className="navbar-popover__menu">
+                  <button className="navbar-popover__item" onClick={() => { navigate('/dashboard'); setPopoverOpen(false); }}>
+                    <PersonIcon style={{ fontSize: 17 }} />
+                    View Profile
+                  </button>
+
+                  <button className="navbar-popover__item" onClick={() => setShowUpload(p => !p)}>
+                    <PhotoCameraIcon style={{ fontSize: 17 }} />
+                    Change Avatar
+                  </button>
+
+                  {showUpload && (
+                    <div className="navbar-popover__upload">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="navbar-popover__file"
+                        onChange={e => setAvatarFile(e.target.files[0])}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        style={{ width: '100%', marginTop: 6 }}
+                        onClick={handleAvatarUpload}
+                        disabled={!avatarFile || loading}
+                      >
+                        {loading ? 'Uploading…' : 'Upload'}
+                      </button>
+                    </div>
+                  )}
+
+                  <button className="navbar-popover__item" onClick={() => { navigate('/settings'); setPopoverOpen(false); }}>
+                    <SettingsIcon style={{ fontSize: 17 }} />
+                    Settings
+                  </button>
+
+                  <div className="navbar-popover__divider" />
+
+                  <button className="navbar-popover__item" onClick={() => { navigate('/help'); setPopoverOpen(false); }}>
+                    <HelpOutlineIcon style={{ fontSize: 17 }} />
+                    Help & Support
+                  </button>
+
+                  <div className="navbar-popover__divider" />
+
+                  <button className="navbar-popover__item navbar-popover__item--danger" onClick={handleLogout}>
+                    <LogoutIcon style={{ fontSize: 17 }} />
+                    Logout
+                  </button>
+                </div>
               </div>
             )}
           </div>
