@@ -2,17 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { verifyForgotPasswordOTP, resendForgotPasswordOTP } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
-import '../../../styles/auth-dashboard.css';
+import '../../../styles/auth-share.css';
 
 const RESEND_COOLDOWN = 60;
 
 const VerifyForgotPassword = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const email = location.state?.email || '';
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const email     = location.state?.email || '';
 
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const [loading, setLoading] = useState(false);
+  const [otp,       setOtp]       = useState(['', '', '', '', '', '']);
+  const [loading,   setLoading]   = useState(false);
   const [countdown, setCountdown] = useState(RESEND_COOLDOWN);
   const [canResend, setCanResend] = useState(false);
   const inputRefs = useRef([]);
@@ -23,8 +23,8 @@ const VerifyForgotPassword = () => {
 
   useEffect(() => {
     if (countdown <= 0) { setCanResend(true); return; }
-    const timer = setTimeout(() => setCountdown((c) => c - 1), 1000);
-    return () => clearTimeout(timer);
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
   }, [countdown]);
 
   const handleChange = (index, value) => {
@@ -80,21 +80,21 @@ const VerifyForgotPassword = () => {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <div className="as-page">
+      <div className="as-card">
 
-        {/* Logo */}
-        <div className="auth-logo">
-          <div className="auth-logo__mark">🗂️</div>
-          <span className="auth-logo__name">Thunio</span>
+        <div className="as-logo">
+          <div className="as-logo__mark">🗂️</div>
+          <span className="as-logo__name">Thunio</span>
         </div>
-        <p className="auth-subtitle">Enter your OTP</p>
-        <p style={{ textAlign: 'center', color: 'var(--text-muted, #6b7280)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+
+        <div className="as-icon-wrap">✉️</div>
+        <h1 className="as-title">Enter your OTP</h1>
+        <p className="as-desc">
           We sent a 6-digit code to <strong>{email}</strong>
         </p>
 
-        {/* OTP Input Boxes */}
-        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', marginBottom: '1.5rem' }} onPaste={handlePaste}>
+        <div className="as-otp-row" onPaste={handlePaste}>
           {otp.map((digit, i) => (
             <input
               key={i}
@@ -103,59 +103,29 @@ const VerifyForgotPassword = () => {
               inputMode="numeric"
               maxLength={1}
               value={digit}
+              className={`as-otp-box${digit ? ' as-otp-box--filled' : ''}`}
               onChange={(e) => handleChange(i, e.target.value)}
               onKeyDown={(e) => handleKeyDown(i, e)}
-              style={{
-                width: '48px', height: '56px', textAlign: 'center',
-                fontSize: '1.5rem', fontWeight: 'bold',
-                border: '2px solid',
-                borderColor: digit ? 'var(--primary, #4f46e5)' : 'var(--border-color, #e5e7eb)',
-                borderRadius: '8px', outline: 'none', transition: 'border-color 0.2s',
-              }}
             />
           ))}
         </div>
 
-        <button
-          onClick={handleVerify}
-          disabled={loading}
-          style={{
-            width: '100%', padding: '0.75rem',
-            background: 'var(--primary, #4f46e5)', color: '#fff',
-            border: 'none', borderRadius: '8px',
-            fontWeight: '600', fontSize: '1rem',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            opacity: loading ? 0.7 : 1, marginBottom: '1rem',
-          }}
-        >
-          {loading ? 'Verifying...' : 'Verify OTP'}
+        <button className="as-submit" onClick={handleVerify} disabled={loading}>
+          {loading ? 'Verifying…' : 'Verify OTP'}
         </button>
 
-        <div style={{ textAlign: 'center', fontSize: '0.875rem', color: 'var(--text-muted, #6b7280)' }}>
+        <div className="as-resend" style={{ marginTop: 16 }}>
           Didn't receive the code?{' '}
           {canResend ? (
-            <span onClick={handleResend} style={{ color: 'var(--primary, #4f46e5)', cursor: 'pointer', fontWeight: '600' }}>
-              Resend OTP
-            </span>
+            <button className="as-resend__btn" onClick={handleResend}>Resend OTP</button>
           ) : (
-            <span>Resend in <strong>{countdown}s</strong></span>
+            <span className="as-resend__countdown">
+              Resend in <strong>{countdown}s</strong>
+            </span>
           )}
         </div>
 
-        <div className="auth-link-row" style={{ marginTop: '1rem' }}>
-          <Link to="/forgot-password">← Back</Link>
-        </div>
-
-        {/* Footer */}
-        <div className="auth-footer">
-          <p className="auth-footer__tagline">NT114 — Web Application for Creating Timelines</p>
-          <div className="auth-footer__links">
-            <a href="/">Home</a>
-            <a href="/about">About Us</a>
-            <a href="/privacy">Privacy Policy</a>
-          </div>
-        </div>
-
+        <Link to="/forgot-password" className="as-back">← Back</Link>
       </div>
     </div>
   );
