@@ -5,7 +5,7 @@ import { PrivateRoute, PublicRoute } from './utils/RouteUtils';
 import Navbar from './components/Navbar';
 import CategorySidebar from './components/CategorySidebar';
 import Home1 from './components/Home1';
-import NotFound from './components/404';
+import NotFound from './components/NotFound';
 import Login from './features/users/components/Login';
 import Register from './features/users/components/Register';
 import VerifyOTP from './features/users/components/VerifyOTP';
