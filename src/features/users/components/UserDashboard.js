@@ -8,7 +8,7 @@ import {
   TaskAlt, PersonAdd, Edit, SpaceDashboard, PhotoCamera, Close,
 } from '@mui/icons-material';
 import Chatbot from '../../ai/chatbot';
-import '../../../styles/auth-dashboard.css';
+import '../../../styles/dashboard.css';
 
 const UserDashboard = () => {
   const { token } = useAuth();

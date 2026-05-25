@@ -27,6 +27,7 @@ import Chatbot from './features/ai/chatbot';
 import Calendar from './features/cards/components/Calendar';
 import Summary from './features/cards/components/Summary';
 import './styles/auth-dashboard.css';
+import './styles/variables.css';
 
 // Routes that should NOT show Navbar/Sidebar
 const AUTH_ROUTES = ['/', '/login', '/register'];
