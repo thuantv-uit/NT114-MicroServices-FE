@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+/* ════════════════════════════════════════════════════════════════
+   CARD ITEM (inside column)
+   ════════════════════════════════════════════════════════════════ */
+
+.card-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  transition: box-shadow 0.18s ease, transform 0.18s ease;
+  cursor: pointer;
+  position: relative;
+  font-family: 'DM Sans', sans-serif;
+}
+.card-item:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.10); transform: translateY(-1px); }
+.card-item--dragging { opacity: 0.5; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+
+.card-item__progress-strip {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 10px 10px 0 0;
+}
+
+.card-item__title {
+  font-size: 13.5px; font-weight: 500;
+  color: #1A202C;
+  margin-bottom: 6px; line-height: 1.4;
+}
+
+.card-item__meta {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 6px; flex-wrap: wrap;
+}
+
+.card-item__deadline {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 11.5px; color: #9AA5B4;
+  font-family: 'DM Sans', sans-serif;
+}
+.card-item__deadline--overdue { color: #E53E3E; }
+.card-item__deadline svg { font-size: 13px !important; }
+
+.card-item__progress-badge {
+  display: inline-flex; align-items: center;
+  padding: 2px 8px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.card-item__actions {
+  display: flex; gap: 2px;
+  margin-top: 8px; justify-content: flex-end;
+}
+
+.card-action-btn {
+  width: 26px !important; height: 26px !important;
+  border-radius: 6px !important;
+  color: #9AA5B4 !important;
+  transition: background 0.15s, color 0.15s !important;
+}
+.card-action-btn:hover { background: #F7F8FA !important; color: #4A5568 !important; }
+.card-action-btn--danger:hover { background: #FFF5F5 !important; color: #E53E3E !important; }
+
+.card-empty {
+  text-align: center; padding: 16px 8px;
+  color: #C4CAD4; font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+}

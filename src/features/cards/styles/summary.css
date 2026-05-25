@@ -1,0 +1,111 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+.summary-page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 32px 24px;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.summary-page__title {
+  font-family: 'Outfit', sans-serif;
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 800; letter-spacing: -0.5px;
+  color: #1A202C;
+  margin-bottom: 4px;
+}
+.summary-page__subtitle { font-size: 13px; color: #9AA5B4; margin-bottom: 28px; }
+
+/* ── Stat row ── */
+.summary-stat-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px; margin-bottom: 16px;
+}
+.summary-stat-card {
+  background: #fff; border-radius: 14px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 20px 16px; text-align: center;
+  transition: box-shadow 0.18s, transform 0.18s;
+}
+.summary-stat-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.09); transform: translateY(-2px); }
+.summary-stat-card__num { font-family: 'Outfit', sans-serif; font-size: 34px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.summary-stat-card__label { font-size: 12px; color: #9AA5B4; }
+.summary-stat-card__trend { font-size: 11px; font-weight: 600; margin-top: 6px; }
+
+/* ── Main grid ── */
+.summary-main-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 16px;
+}
+.summary-right-col { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Chart card ── */
+.summary-chart-card {
+  background: #fff; border-radius: 14px;
+  border: 1px solid #E4E7ED;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 20px 24px;
+}
+.summary-card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 14px; font-weight: 600;
+  color: #1A202C; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 7px;
+}
+.summary-card-title--danger { color: #E53E3E; }
+
+/* ── Avg card ── */
+.summary-avg-num {
+  font-family: 'Outfit', sans-serif;
+  font-size: 52px; font-weight: 800;
+  color: #3B5BDB; line-height: 1; text-align: center;
+}
+.summary-avg-sub { font-size: 12px; color: #9AA5B4; text-align: center; margin-top: 6px; }
+
+/* ── Progress breakdown ── */
+.summary-prog-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.summary-prog-label { font-size: 13px; color: #1A202C; font-weight: 500; min-width: 100px; }
+.summary-prog-bar-wrap { flex: 1; height: 8px; background: #F0F2F5; border-radius: 99px; overflow: hidden; }
+.summary-prog-bar { height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+.summary-prog-val { font-size: 12px; color: #4A5568; font-weight: 600; min-width: 34px; text-align: right; }
+.summary-prog-count { font-size: 11px; color: #9AA5B4; min-width: 46px; }
+
+/* ── Legend ── */
+.summary-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.summary-legend-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 99px;
+  font-size: 12px; font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  color: #fff; cursor: default; transition: opacity 0.15s;
+}
+.summary-legend-chip:hover { opacity: 0.85; }
+
+/* ── Overdue items ── */
+.summary-overdue-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid #F0F2F5;
+}
+.summary-overdue-item:last-child { border-bottom: none; }
+.summary-overdue-title { font-size: 13px; font-weight: 500; color: #1A202C; }
+.summary-overdue-date { font-size: 12px; color: #E53E3E; font-weight: 500; }
+
+/* ── Empty ── */
+.summary-empty {
+  text-align: center; padding: 60px 24px;
+  color: #9AA5B4; font-family: 'DM Sans', sans-serif; font-size: 15px;
+}
+.summary-empty__icon { font-size: 48px; margin-bottom: 10px; opacity: 0.4; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .summary-page { padding: 20px 14px; }
+  .summary-stat-row { grid-template-columns: repeat(2, 1fr); }
+  .summary-main-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 480px) {
+  .summary-stat-row { grid-template-columns: repeat(2, 1fr); }
+}
