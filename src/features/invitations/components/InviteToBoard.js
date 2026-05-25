@@ -19,7 +19,7 @@ const InviteToBoard = ({ boardId, board, open, onClose }) => {
   const [email,       setEmail]       = useState('');
   const [role,        setRole]        = useState('member');
   const [submitEmail, setSubmitEmail] = useState('');
-  const [submitRole,  setSubmitRole]  = useState('');
+  const [submitRole,  setSubmitRole]  = useState('member');
 
   const selectedRole = ROLES.find((r) => r.value === role);
 

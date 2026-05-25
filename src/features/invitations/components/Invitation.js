@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { invitationInstance } from '../../../services/axiosConfig';
 import { handleApiCall } from '../../../utils/apiHelper';
 import { showToast } from '../../../utils/toastUtils';
@@ -85,12 +86,23 @@ const Invitation = ({
     }
   };
 
-  // Fire on mount
-  if (boardId && email && (action === 'inviteToBoard' || (action === 'inviteToColumn' && columnId))) {
-    performAction();
-  } else if (invitationId && (action === 'accept' || action === 'reject')) {
-    performAction();
-  }
+  // ✅ Dùng ref để đảm bảo chỉ gọi API đúng 1 lần, tránh double-call do re-render
+  const hasFired = useRef(false);
+
+  useEffect(() => {
+    if (hasFired.current) return;
+
+    const shouldFire =
+      (action === 'inviteToBoard' && boardId && email) ||
+      (action === 'inviteToColumn' && boardId && columnId && email) ||
+      ((action === 'accept' || action === 'reject') && invitationId);
+
+    if (shouldFire) {
+      hasFired.current = true;
+      performAction();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return null;
 };
