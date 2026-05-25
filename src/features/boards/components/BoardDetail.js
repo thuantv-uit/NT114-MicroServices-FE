@@ -82,6 +82,11 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     }
   };
 
+  // Dùng riêng cho DeleteBoard — không fetch lại board đã bị xóa
+  const handleDeleteClose = () => {
+    setOpenDeleteDialog(false);
+  };
+
   const handleDialogClose = async () => {
     const wasCreatingColumn = openCreateColumnDialog;
     setOpenUpdateDialog(false);
@@ -256,8 +261,8 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       <Dialog open={openBackgroundDialog}   onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <ChangeBackground token={token} onClose={handleDialogClose} />
       </Dialog>
-      <Dialog open={openDeleteDialog}       onClose={handleDialogClose} maxWidth="sm" fullWidth>
-        <DeleteBoard token={token} onClose={handleDialogClose} />
+      <Dialog open={openDeleteDialog}       onClose={handleDeleteClose} maxWidth="sm" fullWidth>
+        <DeleteBoard token={token} onClose={handleDeleteClose} />
       </Dialog>
       <Dialog open={openCreateColumnDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <CreateColumn token={token} onClose={handleDialogClose} />

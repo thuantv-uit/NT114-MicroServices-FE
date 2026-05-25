@@ -16,8 +16,8 @@ const DeleteBoard = ({ token, onClose }) => {
     try {
       await deleteBoard(id);
       showToast('Board deleted successfully!', 'success');
-      onClose();
       navigate('/boards');
+      onClose();
     } catch (err) {
       showToast(err.message, 'error');
     } finally {
