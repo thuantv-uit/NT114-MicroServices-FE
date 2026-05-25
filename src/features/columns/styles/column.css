@@ -23,6 +23,22 @@
 .col-card--dragging { opacity: 0.5; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
 
 /* ── Column header ───────────────────────────────────────────── */
+.col-header-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.col-card-count {
+  background: rgba(0,0,0,0.08);
+  color: #4A5568;
+  font-size: 11px; font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 99px;
+  flex-shrink: 0;
+  font-family: 'DM Sans', sans-serif;
+}
+
 .col-header {
   display: flex;
   align-items: center;
