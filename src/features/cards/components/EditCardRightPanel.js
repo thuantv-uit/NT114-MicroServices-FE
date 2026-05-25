@@ -1,123 +1,169 @@
 import React from 'react';
 import { LinearProgress } from '@mui/material';
-import LinearScaleIcon from '@mui/icons-material/LinearScale';
-import '../styles/card.css';
+import RefreshIcon     from '@mui/icons-material/Refresh';
+import GroupIcon       from '@mui/icons-material/Group';
+import PersonAddIcon   from '@mui/icons-material/PersonAdd';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import TimelineIcon    from '@mui/icons-material/Timeline';
+import '../styles/card-edit.css';
 
 const getProgressColor = (p) =>
   p >= 75 ? '#38A169' : p >= 50 ? '#D69E2E' : p >= 25 ? '#ED8936' : '#E53E3E';
 
+// Fake members — TODO: replace with real card.members from API
+const FAKE_MEMBERS = [
+  { initials: 'AJ', color: '#3B5BDB' },
+  { initials: 'ST', color: '#7C3AED' },
+  { initials: 'MK', color: '#38A169' },
+];
+
 const EditCardRightPanel = ({
-  processValue, setProcessValue, processError, handleUpdateProcess, loading,
+  processValue, setProcessValue, processError,
+  handleUpdateProcess, loading, card,
 }) => {
   const color = getProgressColor(processValue);
+
+  // Fake card info — TODO: replace with real card data from API
+  const deadline = card?.deadline
+    ? new Date(card.deadline).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : 'No deadline';
+  const column   = card?.columnTitle  || 'In Progress';
+  const created  = card?.createdAt
+    ? new Date(card.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    : '—';
+  const tags     = card?.tags || [
+    { label: 'Feature', bg: '#EEF2FF', color: '#3B5BDB' },
+    { label: 'Frontend', bg: '#F0FFF4', color: '#38A169' },
+  ];
 
   return (
     <div className="edit-card-right">
 
       {/* ── Progress ── */}
-      <p className="edit-card-section-title">Completion Progress</p>
+      <div>
+        <p className="edit-card-section-title">
+          <TimelineIcon style={{ fontSize: 15 }} />
+          Completion progress
+        </p>
 
-      {/* Big number display */}
-      <div style={{ textAlign: 'center', marginBottom: 12 }}>
-        <span style={{
-          fontFamily: 'Outfit', fontSize: 48, fontWeight: 800,
-          color, lineHeight: 1, letterSpacing: '-2px',
-        }}>
-          {processValue}
-        </span>
-        <span style={{ fontFamily: 'DM Sans', fontSize: 18, color: '#9AA5B4', fontWeight: 500 }}>%</span>
+        <div className="edit-card-prog-num">
+          <span className="edit-card-prog-big" style={{ color }}>{processValue}</span>
+          <span className="edit-card-prog-unit">%</span>
+        </div>
+
+        <LinearProgress
+          variant="determinate"
+          value={processValue}
+          sx={{
+            height: 10, borderRadius: 5, mb: 1.5,
+            background: '#F0F2F5',
+            '& .MuiLinearProgress-bar': {
+              borderRadius: 5,
+              background: `linear-gradient(90deg, ${color}88, ${color})`,
+            },
+          }}
+        />
+
+        <input
+          type="range"
+          min={0} max={100} step={5}
+          value={processValue}
+          disabled={loading}
+          onChange={e => setProcessValue(Number(e.target.value))}
+          style={{ width: '100%', accentColor: color, cursor: loading ? 'not-allowed' : 'pointer', margin: '2px 0 4px' }}
+        />
+
+        <div className="edit-card-prog-ticks">
+          {['0%', '25%', '50%', '75%', '100%'].map(l => (
+            <span key={l} className="edit-card-prog-tick">{l}</span>
+          ))}
+        </div>
+
+        <div className="edit-card-quick-btns">
+          {[0, 25, 50, 75, 100].map(v => (
+            <button
+              key={v}
+              onClick={() => setProcessValue(v)}
+              disabled={loading}
+              className={`edit-card-quick-btn${processValue === v ? ' edit-card-quick-btn--active' : ''}`}
+              style={processValue === v ? {
+                borderColor: getProgressColor(v),
+                background: getProgressColor(v) + '15',
+                color: getProgressColor(v),
+              } : {}}
+            >
+              {v}%
+            </button>
+          ))}
+        </div>
+
+        {processError && <p className="edit-card-field-error">{processError}</p>}
+
+        <button
+          className="btn btn-primary"
+          onClick={e => { e.preventDefault(); handleUpdateProcess(); }}
+          disabled={loading}
+          style={{ width: '100%', justifyContent: 'center', marginTop: 10 }}
+        >
+          <RefreshIcon style={{ fontSize: 15 }} />
+          {loading ? 'Updating…' : 'Update progress'}
+        </button>
       </div>
 
-      {/* Progress bar */}
-      <LinearProgress
-        variant="determinate"
-        value={processValue}
-        sx={{
-          height: 10, borderRadius: 5, mb: 2,
-          background: '#F0F2F5',
-          '& .MuiLinearProgress-bar': {
-            borderRadius: 5,
-            background: `linear-gradient(90deg, ${color}88, ${color})`,
-          },
-        }}
-      />
-
-      {/* Custom slider — NO marks labels, avoid overflow */}
-      <input
-        type="range"
-        min={0}
-        max={100}
-        step={5}
-        value={processValue}
-        disabled={loading}
-        onChange={(e) => setProcessValue(Number(e.target.value))}
-        style={{
-          width: '100%',
-          accentColor: color,
-          cursor: loading ? 'not-allowed' : 'pointer',
-          margin: '4px 0 6px',
-        }}
-      />
-
-      {/* Manual tick labels — no overflow risk */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between',
-        marginBottom: 16,
-        padding: '0 2px',
-      }}>
-        {['0%', '25%', '50%', '75%', '100%'].map((l) => (
-          <span key={l} style={{ fontSize: 10.5, color: '#9AA5B4', fontFamily: 'DM Sans' }}>{l}</span>
-        ))}
-      </div>
-
-      {/* Quick select buttons */}
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
-        {[0, 25, 50, 75, 100].map((v) => (
-          <button
-            key={v}
-            onClick={() => setProcessValue(v)}
-            disabled={loading}
-            style={{
-              flex: 1,
-              padding: '5px 0',
-              borderRadius: 8,
-              border: processValue === v ? `1.5px solid ${getProgressColor(v)}` : '1.5px solid #E4E7ED',
-              background: processValue === v ? getProgressColor(v) + '15' : 'transparent',
-              color: processValue === v ? getProgressColor(v) : '#9AA5B4',
-              fontFamily: 'DM Sans',
-              fontSize: 12,
-              fontWeight: 600,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.15s',
-            }}
-          >
-            {v}%
+      {/* ── Members ── */}
+      <div>
+        <p className="edit-card-section-title">
+          <GroupIcon style={{ fontSize: 15 }} />
+          Members
+        </p>
+        <div className="edit-card-members-row">
+          {FAKE_MEMBERS.map((m, i) => (
+            <div key={i} className="edit-card-member-av" style={{ background: m.color }}>
+              {m.initials}
+            </div>
+          ))}
+          <button className="edit-card-member-add" title="Add member">
+            <PersonAddIcon style={{ fontSize: 14 }} />
           </button>
-        ))}
+        </div>
       </div>
 
-      {processError && (
-        <p style={{ fontSize: 12, color: '#E53E3E', margin: '-8px 0 12px', fontFamily: 'DM Sans' }}>
-          {processError}
-        </p>
-      )}
-
-      <button
-        className="btn btn-primary"
-        onClick={(e) => { e.preventDefault(); handleUpdateProcess(); }}
-        disabled={loading}
-        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-      >
-        <LinearScaleIcon style={{ fontSize: 15 }} />
-        {loading ? 'Updating…' : 'Update Progress'}
-      </button>
-
-      {/* ── Card Info ── */}
+      {/* ── Card info ── */}
       <div className="edit-card-info-box">
-        <p className="edit-card-info-title">Card Information</p>
-        <p style={{ fontSize: 13, color: '#9AA5B4', fontFamily: 'DM Sans', lineHeight: 1.5 }}>
-          More details will appear here as the card is updated.
+        <p className="edit-card-info-title">
+          <InfoOutlinedIcon style={{ fontSize: 14, verticalAlign: -2, marginRight: 5 }} />
+          Card info
         </p>
+
+        <div className="edit-card-info-row">
+          <span className="edit-card-info-label">Deadline</span>
+          <span className="edit-card-info-val">{deadline}</span>
+        </div>
+
+        <div className="edit-card-info-row">
+          <span className="edit-card-info-label">Tags</span>
+          <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+            {tags.map((tag, i) => (
+              <span
+                key={i}
+                className="edit-card-info-badge"
+                style={{ background: tag.bg, color: tag.color }}
+              >
+                {tag.label}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="edit-card-info-row">
+          <span className="edit-card-info-label">Column</span>
+          <span className="edit-card-info-val">{column}</span>
+        </div>
+
+        <div className="edit-card-info-row" style={{ borderBottom: 'none' }}>
+          <span className="edit-card-info-label">Created</span>
+          <span className="edit-card-info-val" style={{ color: '#9AA5B4', fontSize: 12 }}>{created}</span>
+        </div>
       </div>
 
     </div>

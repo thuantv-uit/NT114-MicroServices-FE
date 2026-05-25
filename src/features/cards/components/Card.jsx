@@ -2,17 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCards } from '../services/cardService';
 import { showToast } from '../../../utils/toastUtils';
+import { Dialog } from '@mui/material';
 import {
   DndContext, closestCorners, DragOverlay,
   defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Card, useDragAndDrop } from './CardList';
-import '../styles/card.css';
+import DeleteCardPage from './DeleteCardPage';
+import '../styles/card-item.css';
 
 const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
-  const [cards,   setCards]   = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [cards,         setCards]         = useState([]);
+  const [loading,       setLoading]       = useState(false);
+  const [deleteCardId,  setDeleteCardId]  = useState(null);
   const navigate = useNavigate();
 
   const { sensors, activeCardId, activeCardData, handleDragStart, handleDragEnd } =
@@ -39,47 +42,72 @@ const CardList = ({ columnId, token, boardId, column, onRefresh }) => {
     state: { title: card.title, description: card.description, boardId, columnId },
   });
 
-  const handleDelete = (cardId) => navigate(`/cards/${cardId}/delete`, { state: { boardId } });
+  // Mở dialog xóa thay vì navigate
+  const handleDelete = (cardId) => setDeleteCardId(cardId);
+
+  const handleDeleteClose = () => {
+    setDeleteCardId(null);
+    onRefresh();
+  };
 
   const dropAnimation = {
     sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.4' } } }),
   };
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners}
-      onDragStart={handleDragStart} onDragEnd={handleDragEnd}
-    >
-      <SortableContext items={cards.map(c => c._id)} strategy={verticalListSortingStrategy}>
-        <div style={{ minHeight: 4 }}>
-          {loading && <p className="card-empty">Loading cards…</p>}
-          {!loading && cards.length === 0 && (
-            <p className="card-empty">No cards in this column.</p>
-          )}
-          {cards.map((card) => (
-            <Card
-              key={card._id}
-              card={card}
-              boardId={boardId}
-              columnId={columnId}
-              token={token}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-              onInviteUser={() => showToast('Invite feature coming soon', 'info')}
-              onRefresh={onRefresh}
-            />
-          ))}
-        </div>
-      </SortableContext>
+    <>
+      <DndContext sensors={sensors} collisionDetection={closestCorners}
+        onDragStart={handleDragStart} onDragEnd={handleDragEnd}
+      >
+        <SortableContext items={cards.map(c => c._id)} strategy={verticalListSortingStrategy}>
+          <div style={{ minHeight: 4 }}>
+            {loading && <p className="card-empty">Loading cards…</p>}
+            {!loading && cards.length === 0 && (
+              <p className="card-empty">No cards in this column.</p>
+            )}
+            {cards.map(card => (
+              <Card
+                key={card._id}
+                card={card}
+                boardId={boardId}
+                columnId={columnId}
+                token={token}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+                onInviteUser={() => showToast('Invite feature coming soon', 'info')}
+                onRefresh={onRefresh}
+              />
+            ))}
+          </div>
+        </SortableContext>
 
-      <DragOverlay dropAnimation={dropAnimation}>
-        {activeCardId && activeCardData ? (
-          <Card
-            card={activeCardData} boardId={boardId} columnId={columnId} token={token}
-            onEdit={() => {}} onDelete={() => {}} onInviteUser={() => {}} onRefresh={() => {}}
+        <DragOverlay dropAnimation={dropAnimation}>
+          {activeCardId && activeCardData ? (
+            <Card
+              card={activeCardData} boardId={boardId} columnId={columnId} token={token}
+              onEdit={() => {}} onDelete={() => {}} onInviteUser={() => {}} onRefresh={() => {}}
+            />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+
+      {/* Delete dialog — đồng bộ với DeleteBoard / DeleteColumn */}
+      <Dialog
+        open={!!deleteCardId}
+        onClose={handleDeleteClose}
+        maxWidth="sm"
+        fullWidth
+      >
+        {deleteCardId && (
+          <DeleteCardPage
+            token={token}
+            cardId={deleteCardId}
+            boardId={boardId}
+            onClose={handleDeleteClose}
           />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+        )}
+      </Dialog>
+    </>
   );
 };
 

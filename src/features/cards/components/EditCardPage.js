@@ -8,15 +8,16 @@ import Modal from '@mui/material/Modal';
 import EditCardHeader    from './EditCardHeader';
 import EditCardLeftPanel  from './EditCardLeftPanel';
 import EditCardRightPanel from './EditCardRightPanel';
-import '../styles/card.css';
+import '../styles/card-edit.css';
 
 const EditCardPage = ({ token }) => {
-  const { cardId }  = useParams();
-  const navigate    = useNavigate();
-  const { state }   = useLocation();
-  const boardId     = state?.boardId  || '';
-  const columnId    = state?.columnId || '';
+  const { cardId } = useParams();
+  const navigate   = useNavigate();
+  const { state }  = useLocation();
+  const boardId    = state?.boardId  || '';
+  const columnId   = state?.columnId || '';
 
+  const [card,         setCard]         = useState(null);
   const [formValues,   setFormValues]   = useState({ title: state?.title || '', description: state?.description || '' });
   const [errors,       setErrors]       = useState({});
   const [loading,      setLoading]      = useState(false);
@@ -32,11 +33,12 @@ const EditCardPage = ({ token }) => {
       if (!boardId || !columnId) { showToast('Missing board or column information', 'error'); navigate('/dashboard'); return; }
       setLoading(true);
       try {
-        const card = await fetchCardById(cardId);
-        if (card) {
-          setFormValues({ title: card.title, description: card.description || '' });
-          setProcessValue(card.process || 0);
-          setComments(card.comments || []);
+        const data = await fetchCardById(cardId);
+        if (data) {
+          setCard(data);
+          setFormValues({ title: data.title, description: data.description || '' });
+          setProcessValue(data.process || 0);
+          setComments(data.comments || []);
         } else {
           showToast('Card not found', 'error'); navigate(`/boards/${boardId}`);
         }
@@ -50,14 +52,15 @@ const EditCardPage = ({ token }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target || e;
-    setFormValues((p) => ({ ...p, [name]: value }));
+    setFormValues(p => ({ ...p, [name]: value }));
     const errs = validateCardForm({ ...formValues, [name]: value });
-    setErrors((p) => ({ ...p, [name]: errs[name] }));
+    setErrors(p => ({ ...p, [name]: errs[name] }));
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    const errs = validateCardForm(formValues);
+    if (e?.preventDefault) e.preventDefault();
+    const rawErrs = validateCardForm(formValues);
+    const errs = Object.fromEntries(Object.entries(rawErrs).filter(([, v]) => !!v));
     setErrors(errs);
     if (Object.keys(errs).length > 0) return;
     if (!token) { showToast('Authentication token is missing', 'error'); return; }
@@ -88,7 +91,7 @@ const EditCardPage = ({ token }) => {
     setLoading(true);
     try {
       const c = await addComment(cardId, commentText);
-      setComments((p) => [...p, c]);
+      setComments(p => [...p, c]);
       setCommentText('');
       showToast('Comment added!', 'success');
     } catch (err) { showToast(err.message || 'Failed to add comment', 'error'); }
@@ -102,16 +105,15 @@ const EditCardPage = ({ token }) => {
       disableScrollLock
       open
       onClose={handleClose}
-      sx={{
-        // MUI Modal backdrop phủ toàn màn hình, bao gồm cả sidebar
-        position: 'fixed',
-        inset: 0,
-        zIndex: 1300,
-        overflowY: 'auto',
-      }}
+      sx={{ position: 'fixed', inset: 0, zIndex: 1300, overflowY: 'auto' }}
     >
       <div className="edit-card-modal">
-        <EditCardHeader onClose={handleClose} />
+        <EditCardHeader
+          onClose={handleClose}
+          boardTitle={state?.boardTitle || 'Board'}
+          columnTitle={state?.columnTitle || 'Column'}
+          cardTitle={formValues.title}
+        />
         <div className="edit-card-body">
           <EditCardLeftPanel
             formValues={formValues} errors={errors}
@@ -119,13 +121,13 @@ const EditCardPage = ({ token }) => {
             handleClose={handleClose} loading={loading}
             comments={comments} commentText={commentText}
             commentError={commentError}
-            handleCommentChange={(e) => { setCommentText(e.target.value); setCommentError(''); }}
+            handleCommentChange={e => { setCommentText(e.target.value); setCommentError(''); }}
             handleAddComment={handleAddComment}
           />
           <EditCardRightPanel
             processValue={processValue} setProcessValue={setProcessValue}
             processError={processError} handleUpdateProcess={handleUpdateProcess}
-            loading={loading}
+            loading={loading} card={card}
           />
         </div>
       </div>
