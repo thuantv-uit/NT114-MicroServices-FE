@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useSensor, useSensors } from '@dnd-kit/core';
@@ -9,27 +9,26 @@ import { showToast } from '../../../utils/toastUtils';
 import { updateColumn } from '../../columns/services/columnService';
 import {
   Dialog, DialogTitle, DialogContent, DialogActions,
-  Slider, FormHelperText, Menu, MenuItem, ListItemIcon, Avatar,
+  Slider, FormHelperText, Menu, MenuItem, ListItemIcon,
 } from '@mui/material';
-import DeleteIcon       from '@mui/icons-material/Delete';
-import LinearScaleIcon  from '@mui/icons-material/LinearScale';
-import ImageIcon        from '@mui/icons-material/Image';
-import MoreHorizIcon    from '@mui/icons-material/MoreHoriz';
+import DeleteIcon        from '@mui/icons-material/Delete';
+import LinearScaleIcon   from '@mui/icons-material/LinearScale';
+import ImageIcon         from '@mui/icons-material/Image';
+import MoreHorizIcon     from '@mui/icons-material/MoreHoriz';
 import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import EventIcon        from '@mui/icons-material/Event';
+import EventIcon         from '@mui/icons-material/Event';
 import { updateCard, updateCardImage } from '../services/cardService';
-import { getUserById } from '../../users/services/userService';
 import { useNavigate } from 'react-router-dom';
-import '../styles/card.css';
+import '../styles/card-item.css';
 
-// ── Helpers ────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────
 const getProgressColor = (p) =>
   p >= 75 ? '#38A169' : p >= 50 ? '#D69E2E' : p >= 25 ? '#ED8936' : '#E53E3E';
 
 const getProgressStripColor = (p) => {
   const colors = {
-    0: { r:255,g:0,b:0 }, 25:{r:255,g:128,b:0},
-    50:{r:255,g:255,b:0}, 75:{r:128,g:255,b:0}, 100:{r:0,g:255,b:0},
+    0: { r:229,g:62,b:62 }, 25:{r:237,g:137,b:54},
+    50:{r:214,g:158,b:46}, 75:{r:56,g:161,b:105}, 100:{r:56,g:161,b:105},
   };
   const keys = Object.keys(colors).map(Number).sort((a,b)=>a-b);
   const lower = keys.filter(v=>v<=p).pop() ?? 0;
@@ -43,14 +42,38 @@ const getProgressStripColor = (p) => {
   return `rgb(${r},${g},${b})`;
 };
 
-const formatDate = (d) => {
-  const date = new Date(d);
-  return date.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
-};
+const formatDate = (d) =>
+  new Date(d).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
 
 const isOverdue = (deadline) => deadline && new Date(deadline) < new Date();
 
-// ── useDragAndDrop hook ────────────────────────────────────────
+// Fake tags — TODO: replace with real card.tags from API
+const FAKE_TAGS = [
+  { label: 'Feature',  bg: '#EEF2FF', color: '#3B5BDB' },
+  { label: 'Bug',      bg: '#FFF5F5', color: '#E53E3E' },
+  { label: 'Design',   bg: '#FFFBEB', color: '#D97706' },
+  { label: 'Backend',  bg: '#F0FFF4', color: '#38A169' },
+  { label: 'Critical', bg: '#FFF5F5', color: '#E53E3E' },
+  { label: 'Docs',     bg: '#EEF2FF', color: '#3B5BDB' },
+];
+const getFakeTags = (id) => {
+  const idx = parseInt(id?.slice(-2) || '0', 16) % FAKE_TAGS.length;
+  return [FAKE_TAGS[idx]];
+};
+
+// Fake members — TODO: replace with real card.members from API
+const FAKE_MEMBERS = [
+  { initials: 'AJ', color: '#3B5BDB' },
+  { initials: 'ST', color: '#7C3AED' },
+  { initials: 'MK', color: '#38A169' },
+  { initials: 'LN', color: '#D97706' },
+];
+const getFakeMembers = (id) => {
+  const idx = parseInt(id?.slice(-2) || '0', 16) % 3;
+  return FAKE_MEMBERS.slice(0, idx + 1);
+};
+
+// ── useDragAndDrop hook ────────────────────────────────────────────
 export const useDragAndDrop = (cards, setCards, columnId, columnTitle, onRefresh) => {
   const [activeCardId,   setActiveCardId]   = useState(null);
   const [activeCardData, setActiveCardData] = useState(null);
@@ -84,34 +107,32 @@ export const useDragAndDrop = (cards, setCards, columnId, columnTitle, onRefresh
   return { sensors, activeCardId, activeCardData, handleDragStart, handleDragEnd };
 };
 
-// ── Card component ─────────────────────────────────────────────
+// ── Card component ─────────────────────────────────────────────────
 export const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInviteUser, onRefresh }) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card._id, data: { ...card },
   });
   const navigate = useNavigate();
 
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorEl,      setAnchorEl]      = useState(null);
+  const [openProcess,   setOpenProcess]   = useState(false);
+  const [processVal,    setProcessVal]    = useState(card.process || 0);
+  const [processErr,    setProcessErr]    = useState('');
+  const [openImage,     setOpenImage]     = useState(false);
+  const [imageFile,     setImageFile]     = useState(null);
+  const [openDeadline,  setOpenDeadline]  = useState(false);
+  const [deadlineVal,   setDeadlineVal]   = useState(
+    card.deadline ? new Date(card.deadline).toISOString().split('T')[0] : ''
+  );
+  const [deadlineErr, setDeadlineErr] = useState('');
 
-  // Progress dialog
-  const [openProcess, setOpenProcess] = useState(false);
-  const [processVal,  setProcessVal]  = useState(card.process || 0);
-  const [processErr,  setProcessErr]  = useState('');
+  const dndStyle    = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
+  const stripColor  = getProgressStripColor(card.process || 0);
+  const overdue     = isOverdue(card.deadline);
+  const progColor   = getProgressColor(card.process || 0);
+  const fakeTags    = card.tags?.length ? card.tags : getFakeTags(card._id);
+  const fakeMembers = card.members?.length ? card.members : getFakeMembers(card._id);
 
-  // Image dialog
-  const [openImage,  setOpenImage]  = useState(false);
-  const [imageFile,  setImageFile]  = useState(null);
-
-  // Deadline dialog
-  const [openDeadline,   setOpenDeadline]   = useState(false);
-  const [deadlineVal,    setDeadlineVal]    = useState(card.deadline ? new Date(card.deadline).toISOString().split('T')[0] : '');
-  const [deadlineErr,    setDeadlineErr]    = useState('');
-
-  const dndStyle = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
-  const stripColor = getProgressStripColor(card.process || 0);
-  const overdue = isOverdue(card.deadline);
-
-  // ── Handlers ─────────────────────────────────────────────────
   const stop = (fn) => (e) => { e.stopPropagation(); fn(e); };
 
   const handleUpdateProcess = async () => {
@@ -151,46 +172,78 @@ export const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInvit
         {...attributes}
         {...listeners}
         className={`card-item${isDragging ? ' card-item--dragging' : ''}`}
-        onClick={stop((e) => navigate(`/cards/${card._id}/edit`, { state: { title: card.title, description: card.description, boardId, columnId } }))}
+        onClick={stop(() => navigate(`/cards/${card._id}/edit`, {
+          state: { title: card.title, description: card.description, boardId, columnId },
+        }))}
       >
         {/* Progress color strip */}
         <div className="card-item__progress-strip" style={{ background: stripColor }} />
 
         {/* Cover image */}
         {card.image && (
-          <img
-            src={card.image}
-            alt={card.title}
-            style={{ width:'100%', height:100, objectFit:'cover', borderRadius:'8px 8px 0 0', display:'block', marginBottom:8 }}
-          />
+          <img className="card-item__cover" src={card.image} alt={card.title} />
         )}
 
-        {/* Title + menu */}
-        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', gap:6 }}>
-          <p className="card-item__title" style={{ flex:1 }}>{card.title}</p>
-          <button
-            className="card-action-btn"
-            onClick={stop((e) => setAnchorEl(e.currentTarget))}
-            style={{ border:'none', background:'rgba(0,0,0,0.05)', borderRadius:6, cursor:'pointer', width:26, height:26, display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
-          >
-            <MoreHorizIcon style={{ fontSize:15 }} />
-          </button>
-        </div>
-
-        {/* Meta: deadline + progress badge */}
-        <div className="card-item__meta" style={{ marginTop:6 }}>
-          <span className={`card-item__deadline${overdue ? ' card-item__deadline--overdue' : ''}`}>
-            <CalendarTodayIcon />
-            {card.deadline ? formatDate(card.deadline) : 'No deadline'}
-          </span>
-          {card.process > 0 && (
-            <span
-              className="card-item__progress-badge"
-              style={{ background: getProgressColor(card.process)+'18', color: getProgressColor(card.process) }}
-            >
-              {card.process}%
-            </span>
+        <div className="card-item__body">
+          {/* Tags */}
+          {fakeTags.length > 0 && (
+            <div className="card-item__tags">
+              {fakeTags.map((tag, i) => (
+                <span key={i} className="card-item__tag" style={{ background: tag.bg, color: tag.color }}>
+                  {tag.label}
+                </span>
+              ))}
+            </div>
           )}
+
+          {/* Title + menu */}
+          <div className="card-item__title-row">
+            <p className="card-item__title">{card.title}</p>
+            <button
+              className="card-item__menu-btn"
+              onClick={stop(e => setAnchorEl(e.currentTarget))}
+            >
+              <MoreHorizIcon style={{ fontSize: 15 }} />
+            </button>
+          </div>
+
+          {/* Deadline + progress badge */}
+          <div className="card-item__meta">
+            <span className={`card-item__deadline${overdue ? ' card-item__deadline--overdue' : ''}`}>
+              <CalendarTodayIcon style={{ fontSize: 12 }} />
+              {card.deadline
+                ? overdue
+                  ? `${formatDate(card.deadline)} · Overdue`
+                  : formatDate(card.deadline)
+                : 'No deadline'
+              }
+            </span>
+            {card.process > 0 && (
+              <span
+                className="card-item__progress-badge"
+                style={{ background: `${progColor}18`, color: progColor }}
+              >
+                {card.process}%
+              </span>
+            )}
+          </div>
+
+          {/* Footer: members + progress bar */}
+          <div className="card-item__footer">
+            <div className="card-item__members">
+              {fakeMembers.map((m, i) => (
+                <div key={i} className="card-item__avatar" style={{ background: m.color }}>
+                  {m.initials}
+                </div>
+              ))}
+            </div>
+            <div className="card-item__prog-wrap">
+              <div className="card-item__prog-bar" style={{ width: `${card.process || 0}%`, background: progColor }} />
+            </div>
+            <span className="card-item__prog-pct">{card.process || 0}%</span>
+          </div>
+
+
         </div>
 
         {/* Context menu */}
@@ -198,7 +251,7 @@ export const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInvit
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={() => setAnchorEl(null)}
-          PaperProps={{ sx: { borderRadius:'10px', border:'1px solid #E4E7ED', minWidth:180, boxShadow:'0 4px 20px rgba(0,0,0,0.09)', py:0.5 } }}
+          PaperProps={{ sx: { borderRadius:'10px', border:'1px solid #E4E7ED', minWidth:190, boxShadow:'0 4px 20px rgba(0,0,0,0.09)', py:0.5 } }}
           anchorOrigin={{ vertical:'bottom', horizontal:'right' }}
           transformOrigin={{ vertical:'top', horizontal:'right' }}
         >
@@ -234,13 +287,18 @@ export const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInvit
         <DialogContent sx={{ pt:'20px !important', px:3 }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
             <span style={{ fontSize:13, color:'#4A5568', fontFamily:'DM Sans' }}>Progress</span>
-            <span style={{ fontFamily:'Outfit', fontWeight:700, fontSize:20, color: getProgressColor(processVal) }}>{processVal}%</span>
+            <span style={{ fontFamily:'Outfit', fontWeight:700, fontSize:22, color: getProgressColor(processVal) }}>
+              {processVal}%
+            </span>
           </div>
           <Slider
             value={processVal}
             onChange={(_, v) => { setProcessVal(v); setProcessErr(''); }}
             step={5}
-            marks={[{value:0,label:'0%'},{value:25,label:'25%'},{value:50,label:'50%'},{value:75,label:'75%'},{value:100,label:'100%'}]}
+            marks={[
+              { value:0, label:'0%' }, { value:25, label:'25%' },
+              { value:50, label:'50%' }, { value:75, label:'75%' }, { value:100, label:'100%' },
+            ]}
             min={0} max={100} valueLabelDisplay="auto"
             sx={{ color: getProgressColor(processVal), '& .MuiSlider-markLabel': { fontSize:11 } }}
           />
@@ -259,19 +317,18 @@ export const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInvit
           Update Card Image
         </DialogTitle>
         <DialogContent sx={{ pt:'20px !important', px:3 }}>
-          <div style={{
-            border:'2px dashed #E4E7ED', borderRadius:10, padding:'24px',
-            textAlign:'center', cursor:'pointer', transition:'border-color 0.15s',
-          }}
+          <div
+            className="card-upload-zone"
             onClick={() => document.getElementById('card-img-input').click()}
-            onDragOver={(e) => e.preventDefault()}
+            onDragOver={e => e.preventDefault()}
           >
             <ImageIcon style={{ fontSize:32, color:'#C4CAD4', marginBottom:8 }} />
-            <p style={{ fontSize:13.5, color:'#9AA5B4', fontFamily:'DM Sans', margin:0 }}>
-              {imageFile ? imageFile.name : 'Click to upload an image'}
+            <p className="card-upload-zone__text">
+              {imageFile ? imageFile.name : 'Click or drag to upload an image'}
             </p>
+            <p className="card-upload-zone__hint">PNG, JPG, WEBP up to 5MB</p>
             <input id="card-img-input" type="file" accept="image/*" style={{ display:'none' }}
-              onChange={(e) => setImageFile(e.target.files[0])} />
+              onChange={e => setImageFile(e.target.files[0])} />
           </div>
         </DialogContent>
         <DialogActions sx={{ px:3, pb:2.5, gap:1 }}>
@@ -293,14 +350,14 @@ export const Card = ({ card, boardId, columnId, token, onEdit, onDelete, onInvit
           <input
             type="date"
             value={deadlineVal}
-            onChange={(e) => { setDeadlineVal(e.target.value); setDeadlineErr(''); }}
+            onChange={e => { setDeadlineVal(e.target.value); setDeadlineErr(''); }}
             style={{
               width:'100%', padding:'10px 14px', borderRadius:8,
               border:'1.5px solid #E4E7ED', fontFamily:'DM Sans', fontSize:14,
               color:'#1A202C', outline:'none', boxSizing:'border-box',
             }}
-            onFocus={(e) => e.target.style.borderColor='#3B5BDB'}
-            onBlur={(e) => e.target.style.borderColor='#E4E7ED'}
+            onFocus={e => e.target.style.borderColor='#3B5BDB'}
+            onBlur={e => e.target.style.borderColor='#E4E7ED'}
           />
           {deadlineErr && <p style={{ fontSize:12, color:'#E53E3E', marginTop:6, fontFamily:'DM Sans' }}>{deadlineErr}</p>}
         </DialogContent>
