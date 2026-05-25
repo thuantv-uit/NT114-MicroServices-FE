@@ -45,6 +45,13 @@ const Login = ({ setToken }) => {
           fields={fields}
         />
 
+        {/* Forgot password */}
+        <div style={{ textAlign: 'right', marginTop: '-0.5rem', marginBottom: '0.5rem' }}>
+          <Link to="/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--primary, #4f46e5)' }}>
+            Forgot password?
+          </Link>
+        </div>
+
         {/* Divider */}
         <div className="auth-divider">or continue with</div>
 

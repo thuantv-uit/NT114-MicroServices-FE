@@ -9,6 +9,9 @@ import NotFound from './components/404';
 import Login from './features/users/components/Login';
 import Register from './features/users/components/Register';
 import VerifyOTP from './features/users/components/VerifyOTP';
+import ForgotPassword from './features/users/components/Forgotpassword';
+import VerifyForgotPassword from './features/users/components/Verifyforgotpassword';
+import ResetPassword from './features/users/components/Resetpassword';
 import UserDashboard from './features/users/components/UserDashboard';
 import BoardList from './features/boards/components/BoardList';
 import BoardDetail from './features/boards/components/BoardDetail';
@@ -30,8 +33,7 @@ import Summary from './features/cards/components/Summary';
 import './styles/auth-dashboard.css';
 import './styles/variables.css';
 
-// Routes that should NOT show Navbar/Sidebar
-const AUTH_ROUTES = ['/', '/login', '/register', '/verify-otp'];
+const AUTH_ROUTES = ['/', '/login', '/register', '/verify-otp', '/forgot-password', '/verify-forgot-password', '/reset-password'];
 
 function App() {
   const { token, setToken, logout } = useAuth();
@@ -45,7 +47,6 @@ function App() {
 
   return (
     <div>
-      {/* ── Navbar: always on top ── */}
       {showChrome && (
         <Navbar
           token={token}
@@ -56,7 +57,6 @@ function App() {
         />
       )}
 
-      {/* ── Sidebar: fixed left, always visible when logged in ── */}
       {showChrome && (
         <CategorySidebar
           token={token}
@@ -66,7 +66,6 @@ function App() {
         />
       )}
 
-      {/* ── Main content area ── */}
       <div
         style={{
           marginTop:  showChrome ? 'var(--navbar-h, 60px)' : '0',
@@ -84,9 +83,12 @@ function App() {
           <Route path="/" element={<Home1 />} />
 
           {/* Public routes */}
-          <Route path="/login"      element={<PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />} />
-          <Route path="/register"   element={<PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />} />
-          <Route path="/verify-otp" element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyOTP />} />} />
+          <Route path="/login"                   element={<PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />} />
+          <Route path="/register"                element={<PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />} />
+          <Route path="/verify-otp"              element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyOTP />} />} />
+          <Route path="/forgot-password"         element={<PublicRoute token={token} redirectTo="/dashboard" component={<ForgotPassword />} />} />
+          <Route path="/verify-forgot-password"  element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyForgotPassword />} />} />
+          <Route path="/reset-password"          element={<PublicRoute token={token} redirectTo="/dashboard" component={<ResetPassword />} />} />
 
           {/* Private routes */}
           <Route path="/dashboard" element={<PrivateRoute token={token} component={<UserDashboard token={token} />} />} />

@@ -57,6 +57,34 @@ export const resendOTP = async (email) => {
   );
 };
 
+export const forgotPassword = async (email) => {
+  return handleApiCall(
+    () => userInstance.post('/forgot-password', { email }).then(res => res.data),
+    'Forgot password'
+  );
+};
+ 
+export const verifyForgotPasswordOTP = async (email, otp) => {
+  return handleApiCall(
+    () => userInstance.post('/verify-forgot-password', { email, otp }).then(res => res.data),
+    'Verify forgot password OTP'
+  );
+};
+ 
+export const resendForgotPasswordOTP = async (email) => {
+  return handleApiCall(
+    () => userInstance.post('/forgot-password', { email }).then(res => res.data),
+    'Resend forgot password OTP'
+  );
+};
+ 
+export const resetPassword = async (email, newPassword) => {
+  return handleApiCall(
+    () => userInstance.post('/reset-password', { email, newPassword }).then(res => res.data),
+    'Reset password'
+  );
+};
+
 /**
  * Fetch current user data
  * @returns {Promise<Object>} User data
