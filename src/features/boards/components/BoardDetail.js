@@ -7,7 +7,6 @@ import InviteToBoard from '../../invitations/components/InviteToBoard';
 import UpdateBoard from './UpdateBoard';
 import ChangeBackground from './ChangeColor';
 import DeleteBoard from './DeleteBoard';
-import CreateColumn from '../../columns/components/CreateColumn';
 import {
   CircularProgress, Tooltip, Dialog, styled, Box,
 } from '@mui/material';
@@ -67,7 +66,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   const [openCreateColumnDialog,  setOpenCreateColumnDialog]  = useState(false);
   const columnsWrapperRef = useRef(null);
 
-  useEffect(() => { loadBoard(); }, [id, location?.state?.refresh]);
+  useEffect(() => { loadBoard(); }, [id, location?.state?.refresh]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadBoard = async () => {
     setLoading(true);
@@ -82,7 +81,6 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     }
   };
 
-  // Dùng riêng cho DeleteBoard — không fetch lại board đã bị xóa
   const handleDeleteClose = () => {
     setOpenDeleteDialog(false);
   };
@@ -239,6 +237,8 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
               <ColumnList
                 boardId={id}
                 token={token}
+                openCreateColumnDialog={openCreateColumnDialog}
+                setOpenCreateColumnDialog={setOpenCreateColumnDialog}
                 ColumnContainer={ColumnContainer}
                 CardContainer={CardContainer}
               />
@@ -263,9 +263,6 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       </Dialog>
       <Dialog open={openDeleteDialog}       onClose={handleDeleteClose} maxWidth="sm" fullWidth>
         <DeleteBoard token={token} onClose={handleDeleteClose} />
-      </Dialog>
-      <Dialog open={openCreateColumnDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-        <CreateColumn token={token} onClose={handleDialogClose} />
       </Dialog>
       <InviteToBoard
         boardId={id}

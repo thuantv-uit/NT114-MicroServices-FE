@@ -6,12 +6,13 @@ import { showToast } from '../../../utils/toastUtils';
 import { CircularProgress, Dialog } from '@mui/material';
 import Column      from './Column';
 import CreateCard  from '../../cards/components/CreateCard';
+import CreateColumn from './CreateColumn';
 import ColumnEdit  from './ColumnEdit';
 import DeleteColumn from './DeleteColumn';
 import Card from '../../cards/components/Card';
 import {
   DndContext, useSensor, useSensors, DragOverlay,
-  defaultDropAnimationSideEffects, closestCorners,
+  defaultDropAnimationSideEffects,
   pointerWithin, rectIntersection,
 } from '@dnd-kit/core';
 import { MouseSensor, TouchSensor } from '../../../customLibraries/DndKitSensors';
@@ -27,11 +28,10 @@ const customCollision = (args) => {
   return rectIntersection(args);
 };
 
-const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
+const ColumnList = ({ boardId, token, ColumnContainer, CardContainer, openCreateColumnDialog, setOpenCreateColumnDialog }) => {
   const [columns,            setColumns]            = useState([]);
   const [orderedColumnIds,   setOrderedColumnIds]   = useState([]);
   const [loading,            setLoading]            = useState(false);
-  const [activeDragItemId,   setActiveDragItemId]   = useState(null);
   const [activeDragItemType, setActiveDragItemType] = useState(null);
   const [activeDragItemData, setActiveDragItemData] = useState(null);
   const [sourceColumn,       setSourceColumn]       = useState(null);
@@ -77,7 +77,6 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
 
   // ─────────────────────────────────────────────────────────────
   const handleDragStart = ({ active }) => {
-    setActiveDragItemId(active.id);
     setActiveDragItemType(active.data.current?.type);
     setActiveDragItemData(active.data.current);
     if (active.data.current?.type === 'CARD')
@@ -120,7 +119,6 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
 
   // ── handleDragEnd: persist thay đổi lên server ────────────────
   const handleDragEnd = async ({ active, over }) => {
-    setActiveDragItemId(null);
     setActiveDragItemType(null);
     setActiveDragItemData(null);
     setSourceColumn(null);
@@ -202,6 +200,12 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
     setOpenDeleteDialog(false);
     setOpenCreateCardDialog(false);
     setSelectedColumn(null);
+    loadColumns();
+  };
+
+  // Đóng dialog tạo column và reload ngay lập tức
+  const handleCreateColumnClose = () => {
+    setOpenCreateColumnDialog(false);
     loadColumns();
   };
 
@@ -298,6 +302,11 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer }) => {
           </Dialog>
         </>
       )}
+
+      {/* CreateColumn dialog — nằm trong ColumnList để gọi loadColumns() ngay sau khi tạo */}
+      <Dialog open={!!openCreateColumnDialog} onClose={handleCreateColumnClose} maxWidth="sm" fullWidth>
+        <CreateColumn boardId={boardId} onClose={handleCreateColumnClose} />
+      </Dialog>
     </DndContext>
   );
 };

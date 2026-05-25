@@ -1,5 +1,4 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
 import { createColumn } from '../services/columnService';
 import { showToast } from '../../../utils/toastUtils';
 import FormContainer from '../../../components/FormContainer';
@@ -7,9 +6,7 @@ import GenericForm from '../../../components/GenericForm';
 import { validateColumnForm } from '../../../utils/validateUtils';
 import '../styles/column.css';
 
-const CreateColumn = ({ onClose }) => {
-  const { id } = useParams();
-
+const CreateColumn = ({ boardId, onClose }) => {
   return (
     <FormContainer title="Create New Column">
       <GenericForm
@@ -17,7 +14,7 @@ const CreateColumn = ({ onClose }) => {
         validate={validateColumnForm}
         onSubmit={async (values) => {
           try {
-            await createColumn(values.title, id);
+            await createColumn(values.title, boardId);
             showToast('Column created successfully!', 'success');
             onClose();
           } catch (err) {
