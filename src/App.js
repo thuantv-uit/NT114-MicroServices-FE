@@ -8,6 +8,7 @@ import Home1 from './components/Home1';
 import NotFound from './components/404';
 import Login from './features/users/components/Login';
 import Register from './features/users/components/Register';
+import VerifyOTP from './features/users/components/VerifyOTP';
 import UserDashboard from './features/users/components/UserDashboard';
 import BoardList from './features/boards/components/BoardList';
 import BoardDetail from './features/boards/components/BoardDetail';
@@ -30,15 +31,14 @@ import './styles/auth-dashboard.css';
 import './styles/variables.css';
 
 // Routes that should NOT show Navbar/Sidebar
-const AUTH_ROUTES = ['/', '/login', '/register'];
+const AUTH_ROUTES = ['/', '/login', '/register', '/verify-otp'];
 
 function App() {
   const { token, setToken, logout } = useAuth();
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
-  const [isSidebarOpen, setIsSidebarOpen]     = useState(true); // default open on desktop
+  const [isSidebarOpen, setIsSidebarOpen]     = useState(true);
   const location = useLocation();
 
-  // Show chrome (navbar + sidebar) on all routes except auth/public pages
   const showChrome = token && !AUTH_ROUTES.includes(location.pathname);
 
   const toggleSidebar = () => setIsSidebarOpen((prev) => !prev);
@@ -84,8 +84,9 @@ function App() {
           <Route path="/" element={<Home1 />} />
 
           {/* Public routes */}
-          <Route path="/login"    element={<PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />} />
-          <Route path="/register" element={<PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />} />
+          <Route path="/login"      element={<PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />} />
+          <Route path="/register"   element={<PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />} />
+          <Route path="/verify-otp" element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyOTP />} />} />
 
           {/* Private routes */}
           <Route path="/dashboard" element={<PrivateRoute token={token} component={<UserDashboard token={token} />} />} />

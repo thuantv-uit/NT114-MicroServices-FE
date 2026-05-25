@@ -44,8 +44,9 @@ const Register = () => {
           }}
           onSubmit={async (values) => {
             await registerUser(values.username, values.email, values.password);
-            showToast('Registration successful! Please login.', 'success');
-            setTimeout(() => navigate('/login'), 1500);
+            showToast('Registration successful! Please verify your email.', 'success');
+            // Pass email to VerifyOTP page via route state
+            setTimeout(() => navigate('/verify-otp', { state: { email: values.email } }), 1500);
           }}
           submitLabel="Create account"
           cancelPath={null}

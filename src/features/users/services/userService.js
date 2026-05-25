@@ -33,6 +33,31 @@ export const registerUser = async (username, email, password) => {
 };
 
 /**
+ * Verify OTP code
+ * @param {string} email - User email
+ * @param {string} otp - 6-digit OTP code
+ * @returns {Promise<Object>} Verification result
+ */
+export const verifyOTP = async (email, otp) => {
+  return handleApiCall(
+    () => userInstance.post('/verify-otp', { email, otp }).then(res => res.data),
+    'Verify OTP'
+  );
+};
+
+/**
+ * Resend OTP code
+ * @param {string} email - User email
+ * @returns {Promise<Object>} Resend result
+ */
+export const resendOTP = async (email) => {
+  return handleApiCall(
+    () => userInstance.post('/resend-otp', { email }).then(res => res.data),
+    'Resend OTP'
+  );
+};
+
+/**
  * Fetch current user data
  * @returns {Promise<Object>} User data
  */
