@@ -33,6 +33,7 @@ import Summary from './features/cards/components/Summary';
 import TemplatePage from './features/boards/components/TemplatePage';
 import './styles/auth-dashboard.css';
 import './styles/variables.css';
+import './Logo/styles/loading.css';
 
 const AUTH_ROUTES = ['/', '/login', '/register', '/verify-otp', '/forgot-password', '/verify-forgot-password', '/reset-password'];
 

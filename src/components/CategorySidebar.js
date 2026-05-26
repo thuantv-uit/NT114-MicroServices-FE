@@ -4,7 +4,8 @@ import DashboardIcon     from '@mui/icons-material/Dashboard';
 import FolderIcon        from '@mui/icons-material/Folder';
 import LogoutIcon        from '@mui/icons-material/Logout';
 import ExpandMoreIcon    from '@mui/icons-material/ExpandMore';
-import ViewKanbanIcon    from '@mui/icons-material/ViewKanban';
+import ViewKanbanIcon         from '@mui/icons-material/ViewKanban';
+import AutoAwesomeMosaicIcon  from '@mui/icons-material/AutoAwesomeMosaic';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import BarChartIcon      from '@mui/icons-material/BarChart';
@@ -24,7 +25,7 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar, user }) => {
   const navigate  = useNavigate();
   const location  = useLocation();
   const [projectOpen, setProjectOpen] = useState(
-    location.pathname.startsWith('/boards')
+    location.pathname.startsWith('/boards') || location.pathname === '/templates'
   );
   const [reportsOpen, setReportsOpen] = useState(false);
 
@@ -130,6 +131,14 @@ const CategorySidebar = ({ token, logout, isOpen, toggleSidebar, user }) => {
                 <span className="sidebar-item__icon"><ViewKanbanIcon style={{ fontSize: 17 }} /></span>
                 Board
                 <span className="sidebar-badge">4</span>
+              </Link>
+              <Link
+                to="/templates"
+                className={`sidebar-item${isActive('/templates') ? ' sidebar-item--active' : ''}`}
+                style={{ paddingLeft: 20 }}
+              >
+                <span className="sidebar-item__icon"><AutoAwesomeMosaicIcon style={{ fontSize: 17 }} /></span>
+                Templates
               </Link>
             </div>
           </div>

@@ -278,3 +278,20 @@
 @media (max-width: 400px) {
   .navbar-search { display: none; }
 }
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--c-primary);
+  letter-spacing: -0.5px;
+  text-decoration: none;
+  padding: 0 4px;
+}
+.navbar-logo svg {
+  flex-shrink: 0;
+  display: block;
+}
+.navbar-logo__accent { color: #7C3AED; }

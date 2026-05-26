@@ -1,0 +1,138 @@
+/* ============================================================
+   loading.css — Thunio branded loading system
+   Import vào styles/ cùng cấp với sidebar.css, variables.css
+   ============================================================ */
+
+@import '../../styles/variables.css';
+
+/* ── Thunio spinner — 3 Kanban columns ── */
+
+.thunio-spinner-wrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.thunio-spinner {
+  display: inline-flex;
+  align-items: flex-end;
+}
+
+.thu-col {
+  display: block;
+  border-radius: 3px;
+  animation: thu-bounce 1s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Default colors — dùng màu brand */
+.thunio-spinner--default .thu-col--1 { background: var(--c-primary); }
+.thunio-spinner--default .thu-col--2 { background: #7C3AED; animation-delay: 0.15s; }
+.thunio-spinner--default .thu-col--3 { background: var(--c-success); animation-delay: 0.3s; }
+
+/* White — dùng trong button primary / danger */
+.thunio-spinner--white .thu-col--1,
+.thunio-spinner--white .thu-col--2,
+.thunio-spinner--white .thu-col--3 {
+  background: rgba(255, 255, 255, 0.9);
+}
+.thunio-spinner--white .thu-col--2 { animation-delay: 0.15s; }
+.thunio-spinner--white .thu-col--3 { animation-delay: 0.3s;  }
+
+@keyframes thu-bounce {
+  0%, 100% { transform: scaleY(0.4); opacity: 0.45; }
+  50%       { transform: scaleY(1);   opacity: 1;    }
+}
+
+/* ── Spinner brand name ── */
+.thunio-spinner-brand {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--c-primary);
+  letter-spacing: -0.3px;
+}
+
+.thunio-spinner-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--c-text-3);
+}
+
+/* ── Page spinner — full viewport center ── */
+.thunio-page-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - var(--navbar-h));
+  width: 100%;
+}
+
+/* ── Skeleton shimmer ── */
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--c-border) 25%,
+    var(--c-bg)     50%,
+    var(--c-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: thu-shimmer 1.4s infinite;
+}
+
+@keyframes thu-shimmer {
+  0%   { background-position:  200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Skeleton helpers ── */
+.skel-line   { border-radius: 4px; height: 10px; }
+.skel-line-sm { border-radius: 4px; height: 8px; width: 55%; }
+.skel-line-xs { border-radius: 4px; height: 8px; width: 35%; }
+.skel-avatar { border-radius: 50%; }
+.skel-tag    { border-radius: 99px; height: 20px; width: 52px; }
+.skel-progress {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--c-bg);
+  overflow: hidden;
+}
+.skel-progress-fill {
+  height: 100%;
+  width: 60%;
+  border-radius: 99px;
+}
+
+/* ── Skeleton — Board card ── */
+.skel-board-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skel-board-card__header { display: flex; align-items: center; gap: 8px; }
+.skel-board-card__tags   { display: flex; gap: 6px; margin-top: 2px; }
+.skel-board-card__footer { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+
+/* ── Skeleton — List row ── */
+.skel-list-row {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skel-list-row__info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

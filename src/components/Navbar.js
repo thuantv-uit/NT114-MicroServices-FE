@@ -12,6 +12,8 @@ import { showToast } from '../utils/toastUtils';
 import { getPendingBoardInvitations, getPendingColumnInvitations } from '../features/invitations/components/Invitation';
 import { fetchUserData, changeAvatar } from '../features/users/services/userService';
 import '../styles/navbar.css';
+import { ReactComponent as ThunioLogo } from '../assets/Logo/Thunio.svg';
+
 
 const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -100,6 +102,7 @@ const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
           <MenuIcon style={{ fontSize: 22 }} />
         </button>
         <Link to="/dashboard" className="navbar-logo">
+          <ThunioLogo width={28} height={28} />
           Thun<span className="navbar-logo__accent">io</span>
         </Link>
       </div>
