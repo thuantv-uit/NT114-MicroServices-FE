@@ -30,6 +30,7 @@ import PendingInvitationsPage from './features/invitations/components/PendingInv
 import Chatbot from './features/ai/chatbot';
 import Calendar from './features/cards/components/Calendar';
 import Summary from './features/cards/components/Summary';
+import TemplatePage from './features/boards/components/TemplatePage';
 import './styles/auth-dashboard.css';
 import './styles/variables.css';
 
@@ -95,6 +96,7 @@ function App() {
 
           <Route path="/boards"    element={<PrivateRoute token={token} component={<BoardList token={token} />} />} />
           <Route path="/boards/:id" element={<PrivateRoute token={token} component={<BoardDetail token={token} setBackgroundColor={setBackgroundColor} />} />} />
+          <Route path="/templates" element={<PrivateRoute token={token} component={<TemplatePage token={token} />} />} />
           <Route path="/boards/create" element={<PrivateRoute token={token} component={<BoardCreate token={token} />} />} />
           <Route path="/boards/:id/update" element={<PrivateRoute token={token} component={<UpdateBoard token={token} />} />} />
           <Route path="/boards/:id/delete" element={<PrivateRoute token={token} component={<DeleteBoard token={token} />} />} />
