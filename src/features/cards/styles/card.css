@@ -1,9 +1,9 @@
+@import '../../../styles/variables.css';
+
 /* ═══════════════════════════════════════════════════════════════
    CARD DESIGN SYSTEM
    Nhất quán với board.css + column.css + invitation.css
    ═══════════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
 
 /* ════════════════════════════════════════════════════════════════
    CARD ITEM (inside column)

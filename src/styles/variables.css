@@ -1,30 +1,116 @@
+/* ═══════════════════════════════════════════════════════════════
+   VARIABLES — nguồn token duy nhất cho toàn bộ project
+   Import file này một lần duy nhất (index.html hoặc App entry)
+   Tất cả file khác KHÔNG được @import Google Fonts hay định nghĩa :root
+   ═══════════════════════════════════════════════════════════════ */
+
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
 
+/* ══════════════════════════════════════════════════════════════
+   COLOR SCHEMES — preset themes
+   Áp dụng bằng cách set attribute trên <html>:
+     <html data-theme="blue">      ← mặc định
+     <html data-theme="purple">
+     <html data-theme="teal">
+     <html data-theme="rose">
+     <html data-theme="amber">
+     <html data-theme="custom">    ← tuỳ chỉnh, xem phần CUSTOM bên dưới
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Theme: Blue (mặc định) ── */
 :root {
+  --c-primary:     #3B5BDB;
+  --c-primary-h:   #2F4AC5;
+  --c-primary-lt:  #EEF2FF;
+  --c-primary-rgb: 59, 91, 219;
+}
+
+[data-theme="purple"] {
+  --c-primary:     #7C3AED;
+  --c-primary-h:   #6D28D9;
+  --c-primary-lt:  #F5F3FF;
+  --c-primary-rgb: 124, 58, 237;
+}
+
+[data-theme="teal"] {
+  --c-primary:     #0D9488;
+  --c-primary-h:   #0F766E;
+  --c-primary-lt:  #F0FDFA;
+  --c-primary-rgb: 13, 148, 136;
+}
+
+[data-theme="rose"] {
+  --c-primary:     #E11D48;
+  --c-primary-h:   #BE123C;
+  --c-primary-lt:  #FFF1F2;
+  --c-primary-rgb: 225, 29, 72;
+}
+
+[data-theme="amber"] {
+  --c-primary:     #D97706;
+  --c-primary-h:   #B45309;
+  --c-primary-lt:  #FFFBEB;
+  --c-primary-rgb: 217, 119, 6;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CUSTOM THEME — tuỳ chỉnh trực tiếp tại đây
+   Đổi data-theme="custom" trên <html> rồi chỉnh 4 biến bên dưới
+   ══════════════════════════════════════════════════════════════ */
+[data-theme="custom"] {
+  --c-primary:     #3B5BDB;   /* ← đổi màu chính */
+  --c-primary-h:   #2F4AC5;   /* ← đổi màu hover (thường tối hơn ~10%) */
+  --c-primary-lt:  #EEF2FF;   /* ← đổi màu nền nhạt (thường rất nhạt) */
+  --c-primary-rgb: 59, 91, 219; /* ← giá trị RGB của --c-primary (dùng cho rgba shadow) */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BASE TOKENS — dùng chung mọi theme
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  /* ── Surfaces ── */
   --c-bg:        #F7F8FA;
   --c-surface:   #FFFFFF;
+  --c-surface-2: #F0F2F5;
+
+  /* ── Borders ── */
   --c-border:    #E4E7ED;
+  --c-border-2:  #D1D5DB;
+
+  /* ── Text ── */
   --c-text-1:    #1A202C;
   --c-text-2:    #4A5568;
   --c-text-3:    #9AA5B4;
-  --c-primary:   #3B5BDB;
-  --c-primary-h: #2F4AC5;
-  --c-primary-lt:#EEF2FF;
-  --c-danger:    #E53E3E;
-  --c-success:   #38A169;
 
+  /* ── Semantic ── */
+  --c-danger:     #E53E3E;
+  --c-danger-h:   #C53030;
+  --c-danger-lt:  #FFF5F5;
+  --c-success:    #38A169;
+  --c-success-lt: #F0FFF4;
+  --c-warning:    #D69E2E;
+  --c-warning-lt: #FFFBEB;
+
+  /* ── Shadows ── */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
   --shadow-sm: 0 2px 8px rgba(0,0,0,0.07);
   --shadow-md: 0 4px 20px rgba(0,0,0,0.09);
   --shadow-lg: 0 8px 40px rgba(0,0,0,0.13);
 
+  /* ── Radius ── */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
 
+  /* ── Layout ── */
   --sidebar-w: 270px;
   --navbar-h:  60px;
 
+  /* ── Motion ── */
   --transition: 0.18s ease;
+
+  /* ── Typography ── */
   --font-display: 'Outfit', sans-serif;
   --font-body:    'DM Sans', sans-serif;
 }

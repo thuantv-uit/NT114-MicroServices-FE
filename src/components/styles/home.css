@@ -1,10 +1,9 @@
+@import '../../styles/variables.css';
+
 /* ═══════════════════════════════════════════════════════════════
    HOME PAGE + HEADER — standalone stylesheet
    Tokens scoped vào .hp — không ảnh hưởng Login / Register
    ═══════════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap');
-
 
 /* ── Tokens — scoped vào .hp, không leak ra global ── */
 .hp {

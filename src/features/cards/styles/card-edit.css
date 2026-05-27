@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+@import '../../../styles/variables.css';
 
 /* ════════════════════════════════════════════════════════════════
    EDIT CARD MODAL
@@ -251,21 +251,6 @@
   font-size: 11px; font-weight: 600;
   padding: 2px 8px; border-radius: 99px;
 }
-
-/* ── Shared btn ── */
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 9px 18px; border-radius: 8px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13.5px; font-weight: 500;
-  cursor: pointer; border: none;
-  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
-}
-.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
-.btn-primary { background: #3B5BDB; color: #fff; box-shadow: 0 2px 8px rgba(59,91,219,0.2); }
-.btn-primary:hover:not(:disabled) { background: #2F4AC5; transform: translateY(-1px); }
-.btn-ghost { background: #F7F8FA; color: #4A5568; border: 1.5px solid #E4E7ED; }
-.btn-ghost:hover:not(:disabled) { background: #E4E7ED; }
 
 /* ── Responsive ── */
 @media (max-width: 768px) {

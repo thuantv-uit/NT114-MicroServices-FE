@@ -1,9 +1,9 @@
+@import '../../../styles/variables.css';
+
 /* ═══════════════════════════════════════════════════════════════
    COLUMN DESIGN SYSTEM
    Nhất quán với board.css — cùng tokens, font, radius
    ═══════════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap');
 
 /* ── Column card ─────────────────────────────────────────────── */
 .col-card {

@@ -1,9 +1,9 @@
+@import '../../../styles/variables.css';
+
 /* ═══════════════════════════════════════════════════════════════
    INVITATION DESIGN SYSTEM
    Nhất quán với board.css + column.css
    ═══════════════════════════════════════════════════════════════ */
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=DM+Sans:wght@400;500&display=swap');
 
 /* ── Shared dialog overrides ─────────────────────────────────── */
 .inv-dialog-title {

@@ -10,14 +10,14 @@ import DeleteBoard from './DeleteBoard';
 import {
   CircularProgress, Tooltip, Dialog, styled, Box,
 } from '@mui/material';
-import PaletteIcon      from '@mui/icons-material/Palette';
-import EditIcon         from '@mui/icons-material/Edit';
-import DeleteIcon       from '@mui/icons-material/Delete';
-import PersonAddIcon    from '@mui/icons-material/PersonAdd';
-import AddIcon          from '@mui/icons-material/Add';
-import MoreHorizIcon    from '@mui/icons-material/MoreHoriz';
-import SummarizeIcon    from '@mui/icons-material/Summarize';
-import ViewKanbanIcon   from '@mui/icons-material/ViewKanban';
+import PaletteIcon         from '@mui/icons-material/Palette';
+import EditIcon            from '@mui/icons-material/Edit';
+import DeleteIcon          from '@mui/icons-material/Delete';
+import PersonAddIcon       from '@mui/icons-material/PersonAdd';
+import AddIcon             from '@mui/icons-material/Add';
+import MoreHorizIcon       from '@mui/icons-material/MoreHoriz';
+import SummarizeIcon       from '@mui/icons-material/Summarize';
+import ViewKanbanIcon      from '@mui/icons-material/ViewKanban';
 import CalendarTodayIcon   from '@mui/icons-material/CalendarToday';
 import DescriptionIcon     from '@mui/icons-material/Description';
 import TimelineIcon        from '@mui/icons-material/Timeline';
@@ -53,6 +53,16 @@ const FAKE_MEMBERS = [
   { initials: 'MK', color: '#38A169' },
   { initials: 'LN', color: '#D97706' },
 ];
+
+/* ── Tính độ sáng của màu hex, trả về true nếu nền sáng ── */
+const isLightColor = (hex) => {
+  if (!hex || hex === 'transparent') return false;
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
+};
 
 const BoardDetail = ({ token, setBackgroundColor }) => {
   const { id } = useParams();
@@ -110,17 +120,21 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
     board?.backgroundColorUpdatedAt &&
     new Date(board.backgroundImageUpdatedAt) > new Date(board.backgroundColorUpdatedAt);
 
+  /* ── Tính class light/dark dựa theo màu nền hiện tại ── */
+  const bgColor   = board?.backgroundColor || '#3B5BDB';
+  const lightBg   = !isImageLatest && isLightColor(bgColor);
+
   const navItems = [
-    { name: 'Board',     icon: <ViewKanbanIcon    style={{ fontSize: 16 }} />, path: `/boards/${id}`           },
-    { name: 'Summary',   icon: <SummarizeIcon     style={{ fontSize: 16 }} />, path: `/boards/${id}/summary`   },
-    { name: 'Timeline',  icon: <TimelineIcon      style={{ fontSize: 16 }} />, path: `/boards/${id}/timeline`  },
-    { name: 'Calendar',  icon: <CalendarTodayIcon style={{ fontSize: 16 }} />, path: `/boards/${id}/calendar`  },
-    { name: 'Analytics', icon: <BarChartIcon      style={{ fontSize: 16 }} />, path: `/boards/${id}/analytics` },
-    { name: 'Files',     icon: <InsertDriveFileIcon style={{ fontSize: 16 }} />, path: `/boards/${id}/files`   },
+    { name: 'Board',     icon: <ViewKanbanIcon      style={{ fontSize: 16 }} />, path: `/boards/${id}`           },
+    { name: 'Summary',   icon: <SummarizeIcon       style={{ fontSize: 16 }} />, path: `/boards/${id}/summary`   },
+    { name: 'Timeline',  icon: <TimelineIcon        style={{ fontSize: 16 }} />, path: `/boards/${id}/timeline`  },
+    { name: 'Calendar',  icon: <CalendarTodayIcon   style={{ fontSize: 16 }} />, path: `/boards/${id}/calendar`  },
+    { name: 'Analytics', icon: <BarChartIcon        style={{ fontSize: 16 }} />, path: `/boards/${id}/analytics` },
+    { name: 'Files',     icon: <InsertDriveFileIcon style={{ fontSize: 16 }} />, path: `/boards/${id}/files`     },
   ];
 
   const pageStyle = {
-    backgroundColor: isImageLatest ? 'transparent' : board?.backgroundColor || '#3B5BDB',
+    backgroundColor: isImageLatest ? 'transparent' : bgColor,
     backgroundImage: isImageLatest ? `url(${board?.backgroundImage})` : 'none',
     backgroundSize: 'cover',
     backgroundPosition: 'center',
@@ -128,7 +142,10 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
   };
 
   return (
-    <div className="board-page board-detail-page" style={pageStyle}>
+    <div
+      className={`board-page board-detail-page${lightBg ? ' board--light-bg' : ''}`}
+      style={pageStyle}
+    >
 
       {/* ── Header ── */}
       <div className="board-detail-header">
@@ -212,7 +229,6 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
             fontFamily: 'var(--font-body)',
           }}>
             <ThunioSpinner size="md" />
-            {/* <span>Loading board details…</span> */}
           </div>
         )}
       </div>
@@ -266,13 +282,13 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       )}
 
       {/* ── Dialogs ── */}
-      <Dialog open={openUpdateDialog}       onClose={handleDialogClose} maxWidth="sm" fullWidth>
+      <Dialog open={openUpdateDialog}     onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <UpdateBoard token={token} onClose={handleDialogClose} />
       </Dialog>
-      <Dialog open={openBackgroundDialog}   onClose={handleDialogClose} maxWidth="sm" fullWidth>
+      <Dialog open={openBackgroundDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <ChangeBackground token={token} onClose={handleDialogClose} />
       </Dialog>
-      <Dialog open={openDeleteDialog}       onClose={handleDeleteClose} maxWidth="sm" fullWidth>
+      <Dialog open={openDeleteDialog}     onClose={handleDeleteClose} maxWidth="sm" fullWidth>
         <DeleteBoard token={token} onClose={handleDeleteClose} />
       </Dialog>
       <InviteToBoard

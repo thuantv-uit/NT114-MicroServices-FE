@@ -5,6 +5,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import App from './App';
 import './styles.css';
+import './styles/variables.css';
+
+document.documentElement.setAttribute('data-theme', 'purple');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
