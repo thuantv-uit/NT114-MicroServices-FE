@@ -6,13 +6,14 @@
   left: 0;
   width: var(--sidebar-w);
   height: calc(100vh - var(--navbar-h));
-  background: var(--c-surface);
+  background: var(--c-primary-lt);
   border-right: 1px solid var(--c-border);
   display: flex;
   flex-direction: column;
   z-index: 1100;
   font-family: var(--font-body);
   transition: transform var(--transition);
+  background: var(--c-primary-lt);
   overflow: hidden;
 }
 .app-sidebar--collapsed { transform: translateX(-100%); }
@@ -29,7 +30,7 @@
 .sidebar-user__avatar {
   width: 34px; height: 34px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--c-primary), #7C3AED);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-h));
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display);
   font-size: 13px; font-weight: 700;
@@ -78,10 +79,10 @@
   text-align: left;
   box-sizing: border-box;
 }
-.sidebar-item:hover { background: var(--c-bg); color: var(--c-text-1); }
-.sidebar-item--active { background: var(--c-primary-lt); color: var(--c-primary); }
-.sidebar-item--danger:hover { background: #FFF5F5; color: var(--c-danger); }
-.sidebar-item__icon { font-size: 19px; flex-shrink: 0; display: flex; }
+.sidebar-item:hover          { background: var(--c-bg); color: var(--c-text-1); }
+.sidebar-item--active        { background: var(--c-primary-lt); color: var(--c-primary); }
+.sidebar-item--danger:hover  { background: var(--c-danger-lt); color: var(--c-danger); }
+.sidebar-item__icon          { font-size: 19px; flex-shrink: 0; display: flex; }
 
 /* ── Accordion ── */
 .sidebar-group { margin-bottom: 2px; }
@@ -101,22 +102,22 @@
   width: 100%;
   text-align: left;
 }
-.sidebar-group__header:hover { background: var(--c-bg); color: var(--c-text-1); }
-.sidebar-group__header-left { display: flex; align-items: center; gap: 10px; }
+.sidebar-group__header:hover      { background: var(--c-bg); color: var(--c-text-1); }
+.sidebar-group__header-left       { display: flex; align-items: center; gap: 10px; }
 .sidebar-group__chevron {
   font-size: 16px;
   transition: transform 0.2s ease;
   flex-shrink: 0;
   display: flex;
 }
-.sidebar-group__chevron--open { transform: rotate(180deg); }
+.sidebar-group__chevron--open     { transform: rotate(180deg); }
 .sidebar-group__children {
   padding-left: 16px;
   overflow: hidden;
   max-height: 0;
   transition: max-height 0.22s ease;
 }
-.sidebar-group__children--open { max-height: 400px; }
+.sidebar-group__children--open    { max-height: 400px; }
 
 /* ── Badges ── */
 .sidebar-badge {
@@ -128,9 +129,9 @@
   border-radius: 99px;
   flex-shrink: 0;
 }
-.sidebar-badge--red   { background: #FFF5F5; color: var(--c-danger);  }
-.sidebar-badge--green { background: #F0FFF4; color: var(--c-success); }
-.sidebar-badge--amber { background: #FFFBEB; color: #D97706;          }
+.sidebar-badge--red   { background: var(--c-danger-lt);  color: var(--c-danger);  }
+.sidebar-badge--green { background: var(--c-success-lt); color: var(--c-success); }
+.sidebar-badge--amber { background: var(--c-warning-lt); color: var(--c-warning); }
 
 /* ── Recent board dot ── */
 .sidebar-recent-dot {

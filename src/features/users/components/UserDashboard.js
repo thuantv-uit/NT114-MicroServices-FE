@@ -11,6 +11,10 @@ import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 import Chatbot from '../../ai/chatbot';
 import '../styles/dashboard.css';
 
+/* ── Đọc CSS variable từ :root ── */
+const cv = (name) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 const UserDashboard = () => {
   const { token } = useAuth();
   const [user,            setUser]            = useState(null);
@@ -50,33 +54,34 @@ const UserDashboard = () => {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   });
 
+  /* ── Dùng CSS variables thay vì hardcode hex ── */
   const stats = [
-    { icon: <ViewKanban style={{ fontSize: 20 }} />, color: '#3B5BDB', bg: '#EEF2FF', label: 'Total Boards',  value: 12, trend: '↑ 2 this month',      trendUp: true  },
-    { icon: <CheckCircle style={{ fontSize: 20 }} />, color: '#38A169', bg: '#F0FFF4', label: 'Tasks Done',    value: 84, trend: '↑ 12 this week',      trendUp: true  },
-    { icon: <AccessAlarm style={{ fontSize: 20 }} />, color: '#E53E3E', bg: '#FFF5F5', label: 'Overdue',       value: 3,  trend: '↑ 1 since yesterday', trendUp: false },
-    { icon: <Group       style={{ fontSize: 20 }} />, color: '#D97706', bg: '#FFFBEB', label: 'Team Members',  value: 8,  trend: 'Across 4 boards',     trendUp: null  },
+    { icon: <ViewKanban  style={{ fontSize: 20 }} />, color: 'var(--c-primary)',  bg: 'var(--c-primary-lt)',  label: 'Total Boards', value: 12, trend: '↑ 2 this month',      trendUp: true  },
+    { icon: <CheckCircle style={{ fontSize: 20 }} />, color: 'var(--c-success)',  bg: 'var(--c-success-lt)',  label: 'Tasks Done',   value: 84, trend: '↑ 12 this week',      trendUp: true  },
+    { icon: <AccessAlarm style={{ fontSize: 20 }} />, color: 'var(--c-danger)',   bg: 'var(--c-danger-lt)',   label: 'Overdue',      value: 3,  trend: '↑ 1 since yesterday', trendUp: false },
+    { icon: <Group       style={{ fontSize: 20 }} />, color: 'var(--c-warning)',  bg: 'var(--c-warning-lt)',  label: 'Team Members', value: 8,  trend: 'Across 4 boards',     trendUp: null  },
   ];
 
   const activities = [
-    { icon: <TaskAlt    style={{ fontSize: 16 }} />, iconBg: '#EEF2FF', iconColor: '#3B5BDB', badgeCls: 'badge-blue',  badge: 'Task',    text: 'Completed "Design System Review"',         time: '2 hours ago'          },
-    { icon: <PersonAdd  style={{ fontSize: 16 }} />, iconBg: '#FFF5F5', iconColor: '#E53E3E', badgeCls: 'badge-red',   badge: 'Invite',  text: 'Invited sarah@example.com to Team Board',  time: 'Yesterday at 3:40 PM' },
-    { icon: <Edit       style={{ fontSize: 16 }} />, iconBg: '#F0FFF4', iconColor: '#38A169', badgeCls: 'badge-green', badge: 'Profile', text: 'Updated profile information',              time: '3 days ago'           },
-    { icon: <SpaceDashboard style={{ fontSize: 16 }} />, iconBg: '#FFFBEB', iconColor: '#D97706', badgeCls: 'badge-amber', badge: 'Board', text: 'Created "Q3 Roadmap" board',             time: '4 days ago'           },
+    { icon: <TaskAlt        style={{ fontSize: 16 }} />, iconBg: 'var(--c-primary-lt)', iconColor: 'var(--c-primary)', badgeCls: 'badge-blue',  badge: 'Task',    text: 'Completed "Design System Review"',        time: '2 hours ago'          },
+    { icon: <PersonAdd      style={{ fontSize: 16 }} />, iconBg: 'var(--c-danger-lt)',  iconColor: 'var(--c-danger)',  badgeCls: 'badge-red',   badge: 'Invite',  text: 'Invited sarah@example.com to Team Board', time: 'Yesterday at 3:40 PM' },
+    { icon: <Edit           style={{ fontSize: 16 }} />, iconBg: 'var(--c-success-lt)', iconColor: 'var(--c-success)', badgeCls: 'badge-green', badge: 'Profile', text: 'Updated profile information',             time: '3 days ago'           },
+    { icon: <SpaceDashboard style={{ fontSize: 16 }} />, iconBg: 'var(--c-warning-lt)', iconColor: 'var(--c-warning)', badgeCls: 'badge-amber', badge: 'Board',   text: 'Created "Q3 Roadmap" board',              time: '4 days ago'           },
   ];
 
   const deadlines = [
-    { name: 'API Refactor',  pct: 85, color: '#3B5BDB' },
-    { name: 'UI Redesign',   pct: 60, color: '#7C3AED' },
-    { name: 'User Testing',  pct: 40, color: '#38A169' },
-    { name: 'Launch Prep',   pct: 20, color: '#E53E3E' },
-    { name: 'Docs',          pct: 72, color: '#D97706' },
+    { name: 'API Refactor', pct: 85, color: 'var(--c-primary)'  },
+    { name: 'UI Redesign',  pct: 60, color: 'var(--c-primary-h)' },
+    { name: 'User Testing', pct: 40, color: 'var(--c-success)'   },
+    { name: 'Launch Prep',  pct: 20, color: 'var(--c-danger)'    },
+    { name: 'Docs',         pct: 72, color: 'var(--c-warning)'   },
   ];
 
   const boards = [
-    { name: 'Q3 Roadmap',     color: '#3B5BDB', count: 14 },
-    { name: 'UI Redesign',    color: '#7C3AED', count: 9  },
-    { name: 'Backend Sprint', color: '#38A169', count: 22 },
-    { name: 'Marketing',      color: '#D97706', count: 7  },
+    { name: 'Q3 Roadmap',     color: 'var(--c-primary)',   count: 14 },
+    { name: 'UI Redesign',    color: 'var(--c-primary-h)', count: 9  },
+    { name: 'Backend Sprint', color: 'var(--c-success)',   count: 22 },
+    { name: 'Marketing',      color: 'var(--c-warning)',   count: 7  },
   ];
 
   const taskDone = 59, taskProgress = 17, taskOverdue = 8;
@@ -87,6 +92,7 @@ const UserDashboard = () => {
   const overdueDash  = (taskOverdue  / total) * circ;
 
   return (
+    <div className="dashboard-wrapper">
     <div className="dashboard-page">
 
       {loading && <PageSpinner text="Loading dashboard…" />}
@@ -228,12 +234,12 @@ const UserDashboard = () => {
               <div className="donut-wrap">
                 <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="100" height="100" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="50" cy="50" r={r} fill="none" stroke="#F7F8FA" strokeWidth="10" />
-                    <circle cx="50" cy="50" r={r} fill="none" stroke="#3B5BDB" strokeWidth="10"
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-bg)" strokeWidth="10" />
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-primary)"  strokeWidth="10"
                       strokeDasharray={`${doneDash} ${circ}`} strokeLinecap="round" />
-                    <circle cx="50" cy="50" r={r} fill="none" stroke="#38A169" strokeWidth="10"
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-success)"  strokeWidth="10"
                       strokeDasharray={`${progressDash} ${circ}`} strokeDashoffset={-doneDash} strokeLinecap="round" />
-                    <circle cx="50" cy="50" r={r} fill="none" stroke="#E53E3E" strokeWidth="10"
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-danger)"   strokeWidth="10"
                       strokeDasharray={`${overdueDash} ${circ}`} strokeDashoffset={-(doneDash + progressDash)} strokeLinecap="round" />
                   </svg>
                   <div style={{ position: 'absolute', textAlign: 'center' }}>
@@ -243,9 +249,9 @@ const UserDashboard = () => {
                 </div>
                 <div className="donut-legend">
                   {[
-                    { color: '#3B5BDB', label: 'Done',       val: taskDone     },
-                    { color: '#38A169', label: 'In Progress', val: taskProgress },
-                    { color: '#E53E3E', label: 'Overdue',     val: taskOverdue  },
+                    { color: 'var(--c-primary)', label: 'Done',        val: taskDone     },
+                    { color: 'var(--c-success)', label: 'In Progress',  val: taskProgress },
+                    { color: 'var(--c-danger)',  label: 'Overdue',      val: taskOverdue  },
                   ].map((l, i) => (
                     <div className="dl-leg" key={i}>
                       <div className="dl-dot" style={{ background: l.color }} />
@@ -271,6 +277,7 @@ const UserDashboard = () => {
           <Chatbot onClose={() => setIsChatOpen(false)} />
         </div>
       )}
+    </div>
     </div>
   );
 };

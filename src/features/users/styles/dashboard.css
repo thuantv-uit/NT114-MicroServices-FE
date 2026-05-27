@@ -1,3 +1,9 @@
+/* ── Full-width background wrapper ── */
+.dashboard-wrapper {
+  min-height: 100vh;
+  background: var(--c-primary-lt);
+}
+
 @import '../../../styles/variables.css';
 
 /* ── Page layout ── */
@@ -101,7 +107,7 @@
 .profile-avatar--initials {
   width: 64px; height: 64px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--c-primary), #7C3AED);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-h));
   display: flex; align-items: center; justify-content: center;
   font-family: var(--font-display);
   font-size: 22px; font-weight: 700;
@@ -147,8 +153,8 @@
   transition: all var(--transition);
 }
 .profile-upload-btn:hover { background: var(--c-primary-lt); }
-.profile-upload-btn--danger { border-color: var(--c-danger); color: var(--c-danger); }
-.profile-upload-btn--danger:hover { background: #FFF5F5; }
+.profile-upload-btn--danger       { border-color: var(--c-danger); color: var(--c-danger); }
+.profile-upload-btn--danger:hover { background: var(--c-danger-lt); }
 .profile-file-input { display: block; width: 100%; font-size: 13px; color: var(--c-text-2); margin: 10px 0; }
 
 /* ── Activity ── */
@@ -169,7 +175,7 @@
   flex-shrink: 0;
 }
 .activity-text { flex: 1; }
-.activity-text__primary { font-size: 13.5px; color: var(--c-text-1); font-weight: 500; margin: 0 0 2px; }
+.activity-text__primary   { font-size: 13.5px; color: var(--c-text-1); font-weight: 500; margin: 0 0 2px; }
 .activity-text__secondary { font-size: 12px; color: var(--c-text-3); margin: 0; }
 .act-badge {
   font-size: 10px; font-weight: 500;
@@ -177,10 +183,10 @@
   border-radius: 99px;
   float: right;
 }
-.badge-blue  { background: var(--c-primary-lt); color: var(--c-primary); }
-.badge-red   { background: #FFF5F5; color: var(--c-danger);  }
-.badge-green { background: #F0FFF4; color: var(--c-success); }
-.badge-amber { background: #FFFBEB; color: #D97706;          }
+.badge-blue  { background: var(--c-primary-lt); color: var(--c-primary);  }
+.badge-red   { background: var(--c-danger-lt);  color: var(--c-danger);   }
+.badge-green { background: var(--c-success-lt); color: var(--c-success);  }
+.badge-amber { background: var(--c-warning-lt); color: var(--c-warning);  }
 
 /* ── Deadlines ── */
 .deadline-item { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
@@ -203,17 +209,17 @@
 }
 .board-chip:last-child { margin-bottom: 0; }
 .board-chip:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-.bc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.bc-name { font-size: 13px; color: var(--c-text-1); font-weight: 500; flex: 1; }
+.bc-dot   { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.bc-name  { font-size: 13px; color: var(--c-text-1); font-weight: 500; flex: 1; }
 .bc-count { font-size: 11px; color: var(--c-text-3); }
 
 /* ── Donut ── */
 .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.donut-pct { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--c-text-1); line-height: 1; }
+.donut-pct  { font-family: var(--font-display); font-size: 28px; font-weight: 700; color: var(--c-text-1); line-height: 1; }
 .donut-legend { width: 100%; margin-top: 12px; }
 .dl-leg { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
 .dl-leg:last-child { margin-bottom: 0; }
-.dl-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dl-dot      { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .dl-leg-text { font-size: 12px; color: var(--c-text-2); flex: 1; }
 .dl-leg-val  { font-size: 12px; color: var(--c-text-1); font-weight: 600; }
 
@@ -223,16 +229,19 @@
   bottom: 28px; right: 28px;
   width: 56px; height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--c-primary), #7C3AED);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-h));
   color: #fff;
   border: none;
   cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 4px 20px rgba(59,91,219,0.4);
+  box-shadow: 0 4px 20px rgba(var(--c-primary-rgb), 0.4);
   transition: transform var(--transition), box-shadow var(--transition);
   z-index: 900;
 }
-.chatbot-fab:hover { transform: scale(1.08) translateY(-2px); box-shadow: 0 8px 28px rgba(59,91,219,0.5); }
+.chatbot-fab:hover {
+  transform: scale(1.08) translateY(-2px);
+  box-shadow: 0 8px 28px rgba(var(--c-primary-rgb), 0.5);
+}
 .chatbot-window {
   position: fixed;
   bottom: 96px; right: 28px;

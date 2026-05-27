@@ -7,7 +7,7 @@ import App from './App';
 import './styles.css';
 import './styles/variables.css';
 
-document.documentElement.setAttribute('data-theme', 'purple');
+document.documentElement.setAttribute('data-theme', 'teal');
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

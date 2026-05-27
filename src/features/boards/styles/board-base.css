@@ -5,6 +5,7 @@
 
 @import '../../../styles/variables.css';
 
+.board-page { background: transparent; }
 .board-page * { box-sizing: border-box; font-family: var(--font-body); }
 
 /* ══════════════════════════════════════════════════════════════

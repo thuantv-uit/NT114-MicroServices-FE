@@ -77,6 +77,7 @@ function App() {
           minHeight:  showChrome ? 'calc(100vh - var(--navbar-h, 60px))' : '100vh',
           boxSizing:  'border-box',
           overflowX:  'hidden',
+          background: 'var(--c-primary-lt)',
         }}
       >
         <Routes>

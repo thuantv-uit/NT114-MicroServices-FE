@@ -13,7 +13,7 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import BoardCreate from './BoardCreate';
-import '../styles/board.css';
+import '../styles/board-list.css';
 import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 
 const BOARDS_PER_PAGE = 8;
@@ -23,12 +23,12 @@ const FAKE_META = {
   columns: [3, 4, 5, 2, 3, 4],
   tasks:   [12, 22, 31, 9, 17, 6],
   members: [
-    [{ initials: 'AJ', color: '#3B5BDB' }, { initials: 'ST', color: '#7C3AED' }, { initials: 'MK', color: '#38A169' }],
-    [{ initials: 'AJ', color: '#3B5BDB' }, { initials: 'LN', color: '#D97706' }],
-    [{ initials: 'MK', color: '#38A169' }, { initials: 'AJ', color: '#3B5BDB' }, { initials: 'PT', color: '#E53E3E' }],
-    [{ initials: 'LN', color: '#D97706' }, { initials: 'AJ', color: '#3B5BDB' }],
-    [{ initials: 'PT', color: '#E53E3E' }, { initials: 'MK', color: '#38A169' }],
-    [{ initials: 'AJ', color: '#3B5BDB' }],
+    [{ initials: 'AJ', color: 'var(--c-primary)'   }, { initials: 'ST', color: 'var(--c-primary-h)'  }, { initials: 'MK', color: 'var(--c-success)'    }],
+    [{ initials: 'AJ', color: 'var(--c-primary)'   }, { initials: 'LN', color: 'var(--c-warning)'    }],
+    [{ initials: 'MK', color: 'var(--c-success)'    }, { initials: 'AJ', color: 'var(--c-primary)'   }, { initials: 'PT', color: 'var(--c-danger)'     }],
+    [{ initials: 'LN', color: 'var(--c-warning)'    }, { initials: 'AJ', color: 'var(--c-primary)'   }],
+    [{ initials: 'PT', color: 'var(--c-danger)'     }, { initials: 'MK', color: 'var(--c-success)'    }],
+    [{ initials: 'AJ', color: 'var(--c-primary)'   }],
   ],
 };
 
@@ -121,7 +121,7 @@ const BoardList = ({ token }) => {
       : 'none',
     backgroundColor: isImageLatest(board)
       ? 'transparent'
-      : board.backgroundColor || '#3B5BDB',
+      : board.backgroundColor || 'var(--c-primary)',
   });
 
   const renderCard = (board, index) => {
@@ -243,7 +243,7 @@ const BoardList = ({ token }) => {
           {pinned.length > 0 && (
             <>
               <p className="board-section-label">
-                <StarIcon style={{ fontSize: 14, verticalAlign: -2, marginRight: 5, color: '#D97706' }} />
+                <StarIcon style={{ fontSize: 14, verticalAlign: -2, marginRight: 5, color: 'var(--c-warning)' }} />
                 Starred
               </p>
               <div className="board-grid" style={{ marginBottom: 28 }}>
