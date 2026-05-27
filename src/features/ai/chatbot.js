@@ -8,6 +8,7 @@ import { createColumn } from '../columns/services/columnService';
 import { invitationInstance } from '../../services/axiosConfig';
 import { handleApiCall } from '../../utils/apiHelper';
 import { showToast } from '../../utils/toastUtils';
+import { ThunioSpinner } from '../../Logo/components/ThunioSpinner';
 import './chatbot.css';
 
 // ── Suggestions ────────────────────────────────────────────────
@@ -417,7 +418,11 @@ const Chatbot = ({ onClose }) => {
         {/* ── Connection banner ── */}
         {mode && healthStatus !== 'online' && (
           <div className={`health-banner ${healthStatus === 'checking' ? 'health-banner--checking' : 'health-banner--offline'}`}>
-            {healthStatus === 'checking' ? '🔄 Checking connection…' : '🔴 Service unreachable. Try switching mode again.'}
+            {healthStatus === 'checking' 
+            ? <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <ThunioSpinner size="sm" /> Checking connection…
+              </span>
+            : '🔴 Service unreachable. Try switching mode again.'}
           </div>
         )}
 
@@ -441,7 +446,8 @@ const Chatbot = ({ onClose }) => {
 
           {isTyping && (
             <div className="typing-indicator">
-              <span className="typing-dot" /><span className="typing-dot" /><span className="typing-dot" />
+              <ThunioSpinner size="sm" />
+              <span style={{ fontSize: 12, color: 'var(--c-text-3)' }}>TimelineBot is thinking…</span>
             </div>
           )}
         </div>
