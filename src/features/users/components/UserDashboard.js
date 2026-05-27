@@ -9,7 +9,7 @@ import {
 } from '@mui/icons-material';
 import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 import Chatbot from '../../ai/chatbot';
-import '../../../styles/dashboard.css';
+import '../styles/dashboard.css';
 
 const UserDashboard = () => {
   const { token } = useAuth();

@@ -11,7 +11,7 @@ import LogoutIcon        from '@mui/icons-material/Logout';
 import { showToast } from '../utils/toastUtils';
 import { getPendingBoardInvitations, getPendingColumnInvitations } from '../features/invitations/components/Invitation';
 import { fetchUserData, changeAvatar } from '../features/users/services/userService';
-import '../styles/navbar.css';
+import './styles/navbar.css';
 import { ReactComponent as ThunioLogo } from '../assets/Logo/Thunio.svg';
 
 

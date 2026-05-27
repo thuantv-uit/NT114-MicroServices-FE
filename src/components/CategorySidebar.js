@@ -13,7 +13,7 @@ import GroupIcon         from '@mui/icons-material/Group';
 import PersonAddIcon     from '@mui/icons-material/PersonAdd';
 import SettingsIcon      from '@mui/icons-material/Settings';
 import { showToast } from '../utils/toastUtils';
-import '../styles/sidebar.css';
+import './styles/sidebar.css';
 
 const recentBoards = [
   { name: 'Q3 Roadmap',     color: '#3B5BDB' },

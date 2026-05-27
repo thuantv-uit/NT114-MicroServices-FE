@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Box, IconButton } from '@mui/material';
 import { Close as CloseIcon, Remove as MinimizeIcon, OpenInFull as ExpandIcon } from '@mui/icons-material';
-import { askQuestion, parseActions, checkHealth } from './api';
+import { askQuestion, parseActions, checkHealth } from './services/api';
 import { createBoard, fetchLatestBoardId } from '../boards/services/boardService';
 import { createColumn } from '../columns/services/columnService';
 import { invitationInstance } from '../../services/axiosConfig';
 import { handleApiCall } from '../../utils/apiHelper';
 import { showToast } from '../../utils/toastUtils';
 import { ThunioSpinner } from '../../Logo/components/ThunioSpinner';
-import './chatbot.css';
+import './styles/chatbot.css';
 
 // ── Suggestions ────────────────────────────────────────────────
 const SUGGESTIONS = {

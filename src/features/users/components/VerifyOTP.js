@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { verifyOTP, resendOTP } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
-import '../../../styles/auth-share.css';
+import '../styles/auth-share.css';
 
 const RESEND_COOLDOWN = 60;
 

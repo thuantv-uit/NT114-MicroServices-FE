@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { forgotPassword } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
-import '../../../styles/auth-share.css';
+import '../styles/auth-share.css';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();

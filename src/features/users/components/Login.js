@@ -5,7 +5,7 @@ import { showToast } from '../../../utils/toastUtils';
 import { validateUserForm } from '../../../utils/validateUtils';
 import { ThunioLogo } from '../../../Logo/components/ThunioLogo';
 import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
-import '../../../styles/Login.css';
+import '../styles/Login.css';
 
 const FEATURES = [
   {
