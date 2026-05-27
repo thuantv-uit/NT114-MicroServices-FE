@@ -7,6 +7,7 @@ import {
   ViewKanban, CheckCircle, AccessAlarm, Group,
   TaskAlt, PersonAdd, Edit, SpaceDashboard, PhotoCamera, Close,
 } from '@mui/icons-material';
+import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 import Chatbot from '../../ai/chatbot';
 import '../../../styles/dashboard.css';
 
@@ -88,11 +89,7 @@ const UserDashboard = () => {
   return (
     <div className="dashboard-page">
 
-      {loading && (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-          <CircularProgress size={44} style={{ color: 'var(--c-primary)' }} />
-        </div>
-      )}
+      {loading && <PageSpinner text="Loading dashboard…" />}
 
       {!loading && (
         <>

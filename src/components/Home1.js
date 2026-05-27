@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
+import { ThunioLogo } from '../Logo/components/ThunioLogo';
 import './styles/home.css';
 
 const FEATURES = [
@@ -146,8 +147,7 @@ const Home1 = () => (
     {/* ── FOOTER ── */}
     <footer className="hp-footer">
       <div className="hp-footer__brand">
-        <div className="hdr-brand__mark hdr-brand__mark--sm">T</div>
-        <span className="hp-footer__name">Thunio</span>
+        <ThunioLogo size="sm" />
         <span className="hp-footer__note">· NT114 — Web Application for Creating Timelines</span>
       </div>
       <nav className="hp-footer__links">

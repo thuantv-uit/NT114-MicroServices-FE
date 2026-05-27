@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { ThunioLogo } from '../Logo/components/ThunioLogo';
 import './styles/home.css';
 
 const NAV_MENUS = [
@@ -89,8 +90,7 @@ const Header = () => (
     <div className="hdr-inner">
       {/* Brand */}
       <Link to="/" className="hdr-brand">
-        <div className="hdr-brand__mark">T</div>
-        <span className="hdr-brand__name">Thunio</span>
+        <ThunioLogo size="lg" />
       </Link>
 
       {/* Nav */}

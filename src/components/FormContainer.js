@@ -1,5 +1,6 @@
 import React from 'react';
 import { CircularProgress } from '@mui/material';
+import { ThunioSpinner } from '../Logo/components/ThunioSpinner';
 import '../features/boards/styles/board.css';
 
 /**
@@ -10,7 +11,7 @@ const FormContainer = ({ title, children, loading }) => (
     <h2 className="dialog-title">{title}</h2>
     {loading && (
       <div className="form-container__loading">
-        <CircularProgress size={28} style={{ color: 'var(--c-primary)' }} />
+        <ThunioSpinner size="md" />
       </div>
     )}
     {children}

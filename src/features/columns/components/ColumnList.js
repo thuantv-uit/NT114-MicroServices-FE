@@ -4,6 +4,7 @@ import { fetchColumns, updateBoardColumnOrder, updateColumn } from '../services/
 import { fetchBoard } from '../../boards/services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import { CircularProgress, Dialog } from '@mui/material';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
 import Column      from './Column';
 import CreateCard  from '../../cards/components/CreateCard';
 import CreateColumn from './CreateColumn';
@@ -225,7 +226,7 @@ const ColumnList = ({ boardId, token, ColumnContainer, CardContainer, openCreate
     >
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-          <CircularProgress size={36} style={{ color: '#fff' }} />
+          <ThunioSpinner size="md" />
         </div>
       ) : (
         <SortableContext items={orderedColumnIds} strategy={horizontalListSortingStrategy}>

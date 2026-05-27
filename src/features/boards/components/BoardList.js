@@ -14,6 +14,7 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import BoardCreate from './BoardCreate';
 import '../styles/board.css';
+import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 
 const BOARDS_PER_PAGE = 8;
 
@@ -235,9 +236,7 @@ const BoardList = ({ token }) => {
 
       {/* ── Loading ── */}
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <CircularProgress size={48} style={{ color: 'var(--c-primary)' }} />
-        </div>
+        <PageSpinner text="Loading boards…" />
       ) : (
         <>
           {/* ── Pinned section ── */}

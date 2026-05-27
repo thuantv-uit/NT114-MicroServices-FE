@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { loginUser } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
 import { validateUserForm } from '../../../utils/validateUtils';
+import { ThunioLogo } from '../../../Logo/components/ThunioLogo';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
 import '../../../styles/Login.css';
 
 const FEATURES = [
@@ -80,8 +82,8 @@ const Login = ({ setToken }) => {
         <div className="login-panel">
           <div className="login-panel__top">
             <div className="login-logo">
-              <div className="login-logo__mark">🗂️</div>
-              <span className="login-logo__name">Thunio</span>
+              <ThunioLogo size="md" />
+              {/* <span className="login-logo__name">Thunio</span> */}
             </div>
 
             <h1 className="login-panel__tagline">
@@ -158,7 +160,16 @@ const Login = ({ setToken }) => {
             </div>
 
             {/* Submit — centred */}
-            <button type="submit" className="login-submit" disabled={loading}>
+            {/* <button type="submit" className="login-submit" disabled={loading}>
+              {loading ? 'Signing in…' : 'Sign in'}
+            </button> */}
+            <button
+              type="submit"
+              className="login-submit"
+              disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            >
+              {loading && <ThunioSpinner size="sm" color="white" />}
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
           </form>

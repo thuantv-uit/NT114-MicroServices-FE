@@ -18,6 +18,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { columnInstance } from '../../../services/axiosConfig';
 import { cardInstance } from '../../../services/axiosConfig';
+import { PageSpinner, ThunioSpinner, LoadingButton } from '../../../Logo/components/ThunioSpinner';
 import '../styles/board.css';
 import '../styles/template.css';
 
@@ -253,9 +254,7 @@ const TemplatePage = ({ token }) => {
 
       {/* ── Content ── */}
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <CircularProgress size={48} style={{ color: 'var(--c-primary)' }} />
-        </div>
+        <PageSpinner text="Loading templates…" />
       ) : filtered.length > 0 ? (
         <>
           <p className="board-section-label" style={{ marginBottom: 16 }}>
@@ -318,9 +317,7 @@ const TemplatePage = ({ token }) => {
 
             <DialogContent sx={{ p: 0, background: 'var(--c-bg)' }}>
               {previewLoading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: '48px 0' }}>
-                  <CircularProgress size={36} style={{ color: 'var(--c-primary)' }} />
-                </div>
+                <PageSpinner text="Loading preview…" />
               ) : (
                 <div className="tpl-preview-board">
                   {previewColumns.map(col => (
@@ -423,7 +420,7 @@ const TemplatePage = ({ token }) => {
             disabled={cloning || !cloneTitle.trim()}
           >
             {cloning
-              ? <><CircularProgress size={14} style={{ color: '#fff', marginRight: 6 }} /> Creating…</>
+              ? <><PageSpinner text="Creating board…" /></>
               : <><AddIcon style={{ fontSize: 16 }} /> Create Board</>
             }
           </button>

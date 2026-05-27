@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { registerUser } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
 import { validateUserForm } from '../../../utils/validateUtils';
+import { ThunioLogo } from '../../../Logo/components/ThunioLogo';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
 import '../../../styles/Register.css';
 
 const FEATURES = [
@@ -87,8 +89,8 @@ const Register = () => {
         <div className="reg-panel">
           <div className="reg-panel__top">
             <div className="reg-logo">
-              <div className="reg-logo__mark">🗂️</div>
-              <span className="reg-logo__name">Thunio</span>
+              <ThunioLogo size="md" />
+              {/* <span className="reg-logo__name">Thunio</span> */}
             </div>
 
             <h1 className="reg-panel__tagline">
@@ -198,7 +200,13 @@ const Register = () => {
             </div>
 
             {/* Submit */}
-            <button type="submit" className="reg-submit" disabled={loading}>
+            {/* <button type="submit" className="reg-submit" disabled={loading}>
+              {loading ? 'Creating account…' : 'Create account'}
+            </button> */}
+            <button type="submit" className="reg-submit" disabled={loading}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+            >
+              {loading && <ThunioSpinner size="sm" color="white" />}
               {loading ? 'Creating account…' : 'Create account'}
             </button>
           </form>

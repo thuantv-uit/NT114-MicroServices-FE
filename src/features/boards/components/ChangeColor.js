@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { fetchBoard, updateBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
 import { CircularProgress } from '@mui/material';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import '../styles/board.css';
 
@@ -62,7 +63,7 @@ const ChangeBackground = ({ token, onClose }) => {
         onClick={() => fileInputRef.current?.click()}
       >
         {loading
-          ? <CircularProgress size={28} />
+          ? <ThunioSpinner size="md" />
           : <>
               <div className="bg-dialog__upload-icon">
                 <CloudUploadIcon style={{ fontSize: 36, opacity: 0.45 }} />

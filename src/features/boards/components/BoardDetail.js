@@ -24,6 +24,7 @@ import TimelineIcon        from '@mui/icons-material/Timeline';
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
 import BarChartIcon        from '@mui/icons-material/BarChart';
 import '../styles/board-detail.css';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
 
 const ColumnContainer = styled(Box)(({ theme }) => ({
   minWidth: 272, maxWidth: 272,
@@ -199,9 +200,19 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
             </div>
           </>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'rgba(255,255,255,0.8)' }}>
-            <CircularProgress size={20} style={{ color: '#fff' }} />
-            <span>Loading board…</span>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            width: '100%',
+            padding: '40px 0',
+            color: 'rgba(255,255,255,0.85)',
+            fontSize: 14,
+            fontFamily: 'var(--font-body)',
+          }}>
+            <ThunioSpinner size="md" />
+            {/* <span>Loading board details…</span> */}
           </div>
         )}
       </div>
@@ -229,7 +240,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         <>
           {loading && (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
-              <CircularProgress size={36} style={{ color: '#fff' }} />
+              <ThunioSpinner size="lg" color="white" />
             </div>
           )}
           <div className="columns-wrapper" ref={columnsWrapperRef}>
