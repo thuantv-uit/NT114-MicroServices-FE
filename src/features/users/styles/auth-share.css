@@ -13,7 +13,7 @@
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
-  background: #EEF2FF;
+  background: var(--c-primary-lt);
   font-family: var(--font-body);
   box-sizing: border-box;
 }
@@ -32,24 +32,8 @@
 /* ── Logo ── */
 .as-logo {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 10px;
   margin-bottom: 28px;
-}
-.as-logo__mark {
-  width: 36px; height: 36px;
-  border-radius: var(--radius-sm);
-  background: var(--c-primary-lt);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-}
-.as-logo__name {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--c-primary);
-  letter-spacing: -0.3px;
 }
 
 /* ── Icon header (lock, mail, etc.) ── */
@@ -112,7 +96,7 @@
 .as-field__input::placeholder { color: var(--c-text-3); }
 .as-field__input:focus {
   border-color: var(--c-primary);
-  box-shadow: 0 0 0 3px rgba(76,110,245,0.12);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.12);
   background: #fff;
 }
 
@@ -159,7 +143,7 @@
 }
 .as-otp-box:focus {
   border-color: var(--c-primary);
-  box-shadow: 0 0 0 3px rgba(76,110,245,0.12);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.12);
   background: #fff;
 }
 .as-otp-box--filled {

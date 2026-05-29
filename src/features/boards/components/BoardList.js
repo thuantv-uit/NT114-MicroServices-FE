@@ -16,7 +16,7 @@ import BoardCreate from './BoardCreate';
 import '../styles/board-list.css';
 import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 
-const BOARDS_PER_PAGE = 8;
+const BOARDS_PER_PAGE = 11;
 
 // ── Fake metadata (replace with real API data later) ──────────────
 const FAKE_META = {

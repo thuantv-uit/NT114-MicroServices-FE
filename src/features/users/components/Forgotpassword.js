@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { forgotPassword } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
+import { ThunioLogo } from '../../../Logo/components/ThunioLogo';
 import '../styles/auth-share.css';
 
 const ForgotPassword = () => {
@@ -29,8 +30,7 @@ const ForgotPassword = () => {
       <div className="as-card">
 
         <div className="as-logo">
-          <div className="as-logo__mark">🗂️</div>
-          <span className="as-logo__name">Thunio</span>
+          <ThunioLogo size="md" />
         </div>
 
         <div className="as-icon-wrap">🔑</div>

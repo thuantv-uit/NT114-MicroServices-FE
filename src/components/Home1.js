@@ -4,12 +4,12 @@ import { ThunioLogo } from '../Logo/components/ThunioLogo';
 import './styles/home.css';
 
 const FEATURES = [
-  { icon: '📅', color: '#EEF2FF', iconColor: '#4C6EF5', title: 'Visual timelines',    desc: 'Drag-and-drop milestones on a Gantt-style timeline. See the big picture at a glance.' },
-  { icon: '👥', color: '#F0FFF4', iconColor: '#38A169', title: 'Team collaboration',  desc: 'Invite teammates, assign tasks and leave comments — all in real time.' },
-  { icon: '🔔', color: '#FFFBEB', iconColor: '#D97706', title: 'Smart reminders',     desc: 'Automated alerts keep your team on track without micromanaging.' },
-  { icon: '📊', color: '#FFF5F5', iconColor: '#E53E3E', title: 'Progress reports',    desc: 'One-click reports for stakeholders. Export as PDF or share a live link.' },
-  { icon: '🔗', color: '#EEF2FF', iconColor: '#7C3AED', title: 'Easy sharing',        desc: 'Publish timelines as a public link or embed them anywhere.' },
-  { icon: '🔒', color: '#E1F5EE', iconColor: '#0F6E56', title: 'Secure by default',   desc: 'End-to-end encryption, role-based access and SSO for every team.' },
+  { icon: '📅', color: 'var(--c-primary-lt)',  iconColor: 'var(--c-primary)',  title: 'Visual timelines',    desc: 'Drag-and-drop milestones on a Gantt-style timeline. See the big picture at a glance.' },
+  { icon: '👥', color: 'var(--c-success-lt)',  iconColor: 'var(--c-success)',  title: 'Team collaboration',  desc: 'Invite teammates, assign tasks and leave comments — all in real time.' },
+  { icon: '🔔', color: 'var(--c-warning-lt)',  iconColor: 'var(--c-warning)',  title: 'Smart reminders',     desc: 'Automated alerts keep your team on track without micromanaging.' },
+  { icon: '📊', color: 'var(--c-danger-lt)',   iconColor: 'var(--c-danger)',   title: 'Progress reports',    desc: 'One-click reports for stakeholders. Export as PDF or share a live link.' },
+  { icon: '🔗', color: 'var(--c-primary-lt)',  iconColor: 'var(--c-primary)',  title: 'Easy sharing',        desc: 'Publish timelines as a public link or embed them anywhere.' },
+  { icon: '🔒', color: 'var(--c-success-lt)',  iconColor: 'var(--c-success)',  title: 'Secure by default',   desc: 'End-to-end encryption, role-based access and SSO for every team.' },
 ];
 
 const STEPS = [
@@ -20,11 +20,11 @@ const STEPS = [
 ];
 
 const TIMELINE_ROWS = [
-  { label: 'API Refactor', pct: 85, color: '#4C6EF5' },
-  { label: 'UI Redesign',  pct: 60, color: '#7C3AED' },
-  { label: 'User Testing', pct: 40, color: '#38A169' },
-  { label: 'Launch Prep',  pct: 20, color: '#E53E3E' },
-  { label: 'Docs',         pct: 72, color: '#D97706' },
+  { label: 'API Refactor', pct: 85, color: 'var(--c-primary)' },
+  { label: 'UI Redesign',  pct: 60, color: 'var(--c-primary-h)' },
+  { label: 'User Testing', pct: 40, color: 'var(--c-success)' },
+  { label: 'Launch Prep',  pct: 20, color: 'var(--c-danger)' },
+  { label: 'Docs',         pct: 72, color: 'var(--c-warning)' },
 ];
 
 const Home1 = () => (

@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: center;
   padding: 32px 24px;
-  background: #EEF2FF;
+  background: var(--c-primary-lt);
   font-family: var(--font-body);
   box-sizing: border-box;
 }
@@ -37,7 +37,7 @@
    ════════════════════════════════════ */
 .reg-panel {
   flex: 1;
-  background: #4C6EF5;
+  background: var(--c-primary);
   padding: 40px 36px 28px;
   display: flex;
   flex-direction: column;

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { resetPassword } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
+import { ThunioLogo } from '../../../Logo/components/ThunioLogo';
 import '../styles/auth-share.css';
 
 const ResetPassword = () => {
@@ -45,8 +46,7 @@ const ResetPassword = () => {
       <div className="as-card">
 
         <div className="as-logo">
-          <div className="as-logo__mark">🗂️</div>
-          <span className="as-logo__name">Thunio</span>
+          <ThunioLogo size="md" />
         </div>
 
         <div className="as-icon-wrap">🔒</div>

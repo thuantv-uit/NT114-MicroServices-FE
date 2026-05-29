@@ -7,23 +7,23 @@
 
 /* ── Tokens — scoped vào .hp, không leak ra global ── */
 .hp {
-  --hc-bg:           #F7F8FA;
-  --hc-surface:      #FFFFFF;
-  --hc-border:       #E4E7ED;
-  --hc-text-1:       #1A202C;
-  --hc-text-2:       #4A5568;
-  --hc-text-3:       #9AA5B4;
-  --hc-primary:      #4C6EF5;
-  --hc-primary-h:    #3B5BDB;
-  --hc-primary-lt:   #EEF2FF;
-  --hc-radius-sm:    8px;
-  --hc-radius-md:    12px;
-  --hc-radius-lg:    16px;
-  --hc-radius-xl:    20px;
-  --hc-shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
-  --hc-shadow-md:    0 6px 24px rgba(0,0,0,0.09);
-  --hc-font-display: 'Outfit', sans-serif;
-  --hc-font-body:    'DM Sans', sans-serif;
+  --hc-bg:           var(--c-bg);
+  --hc-surface:      var(--c-surface);
+  --hc-border:       var(--c-border);
+  --hc-text-1:       var(--c-text-1);
+  --hc-text-2:       var(--c-text-2);
+  --hc-text-3:       var(--c-text-3);
+  --hc-primary:      var(--c-primary);
+  --hc-primary-h:    var(--c-primary-h);
+  --hc-primary-lt:   var(--c-primary-lt);
+  --hc-radius-sm:    var(--radius-sm);
+  --hc-radius-md:    var(--radius-md);
+  --hc-radius-lg:    var(--radius-lg);
+  --hc-radius-xl:    var(--radius-xl);
+  --hc-shadow-sm:    var(--shadow-sm);
+  --hc-shadow-md:    var(--shadow-md);
+  --hc-font-display: var(--font-display);
+  --hc-font-body:    var(--font-body);
 
   font-family: var(--hc-font-body);
   background: var(--hc-bg);
@@ -210,7 +210,7 @@
   padding: 6px 16px;
   border-radius: 99px;
   margin-bottom: 28px;
-  border: 1px solid #C5D0FF;
+  border: 1px solid rgba(var(--c-primary-rgb), 0.35);
 }
 .hp .hp-hero__badge-dot {
   width: 7px; height: 7px;
@@ -405,7 +405,7 @@
   display: flex; align-items: center; justify-content: center;
   margin: 0 auto 16px;
   border: 3px solid var(--hc-surface);
-  box-shadow: 0 0 0 1.5px #C5D0FF;
+  box-shadow: 0 0 0 1.5px rgba(var(--c-primary-rgb), 0.35);
   position: relative;
   z-index: 1;
 }

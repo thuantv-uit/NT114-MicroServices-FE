@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { verifyForgotPasswordOTP, resendForgotPasswordOTP } from '../services/userService';
 import { showToast } from '../../../utils/toastUtils';
+import { ThunioLogo } from '../../../Logo/components/ThunioLogo';
 import '../styles/auth-share.css';
 
 const RESEND_COOLDOWN = 60;
@@ -84,8 +85,7 @@ const VerifyForgotPassword = () => {
       <div className="as-card">
 
         <div className="as-logo">
-          <div className="as-logo__mark">🗂️</div>
-          <span className="as-logo__name">Thunio</span>
+          <ThunioLogo size="md" />
         </div>
 
         <div className="as-icon-wrap">✉️</div>
