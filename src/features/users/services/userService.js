@@ -133,3 +133,15 @@ export const getUserById = async (userId) => {
     'Fetch user by ID'
   );
 };
+
+/**
+ * Delete user account
+ * @param {string} userId - ID of the user to delete
+ * @returns {Promise<Object>} Deletion result
+ */
+export const deleteUser = async (userId) => {
+  return handleApiCall(
+    () => userInstance.delete(`/${userId}`).then(res => res.data),
+    'Delete user'
+  );
+};

@@ -183,7 +183,7 @@ const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
 
                 {/* Menu */}
                 <div className="navbar-popover__menu">
-                  <button className="navbar-popover__item" onClick={() => { navigate('/dashboard'); setPopoverOpen(false); }}>
+                  <button className="navbar-popover__item" onClick={() => { navigate('/profile'); setPopoverOpen(false); }}>
                     <PersonIcon style={{ fontSize: 17 }} />
                     View Profile
                   </button>

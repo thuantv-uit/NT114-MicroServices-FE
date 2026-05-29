@@ -31,6 +31,7 @@ import Chatbot from './features/ai/chatbot';
 import Calendar from './features/cards/components/Calendar';
 import Summary from './features/cards/components/Summary';
 import TemplatePage from './features/boards/components/TemplatePage';
+import ProfilePage from './features/users/components/Profile';
 import './styles/variables.css';
 
 const AUTH_ROUTES = ['/', '/login', '/register', '/verify-otp', '/forgot-password', '/verify-forgot-password', '/reset-password'];
@@ -93,6 +94,7 @@ function App() {
 
           {/* Private routes */}
           <Route path="/dashboard" element={<PrivateRoute token={token} component={<UserDashboard token={token} />} />} />
+          <Route path="/profile"   element={<PrivateRoute token={token} component={<ProfilePage token={token} />} />} />
 
           <Route path="/boards"    element={<PrivateRoute token={token} component={<BoardList token={token} />} />} />
           <Route path="/boards/:id" element={<PrivateRoute token={token} component={<BoardDetail token={token} setBackgroundColor={setBackgroundColor} />} />} />
