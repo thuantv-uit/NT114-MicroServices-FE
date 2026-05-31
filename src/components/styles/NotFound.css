@@ -1,0 +1,118 @@
+@import '../../styles/variables.css';
+
+/* ═══════════════════════════════════════════════════════════════
+   404 NOT FOUND — standalone stylesheet
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page wrapper ── */
+.nf-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background: var(--c-bg);
+  font-family: var(--font-body);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* ── Logo ── */
+.nf-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 44px;
+  text-decoration: none;
+}
+.nf-logo__mark {
+  width: 30px; height: 30px;
+  background: var(--c-primary);
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 800;
+  color: #fff;
+}
+.nf-logo__name {
+  font-family: var(--font-display);
+  font-size: 17px; font-weight: 800;
+  color: var(--c-text-1);
+  letter-spacing: -0.3px;
+}
+
+/* ── 404 number ── */
+.nf-code {
+  font-family: var(--font-display);
+  font-size: clamp(72px, 14vw, 110px);
+  font-weight: 800;
+  color: var(--c-primary-lt);
+  letter-spacing: -4px;
+  line-height: 1;
+  margin-bottom: 0;
+  user-select: none;
+}
+.nf-code span { color: var(--c-primary); }
+
+/* ── Illustration ── */
+.nf-illus {
+  width: 260px;
+  margin: -12px auto 4px;
+}
+.nf-illus svg { width: 100%; height: auto; }
+
+/* ── Text ── */
+.nf-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  color: var(--c-text-1);
+  letter-spacing: -0.4px;
+  margin-bottom: 10px;
+}
+.nf-sub {
+  font-size: 14px;
+  color: var(--c-text-3);
+  line-height: 1.65;
+  max-width: 340px;
+  margin: 0 auto 32px;
+}
+
+/* ── Buttons ── */
+.nf-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+.nf-btn--pri {
+  background: var(--c-primary);
+  color: #fff;
+  border: none;
+}
+.nf-btn--pri:hover { background: var(--c-primary-h); transform: translateY(-1px); }
+.nf-btn--sec {
+  background: var(--c-surface);
+  color: var(--c-text-2);
+  border: 1.5px solid var(--c-border);
+}
+.nf-btn--sec:hover { border-color: var(--c-primary); color: var(--c-primary); }
+
+/* ── Footer note ── */
+.nf-footer {
+  font-size: 11.5px;
+  color: var(--c-text-3);
+}

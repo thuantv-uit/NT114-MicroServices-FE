@@ -2,17 +2,11 @@ import React, { useState } from 'react';
 import { deleteColumn, updateBoardColumnOrder } from '../services/columnService';
 import { fetchBoard } from '../../boards/services/boardService';
 import { showToast } from '../../../utils/toastUtils';
-import { Box, Button, Typography } from '@mui/material';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import WarningAmberIcon  from '@mui/icons-material/WarningAmber';
+import '../styles/column.css';
+import '../../../features/boards/styles/board.css';
 
-/**
- * Component to delete a column
- * @param {Object} props
- * @param {string} props.token - Authentication token
- * @param {string} props.columnId - Column ID
- * @param {string} props.boardId - Board ID
- * @param {Function} props.onClose - Function to close the dialog
- * @returns {JSX.Element}
- */
 const DeleteColumn = ({ token, columnId, boardId, onClose }) => {
   const [loading, setLoading] = useState(false);
 
@@ -21,8 +15,8 @@ const DeleteColumn = ({ token, columnId, boardId, onClose }) => {
     try {
       await deleteColumn(columnId);
       const board = await fetchBoard(boardId);
-      const newColumnOrderIds = board.columnOrderIds.filter(id => id !== columnId);
-      await updateBoardColumnOrder(boardId, newColumnOrderIds);
+      const newOrder = board.columnOrderIds.filter((id) => id !== columnId);
+      await updateBoardColumnOrder(boardId, newOrder);
       showToast('Column deleted successfully!', 'success');
       onClose();
     } catch (err) {
@@ -33,32 +27,27 @@ const DeleteColumn = ({ token, columnId, boardId, onClose }) => {
   };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h6" gutterBottom>
-        Delete Column
-      </Typography>
-      <Typography sx={{ mb: 3 }}>
-        Are you sure you want to delete this column? This action cannot be undone.
-      </Typography>
-      <Box sx={{ display: 'flex', gap: 2 }}>
-        <Button
-          variant="contained"
-          color="error"
-          onClick={handleDelete}
-          disabled={loading}
-        >
-          Delete
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={onClose}
-          disabled={loading}
-        >
+    <div className="col-dialog">
+      <div className="col-delete-icon">
+        <DeleteOutlineIcon style={{ fontSize: 22 }} />
+      </div>
+      <h2 className="col-dialog__title">Delete Column</h2>
+      <p className="col-delete-body">
+        Are you sure you want to delete this column? All cards inside will be permanently removed.
+      </p>
+      <div className="col-delete-warning">
+        <WarningAmberIcon style={{ fontSize: 15, flexShrink: 0, marginTop: 1 }} />
+        <span>This action <strong>cannot be undone</strong>.</span>
+      </div>
+      <div className="dialog-actions">
+        <button className="btn btn-danger" onClick={handleDelete} disabled={loading}>
+          {loading ? 'Deleting…' : 'Yes, delete column'}
+        </button>
+        <button className="btn btn-ghost" onClick={onClose} disabled={loading}>
           Cancel
-        </Button>
-      </Box>
-    </Box>
+        </button>
+      </div>
+    </div>
   );
 };
 

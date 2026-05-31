@@ -7,129 +7,97 @@ import InviteToBoard from '../../invitations/components/InviteToBoard';
 import UpdateBoard from './UpdateBoard';
 import ChangeBackground from './ChangeColor';
 import DeleteBoard from './DeleteBoard';
-import CreateColumn from '../../columns/components/CreateColumn';
 import {
-  Box,
-  Typography,
-  Paper,
-  CircularProgress,
-  IconButton,
-  styled,
-  Tooltip,
-  Dialog,
-  Divider,
-  Button,
+  CircularProgress, Tooltip, Dialog, styled, Box,
 } from '@mui/material';
-import PaletteIcon from '@mui/icons-material/Palette';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import AddIcon from '@mui/icons-material/Add';
-import SummarizeIcon from '@mui/icons-material/Summarize';
-import ViewKanbanIcon from '@mui/icons-material/ViewKanban';
-import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
-import DescriptionIcon from '@mui/icons-material/Description';
+import PaletteIcon         from '@mui/icons-material/Palette';
+import EditIcon            from '@mui/icons-material/Edit';
+import DeleteIcon          from '@mui/icons-material/Delete';
+import PersonAddIcon       from '@mui/icons-material/PersonAdd';
+import AddIcon             from '@mui/icons-material/Add';
+import MoreHorizIcon       from '@mui/icons-material/MoreHoriz';
+import SummarizeIcon       from '@mui/icons-material/Summarize';
+import ViewKanbanIcon      from '@mui/icons-material/ViewKanban';
+import CalendarTodayIcon   from '@mui/icons-material/CalendarToday';
+import DescriptionIcon     from '@mui/icons-material/Description';
+import TimelineIcon        from '@mui/icons-material/Timeline';
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import BarChartIcon        from '@mui/icons-material/BarChart';
+import '../styles/board-detail.css';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
 
-// Styled components
 const ColumnContainer = styled(Box)(({ theme }) => ({
-  minWidth: 270,
-  maxWidth: 270,
-  backgroundColor: '#EBECF0',
+  minWidth: 272, maxWidth: 272,
+  backgroundColor: 'rgba(235,236,240,0.9)',
+  backdropFilter: 'blur(4px)',
   borderRadius: '12px',
   padding: theme.spacing(1),
-  transition: 'box-shadow 0.2s ease-in-out',
-  '&:hover': {
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
-  },
+  transition: 'box-shadow 0.18s ease',
+  '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.08)' },
 }));
 
 const CardContainer = styled(Box)(({ theme }) => ({
   backgroundColor: '#FFFFFF',
   borderRadius: '8px',
-  padding: theme.spacing(1),
-  marginBottom: theme.spacing(0.5),
-  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
-  transition: 'box-shadow 0.2s ease-in-out',
-  '&:hover': {
-    boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
-  },
+  padding: theme.spacing(1.25),
+  marginBottom: theme.spacing(0.75),
+  boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+  transition: 'box-shadow 0.18s ease, transform 0.18s ease',
+  '&:hover': { boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transform: 'translateY(-1px)' },
 }));
 
-const ColumnsWrapper = styled(Paper)(({ theme }) => ({
-  padding: theme.spacing(1),
-  backgroundColor: 'transparent',
-  borderRadius: '12px',
-  boxShadow: 'none',
-  width: '100%',
-  maxWidth: 'calc(100vw - 32px)',
-  minHeight: 'calc(100vh - 120px)',
-  overflowX: 'auto',
-  display: 'flex',
-  alignItems: 'flex-start',
-}));
+// Fake members — replace with real API data later
+const FAKE_MEMBERS = [
+  { initials: 'AJ', color: '#3B5BDB' },
+  { initials: 'ST', color: '#7C3AED' },
+  { initials: 'MK', color: '#38A169' },
+  { initials: 'LN', color: '#D97706' },
+];
 
-const NavItem = styled(Box)(({ theme, isActive }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  padding: theme.spacing(0.5, 1),
-  borderRadius: '4px',
-  cursor: 'pointer',
-  color: '#172B4D',
-  position: 'relative',
-  '&:hover': {
-    backgroundColor: 'rgba(9, 30, 66, 0.1)',
-  },
-  ...(isActive && {
-    '&:after': {
-      content: '""',
-      position: 'absolute',
-      bottom: '-12px',
-      left: 0,
-      right: 0,
-      height: '2px',
-      backgroundColor: '#00FF00',
-    },
-  }),
-}));
+/* ── Tính độ sáng của màu hex, trả về true nếu nền sáng ── */
+const isLightColor = (hex) => {
+  if (!hex || hex === 'transparent') return false;
+  const clean = hex.replace('#', '');
+  const r = parseInt(clean.slice(0, 2), 16);
+  const g = parseInt(clean.slice(2, 4), 16);
+  const b = parseInt(clean.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.5;
+};
 
-/**
- * Component to display board details with Cloudinary image or color background
- * @param {Object} props
- * @param {string} props.token - Authentication token
- * @param {Function} props.setBackgroundColor - Function to set background color in App.js
- * @returns {JSX.Element}
- */
 const BoardDetail = ({ token, setBackgroundColor }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const [board, setBoard] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [openInviteBoard, setOpenInviteBoard] = useState(false);
-  const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [openBackgroundDialog, setOpenBackgroundDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openCreateColumnDialog, setOpenCreateColumnDialog] = useState(false);
-  const columnsWrapperRef = useRef(null); // Ref để scroll
+  const [board,                   setBoard]                   = useState(null);
+  const [loading,                 setLoading]                 = useState(false);
+  const [openInviteBoard,         setOpenInviteBoard]         = useState(false);
+  const [openUpdateDialog,        setOpenUpdateDialog]        = useState(false);
+  const [openBackgroundDialog,    setOpenBackgroundDialog]    = useState(false);
+  const [openDeleteDialog,        setOpenDeleteDialog]        = useState(false);
+  const [openCreateColumnDialog,  setOpenCreateColumnDialog]  = useState(false);
+  const columnsWrapperRef = useRef(null);
 
-  useEffect(() => {
-    const loadBoard = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchBoard(id);
-        setBoard(data);
-        setBackgroundColor(data.backgroundColor || '#FFFFFF');
-      } catch (err) {
-        showToast(err.message, 'error');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadBoard();
-  }, [id, setBackgroundColor, location?.state?.refresh]);
+  useEffect(() => { loadBoard(); }, [id, location?.state?.refresh]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Handle dialog close and refresh board
+  const loadBoard = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchBoard(id);
+      setBoard(data);
+      setBackgroundColor(data.backgroundColor || '#FFFFFF');
+    } catch (err) {
+      showToast(err.message, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClose = () => {
+    setOpenDeleteDialog(false);
+  };
+
   const handleDialogClose = async () => {
+    const wasCreatingColumn = openCreateColumnDialog;
     setOpenUpdateDialog(false);
     setOpenBackgroundDialog(false);
     setOpenDeleteDialog(false);
@@ -138,211 +106,190 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
       const data = await fetchBoard(id);
       setBoard(data);
       setBackgroundColor(data.backgroundColor || '#FFFFFF');
-      // Scroll đến cuối columnsWrapper khi tạo cột mới
-      if (openCreateColumnDialog) {
+      if (wasCreatingColumn) {
         setTimeout(() => {
-          if (columnsWrapperRef.current) {
-            columnsWrapperRef.current.scrollTo({
-              left: columnsWrapperRef.current.scrollWidth,
-              behavior: 'smooth',
-            });
-          }
+          if (columnsWrapperRef.current)
+            columnsWrapperRef.current.scrollTo({ left: columnsWrapperRef.current.scrollWidth, behavior: 'smooth' });
         }, 0);
       }
-    } catch (err) {
-      showToast(err.message, 'error');
-    }
+    } catch (err) { showToast(err.message, 'error'); }
   };
 
-  // Determine which background to use based on latest update
   const isImageLatest =
     board?.backgroundImageUpdatedAt &&
     board?.backgroundColorUpdatedAt &&
     new Date(board.backgroundImageUpdatedAt) > new Date(board.backgroundColorUpdatedAt);
 
-  // Navigation items - Định nghĩa các item navigation, với path dẫn đến route trong App.js
+  /* ── Tính class light/dark dựa theo màu nền hiện tại ── */
+  const bgColor   = board?.backgroundColor || '#3B5BDB';
+  const lightBg   = !isImageLatest && isLightColor(bgColor);
+
   const navItems = [
-    { name: 'Summary', icon: <SummarizeIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/summary` },
-    { name: 'Board', icon: <ViewKanbanIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}` },
-    { name: 'Calendar', icon: <CalendarTodayIcon sx={{ mr: 0.5 }} />, path: `/boards/${id}/calendar` }
+    { name: 'Board',     icon: <ViewKanbanIcon      style={{ fontSize: 16 }} />, path: `/boards/${id}`           },
+    { name: 'Summary',   icon: <SummarizeIcon       style={{ fontSize: 16 }} />, path: `/boards/${id}/summary`   },
+    { name: 'Timeline',  icon: <TimelineIcon        style={{ fontSize: 16 }} />, path: `/boards/${id}/timeline`  },
+    { name: 'Calendar',  icon: <CalendarTodayIcon   style={{ fontSize: 16 }} />, path: `/boards/${id}/calendar`  },
+    { name: 'Analytics', icon: <BarChartIcon        style={{ fontSize: 16 }} />, path: `/boards/${id}/analytics` },
+    { name: 'Files',     icon: <InsertDriveFileIcon style={{ fontSize: 16 }} />, path: `/boards/${id}/files`     },
   ];
 
+  const pageStyle = {
+    backgroundColor: isImageLatest ? 'transparent' : bgColor,
+    backgroundImage: isImageLatest ? `url(${board?.backgroundImage})` : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    minHeight: 'calc(100vh - var(--navbar-h, 60px))',
+  };
+
   return (
-    <Box
-      sx={{
-        p: 2,
-        backgroundColor: isImageLatest ? 'transparent' : board?.backgroundColor || '#FFFFFF',
-        backgroundImage: isImageLatest ? `url(${board?.backgroundImage})` : 'none',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        minHeight: 'calc(100vh - 64px)',
-        color: '#172B4D',
-      }}
+    <div
+      className={`board-page board-detail-page${lightBg ? ' board--light-bg' : ''}`}
+      style={pageStyle}
     >
-      {/* Header section */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+
+      {/* ── Header ── */}
+      <div className="board-detail-header">
         {board ? (
           <>
-            <Box sx={{ flex: 1 }}>
-              <Typography
-                variant="h5"
-                sx={{
-                  fontWeight: 'bold',
-                  color: '#172B4D',
-                  lineHeight: 1.4,
-                }}
-              >
-                {board.title}
-              </Typography>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <DescriptionIcon sx={{ mr: 1, color: '#5E6C84' }} />
-                <Typography
-                  variant="body2"
-                  sx={{ color: '#5E6C84', lineHeight: 1.4 }}
-                >
-                  {board.description || 'Không có mô tả.'}
-                </Typography>
-              </Box>
-              {/* Navigation items - Khi click, navigate đến path tương ứng trong App.js */}
-              <Box sx={{ display: 'flex', gap: 2, mt: 1, alignItems: 'center' }}>
-                {navItems.map((item) => (
-                  <NavItem
-                    key={item.name}
-                    isActive={location.pathname === item.path}
-                    onClick={() => navigate(item.path)} // Chuyển hướng đến route Summary hoặc Calendar khi click
-                  >
-                    {item.icon}
-                    <Typography variant="body1">{item.name}</Typography>
-                  </NavItem>
+            <div className="board-detail-info">
+
+              {/* Breadcrumb */}
+              <div className="board-breadcrumb">
+                <span className="board-breadcrumb__link" onClick={() => navigate('/boards')}>
+                  Your Boards
+                </span>
+                <span className="board-breadcrumb__sep">/</span>
+                <span className="board-breadcrumb__current">{board.title}</span>
+              </div>
+
+              {/* Title */}
+              <div className="board-title-row">
+                <h1 className="board-detail-title">{board.title}</h1>
+                <span className="board-visibility-badge">
+                  {board.visibility || 'Private'}
+                </span>
+              </div>
+
+              {/* Description */}
+              <div className="board-detail-desc">
+                <DescriptionIcon style={{ fontSize: 14, flexShrink: 0 }} />
+                <span>{board.description || 'No description.'}</span>
+              </div>
+
+              {/* Members */}
+              <div className="board-members-row">
+                {FAKE_MEMBERS.map((m, i) => (
+                  <div key={i} className="board-member-av" style={{ background: m.color }}>
+                    {m.initials}
+                  </div>
                 ))}
-              </Box>
-            </Box>
+                <span className="board-members-count">{FAKE_MEMBERS.length} members</span>
+                <button className="board-invite-btn" onClick={() => setOpenInviteBoard(true)}>
+                  <PersonAddIcon style={{ fontSize: 13 }} />
+                  Invite
+                </button>
+              </div>
+
+            </div>
+
             {/* Action buttons */}
-            <Box sx={{ display: 'flex', gap: 0.5 }}>
-              <Tooltip title="Đổi nền">
-                <IconButton
-                  color="primary"
-                  onClick={() => setOpenBackgroundDialog(true)}
-                  sx={{
-                    bgcolor: 'rgba(0, 0, 0, 0.05)',
-                    '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                    p: 1,
-                  }}
-                >
-                  <PaletteIcon fontSize="medium" />
-                </IconButton>
+            <div className="board-actions">
+              <Tooltip title="Change background" placement="bottom">
+                <button className="board-action-btn" onClick={() => setOpenBackgroundDialog(true)}>
+                  <PaletteIcon style={{ fontSize: 18 }} />
+                </button>
               </Tooltip>
-              <Tooltip title="Cập nhật bảng">
-                <IconButton
-                  color="primary"
-                  onClick={() => setOpenUpdateDialog(true)}
-                  sx={{
-                    bgcolor: 'rgba(0, 0, 0, 0.05)',
-                    '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                    p: 1,
-                  }}
-                >
-                  <EditIcon fontSize="medium" />
-                </IconButton>
+              <Tooltip title="Edit board" placement="bottom">
+                <button className="board-action-btn" onClick={() => setOpenUpdateDialog(true)}>
+                  <EditIcon style={{ fontSize: 18 }} />
+                </button>
               </Tooltip>
-              <Tooltip title="Xóa bảng">
-                <IconButton
-                  color="error"
-                  onClick={() => setOpenDeleteDialog(true)}
-                  sx={{
-                    bgcolor: 'rgba(0, 0, 0, 0.05)',
-                    '&:hover': { bgcolor: 'rgba(235, 90, 90, 0.2)' },
-                    p: 1,
-                  }}
-                >
-                  <DeleteIcon fontSize="medium" />
-                </IconButton>
+              <Tooltip title="More options" placement="bottom">
+                <button className="board-action-btn">
+                  <MoreHorizIcon style={{ fontSize: 18 }} />
+                </button>
               </Tooltip>
-              <Tooltip title="Mời người dùng">
-                <IconButton
-                  color="primary"
-                  onClick={() => setOpenInviteBoard(true)}
-                  sx={{
-                    bgcolor: 'rgba(0, 0, 0, 0.05)',
-                    '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                    p: 1,
-                  }}
-                >
-                  <PersonAddIcon fontSize="medium" />
-                </IconButton>
+              <Tooltip title="Delete board" placement="bottom">
+                <button className="board-action-btn board-action-btn--danger" onClick={() => setOpenDeleteDialog(true)}>
+                  <DeleteIcon style={{ fontSize: 18 }} />
+                </button>
               </Tooltip>
-            </Box>
+            </div>
           </>
         ) : (
-          <Typography variant="h5">Đang tải...</Typography>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 12,
+            width: '100%',
+            padding: '40px 0',
+            color: 'rgba(255,255,255,0.85)',
+            fontSize: 14,
+            fontFamily: 'var(--font-body)',
+          }}>
+            <ThunioSpinner size="md" />
+          </div>
         )}
-      </Box>
+      </div>
 
-      <Divider sx={{ my: 2, borderColor: '#EBECF0' }} />
+      {/* ── Nav tabs ── */}
+      {board && (
+        <nav className="board-nav">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              className={`board-nav-item${location.pathname === item.path ? ' board-nav-item--active' : ''}`}
+              onClick={() => navigate(item.path)}
+            >
+              {item.icon}
+              {item.name}
+            </button>
+          ))}
+        </nav>
+      )}
 
-      {location.pathname === `/boards/${id}` && (
+      <div className="board-detail-divider" />
+
+      {/* ── Columns area ── */}
+      {location.pathname === `/boards/${id}` && board && (
         <>
           {loading && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-              <CircularProgress />
-            </Box>
+            <div style={{ display: 'flex', justifyContent: 'center', padding: '24px 0' }}>
+              <ThunioSpinner size="lg" color="white" />
+            </div>
           )}
-          {board ? (
-            <ColumnsWrapper sx={{ mt: 1 }} ref={columnsWrapperRef}>
-              <Box
-                sx={{
-                  display: 'flex',
-                  gap: 2,
-                  p: 0.5,
-                  mr: 1,
-                  alignItems: 'flex-start',
-                }}
+          <div className="columns-wrapper" ref={columnsWrapperRef}>
+            <div className="columns-row">
+              <ColumnList
+                boardId={id}
+                token={token}
+                openCreateColumnDialog={openCreateColumnDialog}
+                setOpenCreateColumnDialog={setOpenCreateColumnDialog}
+                ColumnContainer={ColumnContainer}
+                CardContainer={CardContainer}
+              />
+              <button
+                className="btn-add-column"
+                onClick={() => setOpenCreateColumnDialog(true)}
               >
-                <ColumnList
-                  boardId={id}
-                  token={token}
-                  ColumnContainer={ColumnContainer}
-                  CardContainer={CardContainer}
-                />
-                {/* Nút tạo cột mới */}
-                <Box sx={{ minWidth: 270, maxWidth: 270 }}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    startIcon={<AddIcon />}
-                    onClick={() => setOpenCreateColumnDialog(true)}
-                    sx={{
-                      width: '100%',
-                      borderRadius: '8px',
-                      textTransform: 'none',
-                      bgcolor: 'rgba(0, 0, 0, 0.05)',
-                      color: '#172B4D',
-                      '&:hover': { bgcolor: 'rgba(9, 30, 66, 0.2)' },
-                    }}
-                  >
-                    Create Column
-                  </Button>
-                </Box>
-              </Box>
-            </ColumnsWrapper>
-          ) : (
-            <Typography color="error">Không tìm thấy bảng</Typography>
-          )}
+                <AddIcon style={{ fontSize: 18 }} />
+                Add Column
+              </button>
+            </div>
+          </div>
         </>
       )}
 
-      {/* Dialogs */}
-      <Dialog open={openUpdateDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
+      {/* ── Dialogs ── */}
+      <Dialog open={openUpdateDialog}     onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <UpdateBoard token={token} onClose={handleDialogClose} />
       </Dialog>
       <Dialog open={openBackgroundDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
         <ChangeBackground token={token} onClose={handleDialogClose} />
       </Dialog>
-      <Dialog open={openDeleteDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-        <DeleteBoard token={token} onClose={handleDialogClose} />
-      </Dialog>
-      <Dialog open={openCreateColumnDialog} onClose={handleDialogClose} maxWidth="sm" fullWidth>
-        <CreateColumn token={token} onClose={handleDialogClose} />
+      <Dialog open={openDeleteDialog}     onClose={handleDeleteClose} maxWidth="sm" fullWidth>
+        <DeleteBoard token={token} onClose={handleDeleteClose} />
       </Dialog>
       <InviteToBoard
         boardId={id}
@@ -350,7 +297,7 @@ const BoardDetail = ({ token, setBackgroundColor }) => {
         open={openInviteBoard}
         onClose={() => setOpenInviteBoard(false)}
       />
-    </Box>
+    </div>
   );
 };
 

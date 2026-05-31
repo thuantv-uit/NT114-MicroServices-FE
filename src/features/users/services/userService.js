@@ -33,6 +33,59 @@ export const registerUser = async (username, email, password) => {
 };
 
 /**
+ * Verify OTP code
+ * @param {string} email - User email
+ * @param {string} otp - 6-digit OTP code
+ * @returns {Promise<Object>} Verification result
+ */
+export const verifyOTP = async (email, otp) => {
+  return handleApiCall(
+    () => userInstance.post('/verify-otp', { email, otp }).then(res => res.data),
+    'Verify OTP'
+  );
+};
+
+/**
+ * Resend OTP code
+ * @param {string} email - User email
+ * @returns {Promise<Object>} Resend result
+ */
+export const resendOTP = async (email) => {
+  return handleApiCall(
+    () => userInstance.post('/resend-otp', { email }).then(res => res.data),
+    'Resend OTP'
+  );
+};
+
+export const forgotPassword = async (email) => {
+  return handleApiCall(
+    () => userInstance.post('/forgot-password', { email }).then(res => res.data),
+    'Forgot password'
+  );
+};
+ 
+export const verifyForgotPasswordOTP = async (email, otp) => {
+  return handleApiCall(
+    () => userInstance.post('/verify-forgot-password', { email, otp }).then(res => res.data),
+    'Verify forgot password OTP'
+  );
+};
+ 
+export const resendForgotPasswordOTP = async (email) => {
+  return handleApiCall(
+    () => userInstance.post('/forgot-password', { email }).then(res => res.data),
+    'Resend forgot password OTP'
+  );
+};
+ 
+export const resetPassword = async (email, newPassword) => {
+  return handleApiCall(
+    () => userInstance.post('/reset-password', { email, newPassword }).then(res => res.data),
+    'Reset password'
+  );
+};
+
+/**
  * Fetch current user data
  * @returns {Promise<Object>} User data
  */
@@ -78,5 +131,17 @@ export const getUserById = async (userId) => {
   return handleApiCall(
     () => userInstance.get(`/${userId}`).then(res => res.data),
     'Fetch user by ID'
+  );
+};
+
+/**
+ * Delete user account
+ * @param {string} userId - ID of the user to delete
+ * @returns {Promise<Object>} Deletion result
+ */
+export const deleteUser = async (userId) => {
+  return handleApiCall(
+    () => userInstance.delete(`/${userId}`).then(res => res.data),
+    'Delete user'
   );
 };

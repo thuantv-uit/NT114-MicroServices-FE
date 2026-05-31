@@ -1,54 +1,42 @@
 import React from 'react';
-import { Box, Button, Typography } from '@mui/material';
 import { createBoard, fetchLatestBoardId } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import '../styles/board.css';
 
-/**
- * Component to confirm board creation with Yes/No buttons
- * @param {Object} props
- * @param {string} props.title - Board title from chatbot
- * @param {string} props.description - Board description from chatbot
- * @param {Function} props.onClose - Function to close the confirmation dialog
- * @param {Function} props.onBoardCreated - Callback function to send boardId to parent
- * @returns {JSX.Element}
- */
 const ConfirmBoardCreation = ({ title, description, onClose, onBoardCreated }) => {
   const handleConfirm = async () => {
     try {
-      // Tạo board mới
-      await createBoard(title, description, '#FFFFFF'); // Mặc định backgroundColor
+      await createBoard(title, description, '#FFFFFF');
       showToast('Board created successfully!', 'success');
-
       const response = await fetchLatestBoardId();
       const boardId = response?.boardId;
-      if (boardId) {
-        if (onBoardCreated) {
-          onBoardCreated(boardId);
-        }
-      } else {
-      }
-
+      if (boardId && onBoardCreated) onBoardCreated(boardId);
       onClose();
     } catch (err) {
       showToast(err.message, 'error');
-      console.error('Error creating board or fetching board ID:', err);
     }
   };
 
   return (
-    <Box sx={{ padding: 2, marginTop: 2, border: '1px solid #ddd', borderRadius: 2 }}>
-      <Typography variant="h6">Confirm Board Creation</Typography>
-      <Typography variant="body1"><strong>Title:</strong> {title || 'Not provided'}</Typography>
-      <Typography variant="body1"><strong>Description:</strong> {description || 'Not provided'}</Typography>
-      <Box sx={{ marginTop: 2, display: 'flex', gap: 2 }}>
-        <Button variant="contained" color="primary" onClick={handleConfirm}>
-          Yes
-        </Button>
-        <Button variant="outlined" color="secondary" onClick={onClose}>
-          No
-        </Button>
-      </Box>
-    </Box>
+    <div className="board-page confirm-creation">
+      <h3 className="confirm-creation__title">
+        <CheckCircleOutlineIcon style={{ fontSize: 18, marginRight: 6, verticalAlign: 'middle', color: 'var(--c-primary)' }} />
+        Confirm Board Creation
+      </h3>
+      <div className="confirm-creation__row">
+        <span className="confirm-creation__label">Title</span>
+        <span className="confirm-creation__value">{title || '—'}</span>
+      </div>
+      <div className="confirm-creation__row">
+        <span className="confirm-creation__label">Description</span>
+        <span className="confirm-creation__value">{description || '—'}</span>
+      </div>
+      <div className="dialog-actions" style={{ marginTop: 20 }}>
+        <button className="btn btn-primary" onClick={handleConfirm}>Create board</button>
+        <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+      </div>
+    </div>
   );
 };
 

@@ -4,48 +4,26 @@ import { showToast } from '../../../utils/toastUtils';
 import FormContainer from '../../../components/FormContainer';
 import GenericForm from '../../../components/GenericForm';
 import { validateColumnForm } from '../../../utils/validateUtils';
+import '../styles/column.css';
 
-/**
- * Component to edit a column
- * @param {Object} props
- * @param {string} props.token - Authentication token
- * @param {string} props.columnId - Column ID
- * @param {string} props.boardId - Board ID
- * @param {Object} props.initialValues - Initial form values
- * @param {Function} props.onClose - Function to close the dialog
- * @returns {JSX.Element}
- */
 const ColumnEdit = ({ token, columnId, boardId, initialValues, onClose }) => {
-  const [formValues, setFormValues] = useState(initialValues);
-  const [loading, setLoading] = useState(false);
-  const fields = [
-    { name: 'title', label: 'Column Title', required: true, InputProps: { sx: { fontSize: '16px' } } },
-    { name: 'backgroundColor', label: 'Background Color', type: 'color', required: false, InputProps: { sx: { fontSize: '16px' } } },
-  ];
+  const [formValues, setFormValues] = useState(initialValues || { title: '', backgroundColor: '#EBECF0' });
+  const [loading, setLoading]       = useState(false);
 
   useEffect(() => {
-    const loadColumn = async () => {
+    if (initialValues?.title) return;
+    const load = async () => {
       setLoading(true);
       try {
-        const columns = await fetchColumns(boardId);
-        const column = columns.find(c => c._id === columnId);
-        if (column) {
-          setFormValues({ 
-            title: column.title,
-            backgroundColor: column.backgroundColor || '#ffffff'
-          });
-        } else {
-          showToast('Column not found', 'error');
-        }
+        const cols = await fetchColumns(boardId);
+        const col  = cols.find((c) => c._id === columnId);
+        if (col) setFormValues({ title: col.title, backgroundColor: col.backgroundColor || '#EBECF0' });
+        else showToast('Column not found', 'error');
       } catch (err) {
         showToast(err.message, 'error');
-      } finally {
-        setLoading(false);
-      }
+      } finally { setLoading(false); }
     };
-    if (!initialValues.title) {
-      loadColumn();
-    }
+    load();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnId, boardId]);
 
@@ -66,7 +44,10 @@ const ColumnEdit = ({ token, columnId, boardId, initialValues, onClose }) => {
         submitLabel="Update Column"
         cancelPath={null}
         onCancel={onClose}
-        fields={fields}
+        fields={[
+          { name: 'title',           label: 'Column Title',      required: true  },
+          { name: 'backgroundColor', label: 'Background Color',  type: 'color', required: false },
+        ]}
       />
     </FormContainer>
   );

@@ -122,3 +122,39 @@ export const fetchLatestBoardId = async () => {
     'Fetch latest board ID'
   );
 };
+
+/**
+ * Fetch all template boards
+ * @returns {Promise<Array>} List of template boards
+ */
+export const fetchTemplates = async () => {
+  return handleApiCall(
+    () => boardInstance.get('/templates/list').then(res => res.data),
+    'Fetch templates'
+  );
+};
+
+/**
+ * Fetch a single template board by ID
+ * @param {string} templateId - Template board ID
+ * @returns {Promise<Object>} Template board data
+ */
+export const fetchTemplateById = async (templateId) => {
+  return handleApiCall(
+    () => boardInstance.get(`/templates/${templateId}`).then(res => res.data),
+    'Fetch template by ID'
+  );
+};
+
+/**
+ * Clone a board from a template
+ * @param {string} templateId - Template board ID
+ * @param {string} title - New board title (optional)
+ * @returns {Promise<Object>} Newly created board
+ */
+export const cloneBoardFromTemplate = async (templateId, title) => {
+  return handleApiCall(
+    () => boardInstance.post(`/templates/${templateId}/clone`, { title }).then(res => res.data), {timeout: 60000},
+    'Clone board from template'
+  );
+};

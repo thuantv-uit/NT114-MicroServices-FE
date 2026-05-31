@@ -1,98 +1,220 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Box, List, ListItem, ListItemButton, ListItemText, ListItemIcon, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import FolderIcon from '@mui/icons-material/Folder';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import DashboardIcon     from '@mui/icons-material/Dashboard';
+import FolderIcon        from '@mui/icons-material/Folder';
+import LogoutIcon        from '@mui/icons-material/Logout';
+import ExpandMoreIcon    from '@mui/icons-material/ExpandMore';
+import ViewKanbanIcon         from '@mui/icons-material/ViewKanban';
+import AutoAwesomeMosaicIcon  from '@mui/icons-material/AutoAwesomeMosaic';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import BarChartIcon      from '@mui/icons-material/BarChart';
+import GroupIcon         from '@mui/icons-material/Group';
+import PersonAddIcon     from '@mui/icons-material/PersonAdd';
+import SettingsIcon      from '@mui/icons-material/Settings';
 import { showToast } from '../utils/toastUtils';
+import './styles/sidebar.css';
 
-/**
- * Vertical category sidebar component
- * @param {Object} props
- * @param {string} props.token - Authentication token to control visibility
- * @param {Function} props.logout - Logout function
- * @param {boolean} props.isOpen - State indicating if the sidebar is open
- * @param {Function} props.toggleSidebar - Function to toggle the sidebar visibility
- * @returns {JSX.Element}
- */
-const CategorySidebar = ({ token, logout, isOpen, toggleSidebar }) => {
-  const navigate = useNavigate();
-  const [expanded, setExpanded] = useState(false);
+const recentBoards = [
+  { name: 'Q3 Roadmap',     color: '#3B5BDB' },
+  { name: 'UI Redesign',    color: '#7C3AED' },
+  { name: 'Backend Sprint', color: '#38A169' },
+];
+
+const CategorySidebar = ({ token, logout, isOpen, toggleSidebar, user }) => {
+  const navigate  = useNavigate();
+  const location  = useLocation();
+  const [projectOpen, setProjectOpen] = useState(
+    location.pathname.startsWith('/boards') || location.pathname === '/templates'
+  );
+  const [reportsOpen, setReportsOpen] = useState(false);
+
+  if (!token) return null;
 
   const handleLogout = () => {
     if (typeof logout === 'function') {
       logout();
       navigate('/login');
     } else {
-      console.error('Logout is not a function');
       showToast('Unable to logout. Please try again.', 'error');
     }
   };
 
-  const handleChange = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
-  };
+  const isActive = (path) =>
+    path === '/boards'
+      ? location.pathname === '/boards' || location.pathname.startsWith('/boards/')
+      : location.pathname === path;
 
-  // eslint-disable-next-line no-unused-vars
-  const handlePlaceholderClick = (itemName) => {
-    console.log(`${itemName} clicked - implement custom logic here`);
-    // Replace with actual navigation or functionality as needed
-  };
-
-  if (!isOpen) return null;
+  const getInitials = (name = '') =>
+    name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   return (
-    <Box
-      sx={{
-        width: 250,
-        height: 'calc(100vh - 64px)',
-        position: 'fixed',
-        top: '64px',
-        left: 0,
-        backgroundColor: '#FFFFFF',
-        borderRight: '1px solid #E0E0E0',
-        boxShadow: '2px 0 4px rgba(0, 0, 0, 0.1)',
-        zIndex: 1100,
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Close button at the top */}
-      <List sx={{ flexGrow: 1 }}>
-        <ListItem disablePadding>
-          <ListItemButton component={Link} to="/dashboard">
-            <ListItemIcon><DashboardIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Dashboard" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem>
-        {/* Project (Expandable) */}
-        <Accordion expanded={expanded === 'project'} onChange={handleChange('project')} disableGutters>
-          <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ px: 2 }}>
-            <ListItemIcon><FolderIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <Typography sx={{ ml: -2 }}>Project</Typography>
-          </AccordionSummary>
-          <AccordionDetails sx={{ p: 0 }}>
-            <List component="div" disablePadding>
-              <ListItem disablePadding sx={{ pl: 4 }}>
-                <ListItemButton component={Link} to="/boards">
-                  <ListItemText primary="Board" sx={{ color: '#000000' }} />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </AccordionDetails>
-        </Accordion>
-      </List>
-      {/* Logout at the bottom */}
-      <List>
-        <ListItem disablePadding sx={{ borderTop: '1px solid #E0E0E0' }}>
-          <ListItemButton onClick={handleLogout}>
-            <ListItemIcon><LogoutIcon sx={{ color: '#000000' }} /></ListItemIcon>
-            <ListItemText primary="Logout" sx={{ color: '#000000' }} />
-          </ListItemButton>
-        </ListItem>
-      </List>
-    </Box>
+    <>
+      {/* Mobile backdrop */}
+      <div
+        className={`sidebar-overlay${isOpen ? ' sidebar-overlay--visible' : ''}`}
+        onClick={toggleSidebar}
+      />
+
+      <aside className={`app-sidebar${isOpen ? ' app-sidebar--open' : ' app-sidebar--collapsed'}`}>
+
+        {/* ── User info ── */}
+        {user && (
+          <div className="sidebar-user">
+            <div className="sidebar-user__avatar">
+              {user.avatar
+                ? <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                : getInitials(user.username)
+              }
+            </div>
+            <div className="sidebar-user__info">
+              <div className="sidebar-user__name">{user.username}</div>
+              <div className="sidebar-user__role">{user.role || 'Member'}</div>
+            </div>
+          </div>
+        )}
+
+        <nav className="sidebar-nav">
+
+          {/* ── Main ── */}
+          <p className="sidebar-section-label">Main</p>
+
+          <Link
+            to="/dashboard"
+            className={`sidebar-item${isActive('/dashboard') ? ' sidebar-item--active' : ''}`}
+          >
+            <span className="sidebar-item__icon"><DashboardIcon style={{ fontSize: 19 }} /></span>
+            Dashboard
+          </Link>
+
+          <Link
+            to="/notifications"
+            className={`sidebar-item${isActive('/notifications') ? ' sidebar-item--active' : ''}`}
+          >
+            <span className="sidebar-item__icon"><NotificationsIcon style={{ fontSize: 19 }} /></span>
+            Notifications
+            <span className="sidebar-badge sidebar-badge--red">3</span>
+          </Link>
+
+          <Link
+            to="/calendar"
+            className={`sidebar-item${isActive('/calendar') ? ' sidebar-item--active' : ''}`}
+          >
+            <span className="sidebar-item__icon"><CalendarMonthIcon style={{ fontSize: 19 }} /></span>
+            Calendar
+          </Link>
+
+          {/* ── Workspace ── */}
+          <p className="sidebar-section-label">Workspace</p>
+
+          {/* Project accordion */}
+          <div className="sidebar-group">
+            <button
+              className="sidebar-group__header"
+              onClick={() => setProjectOpen(p => !p)}
+              aria-expanded={projectOpen}
+            >
+              <span className="sidebar-group__header-left">
+                <span className="sidebar-item__icon"><FolderIcon style={{ fontSize: 19 }} /></span>
+                Project
+              </span>
+              <span className={`sidebar-group__chevron${projectOpen ? ' sidebar-group__chevron--open' : ''}`}>
+                <ExpandMoreIcon style={{ fontSize: 18 }} />
+              </span>
+            </button>
+            <div className={`sidebar-group__children${projectOpen ? ' sidebar-group__children--open' : ''}`}>
+              <Link
+                to="/boards"
+                className={`sidebar-item${isActive('/boards') ? ' sidebar-item--active' : ''}`}
+                style={{ paddingLeft: 20 }}
+              >
+                <span className="sidebar-item__icon"><ViewKanbanIcon style={{ fontSize: 17 }} /></span>
+                Board
+                <span className="sidebar-badge">4</span>
+              </Link>
+              <Link
+                to="/templates"
+                className={`sidebar-item${isActive('/templates') ? ' sidebar-item--active' : ''}`}
+                style={{ paddingLeft: 20 }}
+              >
+                <span className="sidebar-item__icon"><AutoAwesomeMosaicIcon style={{ fontSize: 17 }} /></span>
+                Templates
+              </Link>
+            </div>
+          </div>
+
+          {/* Reports accordion */}
+          <div className="sidebar-group">
+            <button
+              className="sidebar-group__header"
+              onClick={() => setReportsOpen(p => !p)}
+              aria-expanded={reportsOpen}
+            >
+              <span className="sidebar-group__header-left">
+                <span className="sidebar-item__icon"><BarChartIcon style={{ fontSize: 19 }} /></span>
+                Reports
+              </span>
+              <span className={`sidebar-group__chevron${reportsOpen ? ' sidebar-group__chevron--open' : ''}`}>
+                <ExpandMoreIcon style={{ fontSize: 18 }} />
+              </span>
+            </button>
+            <div className={`sidebar-group__children${reportsOpen ? ' sidebar-group__children--open' : ''}`}>
+              <Link to="/reports/overview" className="sidebar-item" style={{ paddingLeft: 20 }}>
+                <span className="sidebar-item__icon"><BarChartIcon style={{ fontSize: 17 }} /></span>
+                Overview
+              </Link>
+            </div>
+          </div>
+
+          {/* ── Team ── */}
+          <p className="sidebar-section-label">Team</p>
+
+          <Link
+            to="/members"
+            className={`sidebar-item${isActive('/members') ? ' sidebar-item--active' : ''}`}
+          >
+            <span className="sidebar-item__icon"><GroupIcon style={{ fontSize: 19 }} /></span>
+            Members
+            <span className="sidebar-badge sidebar-badge--green">8</span>
+          </Link>
+
+          <Link
+            to="/invitations"
+            className={`sidebar-item${isActive('/invitations') ? ' sidebar-item--active' : ''}`}
+          >
+            <span className="sidebar-item__icon"><PersonAddIcon style={{ fontSize: 19 }} /></span>
+            Invitations
+            <span className="sidebar-badge sidebar-badge--amber">2</span>
+          </Link>
+
+          {/* ── Recent Boards ── */}
+          <p className="sidebar-section-label">Recent Boards</p>
+          {recentBoards.map((b, i) => (
+            <Link to="/boards" className="sidebar-item" key={i}>
+              <span className="sidebar-recent-dot" style={{ background: b.color }} />
+              {b.name}
+            </Link>
+          ))}
+
+        </nav>
+
+        {/* ── Footer ── */}
+        <div className="sidebar-footer">
+          <Link
+            to="/settings"
+            className={`sidebar-item${isActive('/settings') ? ' sidebar-item--active' : ''}`}
+          >
+            <span className="sidebar-item__icon"><SettingsIcon style={{ fontSize: 19 }} /></span>
+            Settings
+          </Link>
+          <button className="sidebar-item sidebar-item--danger" onClick={handleLogout}>
+            <span className="sidebar-item__icon"><LogoutIcon style={{ fontSize: 19 }} /></span>
+            Logout
+          </button>
+        </div>
+
+      </aside>
+    </>
   );
 };
 

@@ -1,247 +1,163 @@
 import React, { useState } from 'react';
-import { Box, Typography, TextField, Button, ButtonGroup, Stack, List, ListItem, ListItemText, ListItemAvatar, Avatar } from '@mui/material';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
-import SendIcon from '@mui/icons-material/Send';
-import CommentIcon from '@mui/icons-material/Comment';
+import { TextField, Avatar } from '@mui/material';
+import SaveIcon    from '@mui/icons-material/Save';
+import CancelIcon  from '@mui/icons-material/Cancel';
+import SendIcon    from '@mui/icons-material/Send';
+import MessageIcon from '@mui/icons-material/Message';
+import AlignHorizontalLeftIcon from '@mui/icons-material/AlignHorizontalLeft';
+import LocalActivityIcon from '@mui/icons-material/LocalActivity';
+import CardDescriptionMdEditor from './CardDescriptionMdEditor';
+import '../styles/card-edit.css';
 
 const EditCardLeftPanel = ({
-  formValues,
-  errors,
-  handleChange,
-  handleSubmit,
-  handleClose,
-  loading,
-  comments,
-  commentText,
-  commentError,
-  handleCommentChange,
-  handleAddComment,
+  formValues, errors, handleChange, handleSubmit, handleClose,
+  loading, comments, commentText, commentError,
+  handleCommentChange, handleAddComment,
 }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [activeTab,      setActiveTab]      = useState('all');
 
-  const handleTitleClick = () => {
-    setIsEditingTitle(true);
-  };
-
-  const handleTitleChange = (e) => {
-    handleChange(e);
-  };
-
-  const handleTitleBlur = () => {
-    setIsEditingTitle(false);
-  };
-
-  const handleCommentSubmit = (e) => {
-    e.preventDefault();
-    handleAddComment();
+  const handleUpdateDescription = (value) => {
+    handleChange({ target: { name: 'description', value } });
   };
 
   return (
-    <Box
-      sx={{
-        width: '70%',
-        height: 'calc(100vh - 100px)',
-        overflowY: 'auto',
-        padding: '16px',
-        borderRight: '1px solid #e0e0e0',
-        backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2f3542' : '#f9fafc',
-      }}
-    >
-      {!isEditingTitle ? (
-        <Typography
-          variant="h5"
-          sx={{ fontSize: '24px', fontWeight: 'bold', cursor: 'pointer', mb: 2 }}
-          onClick={handleTitleClick}
-        >
-          {formValues.title || 'Click to edit'}
-        </Typography>
-      ) : (
+    <div className="edit-card-left">
+
+      {/* ── Title ── */}
+      {isEditingTitle ? (
         <TextField
           fullWidth
           name="title"
           value={formValues.title}
-          onChange={handleTitleChange}
-          onBlur={handleTitleBlur}
+          onChange={handleChange}
+          onBlur={() => setIsEditingTitle(false)}
           autoFocus
+          variant="outlined"
+          size="small"
+          error={!!errors.title}
+          helperText={errors.title}
           sx={{
-            mb: 2,
             '& .MuiOutlinedInput-root': {
-              borderRadius: 0,
+              borderRadius: '8px',
+              fontFamily: 'Outfit',
+              fontSize: 20,
+              fontWeight: 700,
             },
           }}
         />
+      ) : (
+        <div className="edit-card-title" onClick={() => setIsEditingTitle(true)}>
+          {formValues.title || <span style={{ color: '#C4CAD4' }}>Click to edit title…</span>}
+        </div>
       )}
-      <TextField
-        fullWidth
-        label="Description"
-        name="description"
-        value={formValues.description}
-        onChange={handleChange}
-        error={!!errors.description}
-        helperText={errors.description}
-        margin="normal"
-        multiline
-        minRows={3}
-        disabled={loading}
-        sx={{
-          mb: 0,
-          '& .MuiOutlinedInput-root': {
-            borderRadius: 0,
-            width: '100%',
-          },
-        }}
-      />
-      <Stack direction="row" spacing={0.5} sx={{ mt: 1, padding: 0, margin: 0 }}>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          onClick={handleSubmit}
-          disabled={loading}
-          startIcon={<SaveIcon />}
-          sx={{
-            fontSize: '12px',
-            padding: '4px 8px',
-            borderRadius: '2px',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-            '&:hover': {
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
-            },
-          }}
-        >
-          Save
-        </Button>
-        <Button
-          variant="outlined"
-          color="secondary"
-          onClick={handleClose}
-          disabled={loading}
-          startIcon={<CancelIcon />}
-          sx={{
-            fontSize: '12px',
-            padding: '4px 8px',
-            borderRadius: '2px',
-            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
-            '&:hover': {
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.15)',
-            },
-          }}
-        >
+
+      {/* ── Description ── */}
+      <div>
+        <p className="edit-card-section-title">
+          <AlignHorizontalLeftIcon style={{ fontSize: 15 }} />
+          Description
+        </p>
+        <CardDescriptionMdEditor
+          cardDescriptionProp={formValues.description}
+          handleUpdateCardDescription={handleUpdateDescription}
+        />
+        {errors.description && (
+          <p className="edit-card-field-error">{errors.description}</p>
+        )}
+      </div>
+
+      {/* ── Save / Cancel ── */}
+      <div className="edit-card-save-row">
+        <button className="btn btn-primary" onClick={handleSubmit} disabled={loading}>
+          <SaveIcon style={{ fontSize: 15 }} />
+          {loading ? 'Saving…' : 'Save changes'}
+        </button>
+        <button className="btn btn-ghost" onClick={handleClose} disabled={loading}>
+          <CancelIcon style={{ fontSize: 15 }} />
           Cancel
-        </Button>
-      </Stack>
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="h6" sx={{ fontWeight: '600', fontSize: '18px', mb: 2 }}>
+        </button>
+      </div>
+
+      {/* ── Activity ── */}
+      <div>
+        <p className="edit-card-section-title">
+          <LocalActivityIcon style={{ fontSize: 15 }} />
           Activity
-        </Typography>
-        <ButtonGroup variant="outlined" size="small" aria-label="activity buttons">
-          <Button>All</Button>
-          <Button>Comments</Button>
-          <Button>History</Button>
-          <Button>Work log</Button>
-        </ButtonGroup>
-        <Box sx={{ mt: 2 }}>
-          <form onSubmit={handleCommentSubmit}>
-            <TextField
-              fullWidth
-              label="Add a comment"
-              value={commentText}
-              onChange={handleCommentChange}
-              error={!!commentError}
-              helperText={commentError}
-              multiline
-              rows={2}
-              disabled={loading}
-              sx={{
-                mb: 1,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: '8px',
-                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#3b4252' : '#fff',
-                },
-              }}
-            />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              disabled={loading || !commentText.trim()}
-              startIcon={<SendIcon />}
-              sx={{
-                fontSize: '12px',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                '&:hover': {
-                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)',
-                  backgroundColor: (theme) => theme.palette.primary.dark,
-                },
-              }}
+        </p>
+
+        <div className="edit-card-tab-group">
+          {['all', 'comments', 'history'].map(tab => (
+            <button
+              key={tab}
+              className={`edit-card-tab${activeTab === tab ? ' active' : ''}`}
+              onClick={() => setActiveTab(tab)}
             >
-              Add Comment
-            </Button>
-          </form>
-          <List sx={{ mt: 2, maxHeight: '300px', overflowY: 'auto' }}>
-            {comments.length > 0 ? (
-              comments.map((comment, index) => (
-                <ListItem
-                  key={index}
-                  sx={{
-                    mb: 1,
-                    borderRadius: '8px',
-                    border: (theme) => `1px solid ${theme.palette.divider}`,
-                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#3b4252' : '#f5f6f8',
-                    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-                    p: 2,
-                  }}
-                >
-                  <ListItemAvatar>
-                    <Avatar sx={{ bgcolor: (theme) => theme.palette.primary.light, width: 32, height: 32 }}>
-                      <CommentIcon fontSize="small" />
-                    </Avatar>
-                  </ListItemAvatar>
-                  <ListItemText
-                    primary={comment.text}
-                    secondary={new Date(comment.createdAt).toLocaleString('vi-VN', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
+
+        {/* Comment input */}
+        <div className="edit-card-comment-box">
+          <textarea
+            className="edit-card-comment-textarea"
+            placeholder="Add a comment…"
+            value={commentText}
+            onChange={handleCommentChange}
+            disabled={loading}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey && commentText.trim()) {
+                e.preventDefault();
+                handleAddComment();
+              }
+            }}
+          />
+          {commentError && (
+            <p className="edit-card-field-error" style={{ margin: '4px 0 0' }}>{commentError}</p>
+          )}
+          <div className="edit-card-comment-actions">
+            <span className="edit-card-comment-hint">↵ Enter to send · Shift+Enter for new line</span>
+            <button
+              className="btn btn-primary"
+              style={{ padding: '5px 12px', fontSize: 12 }}
+              onClick={handleAddComment}
+              disabled={loading || !commentText.trim()}
+            >
+              <SendIcon style={{ fontSize: 13 }} />
+              Send
+            </button>
+          </div>
+        </div>
+
+        {/* Comment list */}
+        {comments.length > 0 ? (
+          <div className="edit-card-comment-list">
+            {comments.map((c, i) => (
+              <div key={i} className="comment-item">
+                <Avatar sx={{ width: 30, height: 30, bgcolor: '#EEF2FF', color: '#3B5BDB', flexShrink: 0 }}>
+                  <MessageIcon style={{ fontSize: 14 }} />
+                </Avatar>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p className="comment-item__text">{c.text}</p>
+                  <p className="comment-item__time">
+                    {new Date(c.createdAt).toLocaleString('vi-VN', {
+                      day: '2-digit', month: '2-digit', year: 'numeric',
+                      hour: '2-digit', minute: '2-digit',
                     })}
-                    primaryTypographyProps={{
-                      variant: 'body1',
-                      sx: { fontWeight: '500', color: (theme) => theme.palette.text.primary },
-                    }}
-                    secondaryTypographyProps={{
-                      variant: 'caption',
-                      sx: { color: (theme) => theme.palette.text.secondary },
-                    }}
-                  />
-                </ListItem>
-              ))
-            ) : (
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  p: 2,
-                  borderRadius: '8px',
-                  border: (theme) => `1px solid ${theme.palette.divider}`,
-                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#3b4252' : '#f5f6f8',
-                }}
-              >
-                <CommentIcon sx={{ mr: 1, color: (theme) => theme.palette.text.secondary }} />
-                <Typography variant="body2" color="text.secondary">
-                  No comments yet.
-                </Typography>
-              </Box>
-            )}
-          </List>
-        </Box>
-      </Box>
-    </Box>
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="comment-empty">
+            <MessageIcon style={{ fontSize: 18, opacity: 0.4 }} />
+            No comments yet.
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
