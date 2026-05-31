@@ -6,8 +6,7 @@
  *   ACTION_API    :3007  →  api_request.py   (POST /query, GET /health)
  */
 
-export const QUESTION_API = process.env.REACT_APP_QUESTION_API_URL || 'http://localhost:3006';
-export const ACTION_API   = process.env.REACT_APP_ACTION_API_URL   || 'http://localhost:3007';
+import { QUESTION_API, ACTION_API } from '../../../services/axiosConfig';
 
 // ── Shared POST helper ─────────────────────────────────────────────────────────
 const postJSON = async (url, body) => {

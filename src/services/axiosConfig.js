@@ -39,3 +39,6 @@ export const boardInstance = createAxiosInstance('http://localhost:3002/api/boar
 export const columnInstance = createAxiosInstance('http://localhost:3003/api/columns');
 export const cardInstance = createAxiosInstance('http://localhost:3004/api/cards');
 export const invitationInstance = createAxiosInstance('http://localhost:3005/api/invitations');
+
+export const QUESTION_API = process.env.REACT_APP_QUESTION_API_URL || 'http://localhost:3006';
+export const ACTION_API   = process.env.REACT_APP_ACTION_API_URL   || 'http://localhost:3007';
