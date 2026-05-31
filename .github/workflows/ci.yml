@@ -1,4 +1,4 @@
-name: CI Node.js/JS Project
+name: MicroService CI - Frontend
 
 on:
   push:
@@ -8,59 +8,27 @@ on:
 
 jobs:
   detect-changes:
-    name: Detect Changes
     uses: ./.github/workflows/detect-changes.yml
 
-  build-and-test:
-    name: Build and Test
+  build-and-push:
+    name: Frontend - Build & Push
     needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.has_changes == 'true' }}
-    uses: ./.github/workflows/build-service.yml
-
-  sonarqube:
-    name: SonarQube Scan
-    needs: [detect-changes, build-and-test]
-    if: ${{ needs.detect-changes.outputs.has_changes == 'true' }}
-    uses: ./.github/workflows/sonarqube.yml
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  trivy:
-    name: Trivy Vulnerability Scan
-    needs: [detect-changes, build-and-test, sonarqube]
-    if: ${{ needs.detect-changes.outputs.has_changes == 'true' }}
-    uses: ./.github/workflows/trivy.yml
-
-  # Optional: Summary job to display overall pipeline status
-  pipeline-summary:
-    name: Pipeline Summary
+    if: ${{ github.event_name == 'push' && needs.detect-changes.outputs.has_changes == 'true' }}
     runs-on: ubuntu-latest
-    if: always()  # Run regardless of previous job outcomes
-    needs: [detect-changes, build-and-test, sonarqube, trivy]
     steps:
-      - name: Generate Pipeline Summary
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push
         run: |
-          echo "::group::CI Pipeline Summary"
-          echo "====================================="
-          echo "Branch/Ref: ${{ github.ref }}"
-          echo "Event: ${{ github.event_name }}"
-          echo "Changes detected: ${{ needs.detect-changes.outputs.has_changes || 'skipped' }}"
-          echo ""
-          echo "Job Status:"
-          echo "- Detect Changes: ${{ needs.detect-changes.result || 'skipped' }}"
-          echo "- Build & Test: ${{ needs.build-and-test.result || 'skipped' }}"
-          echo "- SonarQube Scan: ${{ needs.sonarqube.result || 'skipped' }}"
-          echo "- Trivy Scan: ${{ needs.trivy.result || 'skipped' }}"
-          echo ""
-          echo "Overall Status:"
-          if [[ "${{ needs.detect-changes.result }}" == "failure" || \
-                "${{ needs.build-and-test.result }}" == "failure" || \
-                "${{ needs.sonarqube.result }}" == "failure" || \
-                "${{ needs.trivy.result }}" == "failure" ]]; then
-            echo "❌ Pipeline FAILED"
-            exit 1
-          else
-            echo "✅ Pipeline SUCCESS"
-          fi
-          echo "====================================="
-          echo "::endgroup::"
+          docker build -t thuan410/nt114-microservice-fe:latest \
+                       -t thuan410/nt114-microservice-fe:${{ github.sha }} \
+                       .
+          docker push thuan410/nt114-microservice-fe:latest
+          docker push thuan410/nt114-microservice-fe:${{ github.sha }}

@@ -1,28 +1,21 @@
 import React from 'react';
-import { Box, Typography, Paper, CircularProgress } from '@mui/material';
+import { CircularProgress } from '@mui/material';
+import { ThunioSpinner } from '../Logo/components/ThunioSpinner';
+import '../features/boards/styles/board.css';
 
 /**
- * Generic form container for consistent layout
- * @param {Object} props
- * @param {string} props.title - Form title
- * @param {React.ReactNode} props.children - Form content
- * @param {boolean} props.loading - Loading state
- * @returns {JSX.Element}
+ * Generic form container — redesigned with board design system.
  */
-const FormContainer = ({ title, children, loading }) => {
-  return (
-    <Box sx={{ maxWidth: 800, mx: 'auto', mt: 4, p: 2 }}>
-      <Typography variant="h4" gutterBottom>{title}</Typography>
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-          <CircularProgress />
-        </Box>
-      )}
-      <Paper elevation={3} sx={{ p: 3 }}>
-        {children}
-      </Paper>
-    </Box>
-  );
-};
+const FormContainer = ({ title, children, loading }) => (
+  <div className="board-page form-container">
+    <h2 className="dialog-title">{title}</h2>
+    {loading && (
+      <div className="form-container__loading">
+        <ThunioSpinner size="md" />
+      </div>
+    )}
+    {children}
+  </div>
+);
 
 export default FormContainer;

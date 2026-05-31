@@ -1,0 +1,197 @@
+@import '../../../styles/variables.css';
+
+/* ═══════════════════════════════════════════════════════════════
+   AUTH SHARED — dùng chung cho ForgotPassword, ResetPassword,
+   VerifyOTP, VerifyForgotPassword
+   Tokens đồng nhất với login.css / register.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page wrapper ── */
+.as-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: var(--c-primary-lt);
+  font-family: var(--font-body);
+  box-sizing: border-box;
+}
+
+/* ── Card ── */
+.as-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--c-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 40px 36px 36px;
+  box-sizing: border-box;
+}
+
+/* ── Logo ── */
+.as-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+/* ── Icon header (lock, mail, etc.) ── */
+.as-icon-wrap {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--c-primary-lt);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px;
+  margin: 0 auto 20px;
+}
+
+/* ── Titles ── */
+.as-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--c-text-1);
+  text-align: center;
+  letter-spacing: -0.3px;
+  margin-bottom: 6px;
+}
+.as-desc {
+  font-size: 13.5px;
+  color: var(--c-text-3);
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 28px;
+}
+.as-desc strong {
+  color: var(--c-text-2);
+  font-weight: 600;
+}
+
+/* ── Field ── */
+.as-field {
+  margin-bottom: 14px;
+}
+.as-field__label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--c-text-2);
+  margin-bottom: 6px;
+}
+.as-field__input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--c-border);
+  background: var(--c-bg);
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--c-text-1);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.as-field__input::placeholder { color: var(--c-text-3); }
+.as-field__input:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.12);
+  background: #fff;
+}
+
+/* ── Submit button ── */
+.as-submit {
+  display: block;
+  width: 100%;
+  height: 42px;
+  margin-top: 8px;
+  border-radius: var(--radius-sm);
+  background: var(--c-primary);
+  color: #fff;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.as-submit:hover:not(:disabled)  { background: var(--c-primary-h); }
+.as-submit:active:not(:disabled) { transform: scale(0.99); }
+.as-submit:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── OTP boxes ── */
+.as-otp-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+.as-otp-box {
+  width: 48px; height: 56px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  border: 1.5px solid var(--c-border);
+  border-radius: var(--radius-sm);
+  background: var(--c-bg);
+  color: var(--c-text-1);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  box-sizing: border-box;
+}
+.as-otp-box:focus {
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(var(--c-primary-rgb), 0.12);
+  background: #fff;
+}
+.as-otp-box--filled {
+  border-color: var(--c-primary);
+  background: var(--c-primary-lt);
+  color: var(--c-primary);
+}
+
+/* ── Resend row ── */
+.as-resend {
+  text-align: center;
+  font-size: 13px;
+  color: var(--c-text-3);
+  margin-bottom: 16px;
+}
+.as-resend__btn {
+  color: var(--c-primary);
+  font-weight: 600;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  padding: 0;
+}
+.as-resend__btn:disabled {
+  color: var(--c-text-3);
+  cursor: default;
+}
+.as-resend__countdown strong {
+  color: var(--c-text-2);
+}
+
+/* ── Back link ── */
+.as-back {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--c-primary);
+  font-weight: 500;
+  text-decoration: none;
+  margin-top: 16px;
+  transition: opacity 0.15s;
+}
+.as-back:hover { opacity: 0.75; }
+
+/* ── Responsive ── */
+@media (max-width: 480px) {
+  .as-card { padding: 32px 24px 28px; }
+  .as-otp-box { width: 42px; height: 50px; font-size: 18px; }
+}

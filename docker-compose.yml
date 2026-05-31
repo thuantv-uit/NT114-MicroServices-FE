@@ -4,11 +4,11 @@ services:
   frontend:
     build:
       context: .
+      dockerfile: Dockerfile
     image: nt114-microservice-fe:latest
     ports:
       - "3000:3000"
-    networks:
-      - app-network
+    restart: unless-stopped
 
 # Định nghĩa network
 networks:

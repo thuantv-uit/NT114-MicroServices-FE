@@ -1,238 +1,247 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { AppBar, Toolbar, Box, IconButton, Badge, Avatar, Popover, Button, Input, Typography, TextField, InputAdornment } from '@mui/material';
+import MenuIcon          from '@mui/icons-material/Menu';
+import SearchIcon        from '@mui/icons-material/Search';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import MenuIcon from '@mui/icons-material/Menu';
-import HomeIcon from '@mui/icons-material/Home';
-import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
-import SettingsIcon from '@mui/icons-material/Settings';
-import SearchIcon from '@mui/icons-material/Search';
+import HelpOutlineIcon   from '@mui/icons-material/HelpOutline';
+import PersonIcon        from '@mui/icons-material/Person';
+import PhotoCameraIcon   from '@mui/icons-material/PhotoCamera';
+import SettingsIcon      from '@mui/icons-material/Settings';
+import LogoutIcon        from '@mui/icons-material/Logout';
 import { showToast } from '../utils/toastUtils';
 import { getPendingBoardInvitations, getPendingColumnInvitations } from '../features/invitations/components/Invitation';
 import { fetchUserData, changeAvatar } from '../features/users/services/userService';
+import './styles/navbar.css';
+import { ReactComponent as ThunioLogo } from '../assets/Logo/Thunio.svg';
 
-/**
- * Navigation bar component
- * @param {Object} props
- * @param {string} props.token - Authentication token
- * @param {Function} props.logout - Logout function
- * @param {string} props.backgroundColor - Background color of the board (unused in this version)
- * @param {boolean} props.isSidebarOpen - State indicating if the sidebar is open
- * @param {Function} props.toggleSidebar - Function to toggle the sidebar visibility
- * @returns {JSX.Element}
- */
-const Navbar = ({ token, logout, backgroundColor, isSidebarOpen, toggleSidebar }) => {
+
+const Navbar = ({ token, logout, isSidebarOpen, toggleSidebar }) => {
   const navigate = useNavigate();
   const [notificationCount, setNotificationCount] = useState(0);
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [avatarFile, setAvatarFile] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [user,         setUser]         = useState(null);
+  const [loading,      setLoading]      = useState(false);
+  const [avatarFile,   setAvatarFile]   = useState(null);
+  const [popoverOpen,  setPopoverOpen]  = useState(false);
+  const [showUpload,   setShowUpload]   = useState(false);
+  const popoverRef = useRef(null);
 
-  // Extract userId from token
   let userId = null;
   if (token) {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       userId = payload.userId || payload.id || payload._id || null;
-    } catch (err) {
-      console.error('Failed to parse token:', err);
-    }
+    } catch (_) {}
   }
 
   useEffect(() => {
-    const fetchPendingInvitations = async () => {
-      if (!userId) return;
+    if (!token || !userId) return;
 
+    const fetchInvitations = async () => {
       try {
-        const boardInvites = await getPendingBoardInvitations(userId);
-        const columnInvites = await getPendingColumnInvitations(userId);
-        const totalCount = (boardInvites?.length || 0) + (columnInvites?.length || 0);
-        setNotificationCount(totalCount);
-      } catch (err) {
-        console.error('Failed to fetch pending invitations:', err);
-      }
+        const [board, col] = await Promise.all([
+          getPendingBoardInvitations(userId),
+          getPendingColumnInvitations(userId),
+        ]);
+        setNotificationCount((board?.length || 0) + (col?.length || 0));
+      } catch (_) {}
     };
 
-    const loadUserData = async () => {
-      if (!token) return;
+    const loadUser = async () => {
       setLoading(true);
-      try {
-        const userData = await fetchUserData();
-        setUser(userData);
-      } catch (err) {
-        console.error('Failed to fetch user data:', err);
-      } finally {
-        setLoading(false);
-      }
+      try { setUser(await fetchUserData()); }
+      catch (_) {}
+      finally { setLoading(false); }
     };
 
-    if (token && userId) {
-      fetchPendingInvitations();
-      loadUserData();
-    }
+    fetchInvitations();
+    loadUser();
   }, [token, userId]);
 
-  const handleNotificationClick = () => {
-    if (userId) {
-      navigate(`/pending-invitations/${userId}`);
-    } else {
-      console.error('No userId found, cannot navigate to pending invitations');
-      showToast('Unable to navigate to pending invitations. Please try logging in again.', 'error');
-    }
-  };
-
-  const handleAvatarClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClosePopover = () => {
-    setAnchorEl(null);
-    setAvatarFile(null);
-  };
-
-  const handleAvatarChange = (event) => {
-    setAvatarFile(event.target.files[0]);
-  };
+  useEffect(() => {
+    const handler = (e) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target))
+        setPopoverOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   const handleAvatarUpload = async () => {
-    if (!avatarFile) {
-      showToast('Please select an image file', 'error');
-      return;
-    }
-
+    if (!avatarFile) { showToast('Please select an image file', 'error'); return; }
     try {
       setLoading(true);
-      const response = await changeAvatar(avatarFile);
-      setUser(response.user);
+      const res = await changeAvatar(avatarFile);
+      setUser(res.user);
       setAvatarFile(null);
-      handleClosePopover();
+      setPopoverOpen(false);
+      setShowUpload(false);
       showToast('Avatar updated successfully', 'success');
-    } catch (error) {
-      showToast('Failed to update avatar: ' + (error.message || 'Unknown error'), 'error');
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      showToast('Failed to update avatar: ' + (err.message || 'Unknown error'), 'error');
+    } finally { setLoading(false); }
+  };
+
+  const handleLogout = () => {
+    if (typeof logout === 'function') {
+      logout();
+      navigate('/login');
+    } else {
+      showToast('Unable to logout. Please try again.', 'error');
     }
   };
 
-  const open = Boolean(anchorEl);
-  const id = open ? 'avatar-popover' : undefined;
+  const getInitials = (name = '') =>
+    name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
 
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        width: '100vw',
-        backgroundColor: '#FFFFFF',
-        color: '#000000',
-        borderBottom: '1px solid #E0E0E0',
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
-        zIndex: 1200,
-      }}
-    >
-      <Toolbar>
-        {/* Left section: Toggle button and Thunio logo */}
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <IconButton color="inherit" onClick={toggleSidebar}>
-            <MenuIcon />
-          </IconButton>
-          <IconButton color="inherit" sx={{ ml: 1 }}>
-            <HomeIcon />
-          </IconButton>
-          <Typography variant="h6" sx={{ ml: 1, color: '#000000' }}>
-            Thunio
-          </Typography>
-        </Box>
+    <header className="app-navbar">
 
-        {/* Center section: Search bar */}
-        <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}>
-          <TextField
-            variant="outlined"
-            size="small"
-            placeholder="Search..."
-            sx={{ width: '50%', bgcolor: '#F5F5F5', borderRadius: 1 }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon sx={{ color: '#000000' }} />
-                </InputAdornment>
-              ),
-            }}
-          />
-        </Box>
+      {/* ── Left ── */}
+      <div className="navbar-left">
+        <button className="navbar-icon-btn" onClick={toggleSidebar} title="Toggle menu">
+          <MenuIcon style={{ fontSize: 22 }} />
+        </button>
+        <Link to="/dashboard" className="navbar-logo">
+          <ThunioLogo width={28} height={28} />
+          Thun<span className="navbar-logo__accent">io</span>
+        </Link>
+      </div>
 
-        {/* Right section: Notification, Help, Settings, Avatar/Login */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {token && (
-            <IconButton color="inherit" onClick={handleNotificationClick}>
-              <Badge badgeContent={notificationCount} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-          )}
-          <IconButton color="inherit">
-            <HelpOutlineIcon />
-          </IconButton>
-          <IconButton color="inherit">
-            <SettingsIcon />
-          </IconButton>
-          {token && user ? (
-            <>
-              <IconButton onClick={handleAvatarClick}>
-                <Avatar
-                  src={user.avatar || 'https://via.placeholder.com/150'}
-                  alt={user.username}
-                  sx={{ width: 40, height: 40 }}
-                />
-              </IconButton>
-              <Popover
-                id={id}
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClosePopover}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'right',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'right',
-                }}
-              >
-                <Box sx={{ p: 2, width: 250 }}>
-                  <Typography variant="subtitle1" sx={{ mb: 1 }}>
+      {/* ── Search ── */}
+      <div className="navbar-search">
+        <span className="navbar-search__icon">
+          <SearchIcon style={{ fontSize: 17 }} />
+        </span>
+        <input
+          className="navbar-search__input"
+          type="text"
+          placeholder="Search boards, tasks, members…"
+        />
+        <span className="navbar-search__kbd">⌘K</span>
+      </div>
+
+      {/* ── Right ── */}
+      <div className="navbar-right">
+
+        <button className="navbar-icon-btn" title="Help">
+          <HelpOutlineIcon style={{ fontSize: 22 }} />
+        </button>
+
+        <div className="navbar-divider" />
+
+        {/* Notifications */}
+        {token && (
+          <div className="navbar-badge-wrap">
+            <button
+              className="navbar-icon-btn"
+              onClick={() => userId && navigate(`/pending-invitations/${userId}`)}
+              title="Notifications"
+            >
+              <NotificationsIcon style={{ fontSize: 22 }} />
+            </button>
+            {notificationCount > 0 && (
+              <span className="navbar-badge">{notificationCount}</span>
+            )}
+          </div>
+        )}
+
+        <div className="navbar-divider" />
+
+        {/* Avatar + popover */}
+        {token && user ? (
+          <div className="navbar-user-wrap" ref={popoverRef}>
+            <div className="navbar-user-info">
+              <span className="navbar-user-name">{user.username}</span>
+              <span className="navbar-user-role">{user.role || 'Member'}</span>
+            </div>
+
+            <div
+              className="navbar-avatar-wrap"
+              onClick={() => setPopoverOpen(p => !p)}
+            >
+              {user.avatar
+                ? <img className="navbar-avatar" src={user.avatar} alt={user.username} />
+                : <div className="navbar-avatar navbar-avatar--initials">{getInitials(user.username)}</div>
+              }
+            </div>
+
+            {popoverOpen && (
+              <div className="navbar-popover">
+                {/* Header */}
+                <div className="navbar-popover__header">
+                  <div className="navbar-popover__avatar">
+                    {user.avatar
+                      ? <img src={user.avatar} alt={user.username} style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} />
+                      : getInitials(user.username)
+                    }
+                  </div>
+                  <div>
+                    <div className="navbar-popover__name">{user.username}</div>
+                    <div className="navbar-popover__email">{user.email || 'No email'}</div>
+                  </div>
+                </div>
+
+                {/* Menu */}
+                <div className="navbar-popover__menu">
+                  <button className="navbar-popover__item" onClick={() => { navigate('/profile'); setPopoverOpen(false); }}>
+                    <PersonIcon style={{ fontSize: 17 }} />
+                    View Profile
+                  </button>
+
+                  <button className="navbar-popover__item" onClick={() => setShowUpload(p => !p)}>
+                    <PhotoCameraIcon style={{ fontSize: 17 }} />
                     Change Avatar
-                  </Typography>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    sx={{ mb: 1, display: 'block' }}
-                  />
-                  <Button
-                    variant="contained"
-                    onClick={handleAvatarUpload}
-                    disabled={!avatarFile || loading}
-                    fullWidth
-                  >
-                    Upload
-                  </Button>
-                </Box>
-              </Popover>
-            </>
-          ) : (
-            <>
-              <Button color="inherit" component={Link} to="/login">
-                Login
-              </Button>
-              <Button color="inherit" component={Link} to="/register">
-                Register
-              </Button>
-            </>
-          )}
-        </Box>
-      </Toolbar>
-    </AppBar>
+                  </button>
+
+                  {showUpload && (
+                    <div className="navbar-popover__upload">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="navbar-popover__file"
+                        onChange={e => setAvatarFile(e.target.files[0])}
+                      />
+                      <button
+                        className="btn btn-primary"
+                        style={{ width: '100%', marginTop: 6 }}
+                        onClick={handleAvatarUpload}
+                        disabled={!avatarFile || loading}
+                      >
+                        {loading ? 'Uploading…' : 'Upload'}
+                      </button>
+                    </div>
+                  )}
+
+                  <button className="navbar-popover__item" onClick={() => { navigate('/settings'); setPopoverOpen(false); }}>
+                    <SettingsIcon style={{ fontSize: 17 }} />
+                    Settings
+                  </button>
+
+                  <div className="navbar-popover__divider" />
+
+                  <button className="navbar-popover__item" onClick={() => { navigate('/help'); setPopoverOpen(false); }}>
+                    <HelpOutlineIcon style={{ fontSize: 17 }} />
+                    Help & Support
+                  </button>
+
+                  <div className="navbar-popover__divider" />
+
+                  <button className="navbar-popover__item navbar-popover__item--danger" onClick={handleLogout}>
+                    <LogoutIcon style={{ fontSize: 17 }} />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            <Link to="/login"    className="navbar-auth-btn">Login</Link>
+            <Link to="/register" className="navbar-auth-btn navbar-auth-btn--primary">Register</Link>
+          </>
+        )}
+      </div>
+    </header>
   );
 };
 

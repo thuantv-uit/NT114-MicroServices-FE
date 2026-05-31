@@ -1,6 +1,7 @@
 // import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Box, Button, Typography, CircularProgress, Paper } from '@mui/material';
+import { ThunioSpinner } from '../Logo/components/ThunioSpinner';
 import useForm from '../hooks/useForm';
 import { showToast } from '../utils/toastUtils';
 
@@ -31,7 +32,7 @@ const DeleteConfirmation = ({ title, message, onDelete, cancelPath }) => {
       <Typography variant="h4" gutterBottom>{title}</Typography>
       {loading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-          <CircularProgress />
+          <ThunioSpinner size="md" />
         </Box>
       )}
       <Paper elevation={3} sx={{ p: 3 }}>

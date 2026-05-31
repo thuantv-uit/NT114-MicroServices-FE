@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { fetchBoard, updateBoard } from '../services/boardService';
 import { showToast } from '../../../utils/toastUtils';
-import FormContainer from '../../../components/FormContainer';
-import { Box, Button, Typography, Input } from '@mui/material';
+import { CircularProgress } from '@mui/material';
+import { ThunioSpinner } from '../../../Logo/components/ThunioSpinner';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import '../styles/board.css';
 
-/**
- * Component to upload a background image for a board
- * @param {Object} props
- * @param {string} props.token - Authentication token
- * @param {Function} props.onClose - Function to close the dialog
- * @returns {JSX.Element}
- */
 const ChangeBackground = ({ token, onClose }) => {
   const { id } = useParams();
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [previewImage, setPreviewImage] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [selectedFile,  setSelectedFile]  = useState(null);
+  const [previewImage,  setPreviewImage]  = useState('');
+  const [loading,       setLoading]       = useState(false);
+  const fileInputRef = useRef(null);
 
-  // Load board data
   useEffect(() => {
     const loadBoard = async () => {
       setLoading(true);
@@ -34,28 +29,22 @@ const ChangeBackground = ({ token, onClose }) => {
     loadBoard();
   }, [id]);
 
-  // Handle file selection and preview
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
     if (file) {
       setSelectedFile(file);
       setPreviewImage(URL.createObjectURL(file));
     }
   };
 
-  // Handle file submission to backend
   const handleSubmit = async () => {
-    if (!selectedFile) {
-      showToast('Please select an image', 'error');
-      return;
-    }
-
+    if (!selectedFile) { showToast('Please select an image', 'error'); return; }
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append('backgroundImage', selectedFile);
       await updateBoard(id, undefined, undefined, undefined, formData);
-      showToast('Background image updated successfully!', 'success');
+      showToast('Background updated!', 'success');
       onClose();
     } catch (err) {
       showToast(err.message, 'error');
@@ -65,59 +54,55 @@ const ChangeBackground = ({ token, onClose }) => {
   };
 
   return (
-    <FormContainer title="Change Board Background Image" loading={loading}>
-      <Box sx={{ maxWidth: 600, mx: 'auto', p: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-        {/* File Input */}
-        <Typography variant="h6" gutterBottom>
-          Upload Background Image
-        </Typography>
-        <Input
+    <div className="board-page bg-dialog">
+      <h2 className="dialog-title">Change Background</h2>
+
+      {/* Upload zone */}
+      <div
+        className="bg-dialog__upload-zone"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {loading
+          ? <ThunioSpinner size="md" />
+          : <>
+              <div className="bg-dialog__upload-icon">
+                <CloudUploadIcon style={{ fontSize: 36, opacity: 0.45 }} />
+              </div>
+              <p className="bg-dialog__upload-text">Click to upload an image</p>
+              <p className="bg-dialog__upload-hint">PNG, JPG, WEBP — max 10 MB</p>
+            </>
+        }
+        <input
+          ref={fileInputRef}
           type="file"
           accept="image/*"
           onChange={handleFileChange}
           disabled={loading}
+          style={{ display: 'none' }}
         />
+      </div>
 
-        {/* Image Preview */}
-        {previewImage && (
-          <Box sx={{ mt: 2, textAlign: 'center' }}>
-            <Typography variant="body2" gutterBottom>
-              Preview
-            </Typography>
-            <img
-              src={previewImage}
-              alt="Preview"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '200px',
-                borderRadius: '4px',
-                border: '1px solid #ccc',
-              }}
-            />
-          </Box>
-        )}
+      {/* Preview */}
+      {previewImage && (
+        <div className="bg-dialog__preview">
+          <span className="bg-dialog__preview-label">Preview</span>
+          <img src={previewImage} alt="Background preview" />
+        </div>
+      )}
 
-        {/* Buttons */}
-        <Box sx={{ display: 'flex', gap: 2, mt: 3 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSubmit}
-            disabled={loading || !selectedFile}
-          >
-            Save
-          </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Box>
-    </FormContainer>
+      <div className="dialog-actions" style={{ marginTop: 20 }}>
+        <button
+          className="btn btn-primary"
+          onClick={handleSubmit}
+          disabled={loading || !selectedFile}
+        >
+          {loading ? 'Saving…' : 'Save background'}
+        </button>
+        <button className="btn btn-ghost" onClick={onClose} disabled={loading}>
+          Cancel
+        </button>
+      </div>
+    </div>
   );
 };
 

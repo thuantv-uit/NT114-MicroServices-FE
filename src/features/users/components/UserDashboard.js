@@ -1,343 +1,284 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../../hooks/useAuth';
 import { fetchUserData, changeAvatar } from '../services/userService';
+import { CircularProgress } from '@mui/material';
 import {
-  Box,
-  Typography,
-  CircularProgress,
-  Grid,
-  Card,
-  CardContent,
-  IconButton,
-  Avatar,
-  Button,
-  Input,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from '@mui/material';
-import { Chat as ChatIcon, Task, GroupAdd, Edit } from '@mui/icons-material';
+  Chat as ChatIcon,
+  ViewKanban, CheckCircle, AccessAlarm, Group,
+  TaskAlt, PersonAdd, Edit, SpaceDashboard, PhotoCamera, Close,
+} from '@mui/icons-material';
+import { PageSpinner } from '../../../Logo/components/ThunioSpinner';
 import Chatbot from '../../ai/chatbot';
-import { COLORS } from '../../../constants/color';
+import '../styles/dashboard.css';
 
-/**
- * Component to display user dashboard
- * @returns {JSX.Element}
- */
+/* ── Đọc CSS variable từ :root ── */
+const cv = (name) =>
+  getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
 const UserDashboard = () => {
   const { token } = useAuth();
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [avatarFile, setAvatarFile] = useState(null);
+  const [user,            setUser]            = useState(null);
+  const [loading,         setLoading]         = useState(false);
+  const [isChatOpen,      setIsChatOpen]      = useState(false);
+  const [avatarFile,      setAvatarFile]      = useState(null);
   const [showAvatarInput, setShowAvatarInput] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
-      if (!token) return;
+    if (!token) return;
+    const load = async () => {
       setLoading(true);
-      try {
-        const [userData] = await Promise.all([fetchUserData()]);
-        setUser(userData);
-      } catch (err) {
-        // Errors handled by interceptor
-      } finally {
-        setLoading(false);
-      }
+      try { setUser(await fetchUserData()); }
+      catch (_) {}
+      finally { setLoading(false); }
     };
-    loadData();
+    load();
   }, [token]);
 
-  const toggleChat = () => setIsChatOpen((prev) => !prev);
-  const handleAvatarChange = (e) => setAvatarFile(e.target.files[0]);
-
   const handleAvatarUpload = async () => {
-    if (!avatarFile) return alert('Please select an image file');
-    if (!token) return alert('You must be logged in to update avatar');
-
+    if (!avatarFile) return;
     try {
       setLoading(true);
-      const response = await changeAvatar(avatarFile);
-      setUser(response.user);
+      const res = await changeAvatar(avatarFile);
+      setUser(res.user);
       setAvatarFile(null);
       setShowAvatarInput(false);
-      alert('Avatar updated successfully');
-    } catch (error) {
-      alert('Failed to update avatar: ' + (error.message || 'Unknown error'));
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) {
+      alert('Failed to update avatar: ' + (err.message || 'Unknown error'));
+    } finally { setLoading(false); }
   };
 
-  const toggleAvatarInput = () => {
-    setShowAvatarInput((prev) => !prev);
-    setAvatarFile(null);
-  };
+  const getInitials = (name = '') =>
+    name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || 'U';
+
+  const today = new Date().toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+  });
+
+  /* ── Dùng CSS variables thay vì hardcode hex ── */
+  const stats = [
+    { icon: <ViewKanban  style={{ fontSize: 20 }} />, color: 'var(--c-primary)',  bg: 'var(--c-primary-lt)',  label: 'Total Boards', value: 12, trend: '↑ 2 this month',      trendUp: true  },
+    { icon: <CheckCircle style={{ fontSize: 20 }} />, color: 'var(--c-success)',  bg: 'var(--c-success-lt)',  label: 'Tasks Done',   value: 84, trend: '↑ 12 this week',      trendUp: true  },
+    { icon: <AccessAlarm style={{ fontSize: 20 }} />, color: 'var(--c-danger)',   bg: 'var(--c-danger-lt)',   label: 'Overdue',      value: 3,  trend: '↑ 1 since yesterday', trendUp: false },
+    { icon: <Group       style={{ fontSize: 20 }} />, color: 'var(--c-warning)',  bg: 'var(--c-warning-lt)',  label: 'Team Members', value: 8,  trend: 'Across 4 boards',     trendUp: null  },
+  ];
+
+  const activities = [
+    { icon: <TaskAlt        style={{ fontSize: 16 }} />, iconBg: 'var(--c-primary-lt)', iconColor: 'var(--c-primary)', badgeCls: 'badge-blue',  badge: 'Task',    text: 'Completed "Design System Review"',        time: '2 hours ago'          },
+    { icon: <PersonAdd      style={{ fontSize: 16 }} />, iconBg: 'var(--c-danger-lt)',  iconColor: 'var(--c-danger)',  badgeCls: 'badge-red',   badge: 'Invite',  text: 'Invited sarah@example.com to Team Board', time: 'Yesterday at 3:40 PM' },
+    { icon: <Edit           style={{ fontSize: 16 }} />, iconBg: 'var(--c-success-lt)', iconColor: 'var(--c-success)', badgeCls: 'badge-green', badge: 'Profile', text: 'Updated profile information',             time: '3 days ago'           },
+    { icon: <SpaceDashboard style={{ fontSize: 16 }} />, iconBg: 'var(--c-warning-lt)', iconColor: 'var(--c-warning)', badgeCls: 'badge-amber', badge: 'Board',   text: 'Created "Q3 Roadmap" board',              time: '4 days ago'           },
+  ];
+
+  const deadlines = [
+    { name: 'API Refactor', pct: 85, color: 'var(--c-primary)'  },
+    { name: 'UI Redesign',  pct: 60, color: 'var(--c-primary-h)' },
+    { name: 'User Testing', pct: 40, color: 'var(--c-success)'   },
+    { name: 'Launch Prep',  pct: 20, color: 'var(--c-danger)'    },
+    { name: 'Docs',         pct: 72, color: 'var(--c-warning)'   },
+  ];
+
+  const boards = [
+    { name: 'Q3 Roadmap',     color: 'var(--c-primary)',   count: 14 },
+    { name: 'UI Redesign',    color: 'var(--c-primary-h)', count: 9  },
+    { name: 'Backend Sprint', color: 'var(--c-success)',   count: 22 },
+    { name: 'Marketing',      color: 'var(--c-warning)',   count: 7  },
+  ];
+
+  const taskDone = 59, taskProgress = 17, taskOverdue = 8;
+  const total = taskDone + taskProgress + taskOverdue;
+  const r = 38, circ = 2 * Math.PI * r;
+  const doneDash     = (taskDone     / total) * circ;
+  const progressDash = (taskProgress / total) * circ;
+  const overdueDash  = (taskOverdue  / total) * circ;
 
   return (
-    <Box
-      sx={{
-      position: 'fixed', // ✅ giúp layout full viewport, không padding
-      top: 0,
-      left: 0,
-      width: '100vw',
-      height: '100vh',
-      overflowY: 'auto', // ✅ cho phép cuộn nếu nội dung vượt khung
-      bgcolor: COLORS.background,
-      m: 0,
-      p: 0,
-    }}
-    >
-      
-      {/* Header */}
-      <Typography
-        variant="h3"
-        sx={{
-          fontWeight: 'bold',
-          mb: 4,
-          color: COLORS.primary,
-          textAlign: 'center',
-        }}
-      >
-        User Dashboard
-      </Typography>
+    <div className="dashboard-wrapper">
+    <div className="dashboard-page">
 
-      {/* Loading State */}
-      {loading && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', my: 4 }}>
-          <CircularProgress size={60} sx={{ color: COLORS.primary }} />
-        </Box>
-      )}
+      {loading && <PageSpinner text="Loading dashboard…" />}
 
-      {/* Main Content */}
       {!loading && (
-        <Grid container spacing={3}>
-          {/* User Info Card */}
-          <Grid item xs={12} md={4}>
-            <Card
-              sx={{
-                boxShadow: 3,
-                borderRadius: 3,
-                bgcolor: COLORS.card,
-                '&:hover': { boxShadow: 6 },
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 'medium', mb: 2, color: COLORS.text }}
-                >
-                  Profile
-                </Typography>
+        <>
+          <h1 className="dashboard-title">Dashboard</h1>
+          <p className="dashboard-sub">{today} · Welcome back, {user?.username || 'there'} 👋</p>
 
-                {user ? (
-                  <>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Avatar
-                        src={user.avatar || 'https://via.placeholder.com/150'}
-                        alt={user.username}
-                        sx={{ width: 100, height: 100, mr: 2 }}
-                      />
-                      <Typography variant="h6" sx={{ color: COLORS.textLight }}>
-                        Welcome, {user.username}!
-                      </Typography>
-                    </Box>
+          {/* ── Stat cards ── */}
+          <div className="stat-row">
+            {stats.map((s, i) => (
+              <div className="stat-card" key={i}>
+                <div className="stat-card__icon" style={{ background: s.bg, color: s.color }}>
+                  {s.icon}
+                </div>
+                <div className="stat-card__label">{s.label}</div>
+                <div className="stat-card__val">{s.value}</div>
+                <div className={`stat-card__trend ${s.trendUp === true ? 'trend--up' : s.trendUp === false ? 'trend--dn' : 'trend--neu'}`}>
+                  {s.trend}
+                </div>
+              </div>
+            ))}
+          </div>
 
-                    <Box sx={{ mt: 2 }}>
-                      <Button
-                        variant="outlined"
-                        onClick={toggleAvatarInput}
-                        sx={{
-                          mb: 1,
-                          borderColor: COLORS.primary,
-                          color: COLORS.primary,
-                          '&:hover': {
-                            borderColor: COLORS.textLight,
-                            color: COLORS.textLight,
-                          },
-                        }}
-                      >
-                        {showAvatarInput ? 'Cancel' : 'Change Avatar'}
-                      </Button>
-                      {showAvatarInput && (
-                        <>
-                          <Input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleAvatarChange}
-                            sx={{ mb: 1, display: 'block' }}
-                          />
-                          <Button
-                            variant="contained"
-                            onClick={handleAvatarUpload}
-                            disabled={!avatarFile || loading}
-                            sx={{
-                              bgcolor: COLORS.primary,
-                              color: COLORS.white,
-                              textTransform: 'none',
-                              '&:hover': { bgcolor: COLORS.textLight },
-                            }}
-                          >
-                            Upload
-                          </Button>
-                        </>
-                      )}
-                    </Box>
-                  </>
-                ) : (
-                  <Typography variant="body1" color="error">
-                    No user data available
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
-          </Grid>
+          {/* ── Row 2: Profile + Activity ── */}
+          <div className="db-grid2">
 
-          {/* Recent Activity Card */}
-          <Grid item xs={12} md={4}>
-            <Card
-              sx={{
-                boxShadow: 3,
-                borderRadius: 3,
-                bgcolor: COLORS.card,
-                '&:hover': { boxShadow: 6 },
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 'medium', mb: 2, color: COLORS.text }}
-                >
-                  Recent Activity
-                </Typography>
-                <List>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Task sx={{ color: COLORS.primary }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Completed task: Project Plan"
-                      secondary="2 hours ago"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <GroupAdd sx={{ color: COLORS.expense }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Invited user to Team Board"
-                      secondary="Yesterday"
-                    />
-                  </ListItem>
-                  <ListItem>
-                    <ListItemIcon>
-                      <Edit sx={{ color: COLORS.income }} />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary="Updated profile information"
-                      secondary="3 days ago"
-                    />
-                  </ListItem>
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
+            {/* Profile */}
+            <div className="dashboard-card">
+              <p className="dashboard-card__title">Profile</p>
+              {user ? (
+                <>
+                  <div className="profile-avatar-row">
+                    {user.avatar
+                      ? <img className="profile-avatar" src={user.avatar} alt={user.username} />
+                      : <div className="profile-avatar profile-avatar--initials">{getInitials(user.username)}</div>
+                    }
+                    <div>
+                      <p className="profile-name">{user.username}</p>
+                      <span className="profile-role-badge">{user.role || 'Member'}</span>
+                      <p className="profile-sub">{user.email || 'No email'}</p>
+                    </div>
+                  </div>
 
-          {/* Task Deadlines Card */}
-          <Grid item xs={12} md={4}>
-            <Card
-              sx={{
-                boxShadow: 3,
-                borderRadius: 3,
-                bgcolor: COLORS.card,
-                '&:hover': { boxShadow: 6 },
-              }}
-            >
-              <CardContent>
-                <Typography
-                  variant="h5"
-                  sx={{ fontWeight: 'medium', mb: 2, color: COLORS.text }}
-                >
-                  Total of all Deadlines
-                </Typography>
-                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                  <Box sx={{ position: 'relative', display: 'inline-flex' }}>
-                    <CircularProgress
-                      variant="determinate"
-                      value={80}
-                      size={100}
-                      thickness={5}
-                      sx={{ color: COLORS.primary }}
-                    />
-                    <Box
-                      sx={{
-                        top: 0,
-                        left: 0,
-                        bottom: 0,
-                        right: 0,
-                        position: 'absolute',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
+                  <div className="profile-mini-stats">
+                    <div className="pstat"><div className="pstat__n">12</div><div className="pstat__l">Boards</div></div>
+                    <div className="pstat"><div className="pstat__n">84</div><div className="pstat__l">Tasks</div></div>
+                    <div className="pstat"><div className="pstat__n">26</div><div className="pstat__l">Invites</div></div>
+                  </div>
+
+                  <div className="profile-upload-zone">
+                    <button
+                      className={`profile-upload-btn${showAvatarInput ? ' profile-upload-btn--danger' : ''}`}
+                      onClick={() => { setShowAvatarInput(p => !p); setAvatarFile(null); }}
                     >
-                      <Typography
-                        variant="h6"
-                        component="div"
-                        sx={{ color: COLORS.text }}
-                      >
-                        80%
-                      </Typography>
-                    </Box>
-                  </Box>
-                </Box>
-                <Typography
-                  variant="body1"
-                  sx={{ color: COLORS.textLight, textAlign: 'center' }}
-                >
-                  80% Completed
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
+                      {showAvatarInput
+                        ? <><Close style={{ fontSize: 14, verticalAlign: -2, marginRight: 5 }} />Cancel</>
+                        : <><PhotoCamera style={{ fontSize: 14, verticalAlign: -2, marginRight: 5 }} />Change Avatar</>
+                      }
+                    </button>
+                    {showAvatarInput && (
+                      <div style={{ marginTop: 10 }}>
+                        <input
+                          className="profile-file-input"
+                          type="file"
+                          accept="image/*"
+                          onChange={e => setAvatarFile(e.target.files[0])}
+                        />
+                        <button
+                          className="btn btn-primary"
+                          onClick={handleAvatarUpload}
+                          disabled={!avatarFile || loading}
+                          style={{ marginTop: 6 }}
+                        >
+                          {loading ? 'Uploading…' : 'Upload'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <p style={{ color: 'var(--c-text-3)', fontSize: 14 }}>No user data available.</p>
+              )}
+            </div>
+
+            {/* Recent Activity */}
+            <div className="dashboard-card">
+              <p className="dashboard-card__title">Recent Activity</p>
+              <div className="activity-list">
+                {activities.map((a, i) => (
+                  <div className="activity-item" key={i}>
+                    <div className="activity-icon" style={{ background: a.iconBg, color: a.iconColor }}>
+                      {a.icon}
+                    </div>
+                    <div className="activity-text">
+                      <span className={`act-badge ${a.badgeCls}`}>{a.badge}</span>
+                      <p className="activity-text__primary">{a.text}</p>
+                      <p className="activity-text__secondary">{a.time}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ── Row 3: Deadlines + Boards + Task Overview ── */}
+          <div className="db-grid3">
+
+            {/* Deadlines */}
+            <div className="dashboard-card">
+              <p className="dashboard-card__title">Deadlines</p>
+              {deadlines.map((d, i) => (
+                <div className="deadline-item" key={i}>
+                  <div className="dl-name">{d.name}</div>
+                  <div className="dl-bar-wrap">
+                    <div className="dl-bar" style={{ width: `${d.pct}%`, background: d.color }} />
+                  </div>
+                  <div className="dl-pct">{d.pct}%</div>
+                </div>
+              ))}
+            </div>
+
+            {/* My Boards */}
+            <div className="dashboard-card">
+              <p className="dashboard-card__title">My Boards</p>
+              {boards.map((b, i) => (
+                <div className="board-chip" key={i}>
+                  <div className="bc-dot" style={{ background: b.color }} />
+                  <div className="bc-name">{b.name}</div>
+                  <div className="bc-count">{b.count} tasks</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Task Overview donut */}
+            <div className="dashboard-card">
+              <p className="dashboard-card__title">Task Overview</p>
+              <div className="donut-wrap">
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="100" height="100" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-bg)" strokeWidth="10" />
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-primary)"  strokeWidth="10"
+                      strokeDasharray={`${doneDash} ${circ}`} strokeLinecap="round" />
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-success)"  strokeWidth="10"
+                      strokeDasharray={`${progressDash} ${circ}`} strokeDashoffset={-doneDash} strokeLinecap="round" />
+                    <circle cx="50" cy="50" r={r} fill="none" stroke="var(--c-danger)"   strokeWidth="10"
+                      strokeDasharray={`${overdueDash} ${circ}`} strokeDashoffset={-(doneDash + progressDash)} strokeLinecap="round" />
+                  </svg>
+                  <div style={{ position: 'absolute', textAlign: 'center' }}>
+                    <div className="donut-pct">{total}</div>
+                    <div style={{ fontSize: 10, color: 'var(--c-text-3)' }}>tasks</div>
+                  </div>
+                </div>
+                <div className="donut-legend">
+                  {[
+                    { color: 'var(--c-primary)', label: 'Done',        val: taskDone     },
+                    { color: 'var(--c-success)', label: 'In Progress',  val: taskProgress },
+                    { color: 'var(--c-danger)',  label: 'Overdue',      val: taskOverdue  },
+                  ].map((l, i) => (
+                    <div className="dl-leg" key={i}>
+                      <div className="dl-dot" style={{ background: l.color }} />
+                      <div className="dl-leg-text">{l.label}</div>
+                      <div className="dl-leg-val">{l.val}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </>
       )}
 
-      {/* Chatbot Floating Button */}
-      <IconButton
-        onClick={toggleChat}
-        sx={{
-          position: 'fixed',
-          bottom: 24,
-          right: 24,
-          bgcolor: COLORS.primary,
-          color: COLORS.white,
-          '&:hover': { bgcolor: COLORS.textLight },
-          width: 60,
-          height: 60,
-          boxShadow: 3,
-        }}
-      >
-        <ChatIcon fontSize="large" />
-      </IconButton>
+      {/* Chatbot FAB */}
+      <button className="chatbot-fab" onClick={() => setIsChatOpen(p => !p)} title="Open TimelineBot">
+        <ChatIcon style={{ fontSize: 26 }} />
+      </button>
 
-      {/* Chatbot Floating Window */}
       {isChatOpen && (
-        <Box
-          sx={{
-            position: 'fixed',
-            bottom: 100,
-            right: 24,
-            width: { xs: '90%', sm: 400 },
-            maxHeight: '70vh',
-            zIndex: 1000,
-          }}
-        >
-          <Chatbot onClose={toggleChat} />
-        </Box>
+        <div className="chatbot-window">
+          <Chatbot onClose={() => setIsChatOpen(false)} />
+        </div>
       )}
-    </Box>
+    </div>
+    </div>
   );
 };
 
