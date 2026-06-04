@@ -27,8 +27,14 @@ jobs:
 
       - name: Build & Push
         run: |
-          docker build -t thuan410/nt114-microservice-fe:latest \
-                       -t thuan410/nt114-microservice-fe:${{ github.sha }} \
-                       .
+          docker build \
+            --build-arg REACT_APP_USER_SERVICE_URL=${{ secrets.REACT_APP_USER_SERVICE_URL }} \
+            --build-arg REACT_APP_BOARD_SERVICE_URL=${{ secrets.REACT_APP_BOARD_SERVICE_URL }} \
+            --build-arg REACT_APP_COLUMN_SERVICE_URL=${{ secrets.REACT_APP_COLUMN_SERVICE_URL }} \
+            --build-arg REACT_APP_CARD_SERVICE_URL=${{ secrets.REACT_APP_CARD_SERVICE_URL }} \
+            --build-arg REACT_APP_INVITATION_SERVICE_URL=${{ secrets.REACT_APP_INVITATION_SERVICE_URL }} \
+            -t thuan410/nt114-microservice-fe:latest \
+            -t thuan410/nt114-microservice-fe:${{ github.sha }} \
+            .
           docker push thuan410/nt114-microservice-fe:latest
           docker push thuan410/nt114-microservice-fe:${{ github.sha }}
