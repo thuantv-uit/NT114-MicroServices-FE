@@ -74,6 +74,12 @@ const Login = ({ setToken }) => {
     }
   };
 
+  // 🆕 Redirect thẳng sang backend → Google sẽ xử lý OAuth flow
+  const handleGoogleLogin = () => {
+    const baseUrl = process.env.REACT_APP_USER_SERVICE_URL.replace('/api/users', '');
+    window.location.href = `${baseUrl}/auth/google`;
+  };
+
   return (
     <div className="login-page">
       <div className="login-split">
@@ -83,7 +89,6 @@ const Login = ({ setToken }) => {
           <div className="login-panel__top">
             <div className="login-logo">
               <ThunioLogo size="md" />
-              {/* <span className="login-logo__name">Thunio</span> */}
             </div>
 
             <h1 className="login-panel__tagline">
@@ -129,7 +134,6 @@ const Login = ({ setToken }) => {
                 name="email"
                 type="email"
                 className={`login-field__input${errors.email ? ' login-field__input--err' : ''}`}
-                // placeholder="you@example.com"
                 value={values.email}
                 onChange={handleChange}
                 autoComplete="email"
@@ -147,22 +151,16 @@ const Login = ({ setToken }) => {
                 name="password"
                 type="password"
                 className={`login-field__input${errors.password ? ' login-field__input--err' : ''}`}
-                // placeholder="••••••••"
                 value={values.password}
                 onChange={handleChange}
                 autoComplete="current-password"
               />
               {errors.password && <p className="login-field__error">{errors.password}</p>}
-              {/* Forgot password — right-aligned, snug below field */}
               <div className="login-forgot">
                 <Link to="/forgot-password">Forgot password?</Link>
               </div>
             </div>
 
-            {/* Submit — centred */}
-            {/* <button type="submit" className="login-submit" disabled={loading}>
-              {loading ? 'Signing in…' : 'Sign in'}
-            </button> */}
             <button
               type="submit"
               className="login-submit"
@@ -179,7 +177,8 @@ const Login = ({ setToken }) => {
 
           {/* Social */}
           <div className="login-social-row">
-            <button className="login-social-btn">
+            {/* 🆕 Dùng onClick thay vì button thường */}
+            <button className="login-social-btn" onClick={handleGoogleLogin}>
               <GoogleSVG /> Google
             </button>
             <button className="login-social-btn">

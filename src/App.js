@@ -12,6 +12,7 @@ import VerifyOTP from './features/users/components/VerifyOTP';
 import ForgotPassword from './features/users/components/Forgotpassword';
 import VerifyForgotPassword from './features/users/components/Verifyforgotpassword';
 import ResetPassword from './features/users/components/Resetpassword';
+import OAuthSuccess from './features/users/components/OAuthSuccess';
 import UserDashboard from './features/users/components/UserDashboard';
 import BoardList from './features/boards/components/BoardList';
 import BoardDetail from './features/boards/components/BoardDetail';
@@ -91,6 +92,8 @@ function App() {
           <Route path="/forgot-password"         element={<PublicRoute token={token} redirectTo="/dashboard" component={<ForgotPassword />} />} />
           <Route path="/verify-forgot-password"  element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyForgotPassword />} />} />
           <Route path="/reset-password"          element={<PublicRoute token={token} redirectTo="/dashboard" component={<ResetPassword />} />} />
+
+          <Route path="/oauth-success" element={<OAuthSuccess setToken={setToken} />} />
 
           {/* Private routes */}
           <Route path="/dashboard" element={<PrivateRoute token={token} component={<UserDashboard token={token} />} />} />

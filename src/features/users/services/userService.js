@@ -145,3 +145,16 @@ export const deleteUser = async (userId) => {
     'Delete user'
   );
 };
+
+// ─────────────────────────────────────────────
+// 🆕 GOOGLE OAUTH
+// ─────────────────────────────────────────────
+ 
+/**
+ * Redirect trình duyệt sang Google OAuth
+ * Không dùng axios vì đây là full-page redirect, không phải API call
+ */
+export const loginWithGoogle = () => {
+  const baseUrl = process.env.REACT_APP_USER_SERVICE_URL.replace('/api/users', '');
+  window.location.href = `${baseUrl}/auth/google`;
+};
