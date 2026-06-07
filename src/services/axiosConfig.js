@@ -7,7 +7,7 @@ import axios from 'axios';
 const createAxiosInstance = (baseURL) => {
   const instance = axios.create({
     baseURL,
-    timeout: 10000,
+    timeout: 30000,
   });
 
   // Request interceptor to add token

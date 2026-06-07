@@ -154,7 +154,7 @@ export const fetchTemplateById = async (templateId) => {
  */
 export const cloneBoardFromTemplate = async (templateId, title) => {
   return handleApiCall(
-    () => boardInstance.post(`/templates/${templateId}/clone`, { title }).then(res => res.data), {timeout: 60000},
+    () => boardInstance.post(`/templates/${templateId}/clone`, {timeout: 60000}, { title }).then(res => res.data),
     'Clone board from template'
   );
 };
