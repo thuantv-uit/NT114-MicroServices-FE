@@ -38,7 +38,7 @@ const Home1 = () => (
         Timeline management, reimagined
       </div>
       <h1 className="hp-hero__h1">
-        Your projects.<br />
+        Your beautiful projects.<br />
         Your <span className="hp-hero__accent">timeline</span>.<br />
         Your way.
       </h1>
