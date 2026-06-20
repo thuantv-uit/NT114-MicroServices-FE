@@ -7,7 +7,7 @@ import CategorySidebar from './components/CategorySidebar';
 import Home1 from './components/Home1';
 import NotFound from './components/NotFound';
 import Login from './features/users/components/Login';
-import Register from './features/users/components/Register';
+// import Register from './features/users/components/Register';
 import VerifyOTP from './features/users/components/VerifyOTP';
 import ForgotPassword from './features/users/components/Forgotpassword';
 import VerifyForgotPassword from './features/users/components/Verifyforgotpassword';
@@ -87,7 +87,7 @@ function App() {
 
           {/* Public routes */}
           <Route path="/login"                   element={<PublicRoute token={token} redirectTo="/dashboard" component={<Login setToken={setToken} />} />} />
-          <Route path="/register"                element={<PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />} />
+          {/* <Route path="/register"                element={<PublicRoute token={token} redirectTo="/dashboard" component={<Register />} />} /> */}
           <Route path="/verify-otp"              element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyOTP />} />} />
           <Route path="/forgot-password"         element={<PublicRoute token={token} redirectTo="/dashboard" component={<ForgotPassword />} />} />
           <Route path="/verify-forgot-password"  element={<PublicRoute token={token} redirectTo="/dashboard" component={<VerifyForgotPassword />} />} />
